@@ -19,11 +19,7 @@ function App() {
     dispatch(loadToken());
     console.log('DISPATCH LOAD TOKEN: ' + token);
 
-    console.log('LOADING TOKEN... ');
-    if (token !== null) {
-      console.log('TOKEN NOT NULL: '+ token);
-      setLoading(false); 
-    }
+    setLoading(false);
   }, [dispatch, token]);
 
   return (
@@ -47,7 +43,7 @@ function App() {
                     margin="auto"
                     display="block"
                   />
-                ) : token ? ( 
+                ) : token ? (
                   <Cart />
                 ) : (
                   <Navigate to="/" replace />
