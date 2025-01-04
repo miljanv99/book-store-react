@@ -20,7 +20,7 @@ function App() {
     console.log('DISPATCH LOAD TOKEN: ' + token);
 
     setLoading(false);
-  }, [dispatch, token]);
+  }, [token]);
 
   return (
     <BrowserRouter>
@@ -31,24 +31,21 @@ function App() {
           <Route
             path="cart"
             element={
-              <>
-                {console.log('Token before rendering Cart:', token)}
-                {loading ? (
-                  <Spinner
-                    thickness="4px"
-                    speed="0.65s"
-                    emptyColor="gray.200"
-                    size="xl"
-                    alignSelf="center"
-                    margin="auto"
-                    display="block"
-                  />
-                ) : token ? (
-                  <Cart />
-                ) : (
-                  <Navigate to="/" replace />
-                )}
-              </>
+              loading ? (
+                <Spinner
+                  thickness="4px"
+                  speed="0.65s"
+                  emptyColor="gray.200"
+                  size="xl"
+                  alignSelf="center"
+                  margin="auto"
+                  display="block"
+                />
+              ) : token ? (
+                <Cart />
+              ) : (
+                <Navigate to="/" replace />
+              )
             }
           />
           <Route path="bookDetails/:bookId" element={<BookDetails />} />
