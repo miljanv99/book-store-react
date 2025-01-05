@@ -7,7 +7,8 @@ import {
   WrapItem,
   IconButton,
   Avatar,
-  Spinner
+  Spinner,
+  Circle
 } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
@@ -19,6 +20,7 @@ import SignInModal from './SignInModal';
 import RegisterModal from './RegisterModal';
 import DrawerComponent from './drawer';
 import { useEffect, useState } from 'react';
+import { selectCartCounter } from '../reducers/cartSlice';
 
 const Navigation = () => {
   const token = useSelector(selectAuthToken);
@@ -26,6 +28,7 @@ const Navigation = () => {
   // Drawer state
   const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
   const userProfileData = useSelector(selectUserData);
+  const cartCounter = useSelector(selectCartCounter);
 
   // Modal state sign
   const {
@@ -99,7 +102,21 @@ const Navigation = () => {
                 <>
                   <WrapItem>
                     <Link href="/cart" color={'white'}>
-                      <IconButton aria-label="cart" icon={<FiShoppingCart size={18} />} />
+                      <Box position={'relative'}>
+                        {cartCounter > 0 ? (
+                          <Circle
+                            zIndex={2}
+                            position={'absolute'}
+                            bottom={5}
+                            left={25}
+                            size="1.5rem"
+                            backgroundColor={'red'}>
+                            {`${cartCounter}`}
+                          </Circle>
+                        ) : null}
+
+                        <IconButton aria-label="cart" icon={<FiShoppingCart size={18} />} />
+                      </Box>
                     </Link>
                   </WrapItem>
                   <WrapItem>

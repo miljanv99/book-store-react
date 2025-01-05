@@ -4,10 +4,12 @@ import { COLORS } from '../../globalColors';
 import { useNavigate } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import BookRating from './BookRating';
+import { useDispatch } from 'react-redux';
+import { incrementCartCounter } from '../../reducers/cartSlice';
 
 function BookItem(props: Book) {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const description = () => {
     let maxLength = 120;
@@ -15,8 +17,13 @@ function BookItem(props: Book) {
     return props.description?.substring(0, maxLength) + '...';
   };
 
-  function showBookDetails(){
+  function showBookDetails() {
     navigate(`/bookDetails/${props._id}`);
+  }
+
+  function addToCart() {
+    dispatch(incrementCartCounter());
+    ////implementation
   }
 
   return (
@@ -29,21 +36,20 @@ function BookItem(props: Book) {
             borderRadius={5}
             w={200}
             h={300}
-            src={props.cover}
-          ></Image>
+            src={props.cover}></Image>
         </Box>
         <Flex w={'50%'} direction={'column'} mt={5} p={2}>
           <Text fontWeight={'bolder'}>{props.title}</Text>
           <Text fontStyle={'italic'}>by {props.author}</Text>
 
-          <BookRating rating={Number(props.currentRating)}/>
-          
+          <BookRating rating={Number(props.currentRating)} />
+
           <Text>{Number(props.currentRating).toFixed(2)} rating</Text>
           <Text mt={5}>{description()}</Text>
           <Flex direction={'column'} flex={1} justifyContent={'space-evenly'}>
-          <Button w={"90%"} colorScheme="green" leftIcon={<AddIcon />}>
-            Add To Cart
-          </Button>
+            <Button onClick={addToCart} w={'90%'} colorScheme="green" leftIcon={<AddIcon />}>
+              Add To Cart
+            </Button>
           </Flex>
         </Flex>
       </Flex>

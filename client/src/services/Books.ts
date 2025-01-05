@@ -19,7 +19,7 @@ export async function getBooks(query?: string): Promise<Book[]> {
 export async function getSingleBook(bookID: string): Promise<Book> {
   try {
     const response = await apiConfig.URL.get(`${getSingleBookEndpoint}${bookID}`);
-    console.log("Book Details: " + response.data.data['title'])
+    console.log('Book Details: ' + response.data.data['title']);
     return response.data.data;
   } catch (error) {
     throw error;

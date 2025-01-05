@@ -17,6 +17,8 @@ import { FC, useEffect, useState } from 'react';
 import { selectUserData, setToken, setUserData } from '../reducers/authSlice';
 import { userLogin, userProfile } from '../services/User';
 import { useDispatch, useSelector } from 'react-redux';
+import { getCartSize } from '../services/Cart';
+import { setCartCounter } from '../reducers/cartSlice';
 
 interface SignProps {
   isModalSignInOpen: boolean;
@@ -91,8 +93,9 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       dispatch(setToken(token));
       console.log('Token after login:', token);
       const profileResponse = await userProfile(token, credentials.username);
-      // const userData = profileResponse?.data['data'];
-      // console.log('PROFILE DATA: ' + JSON.stringify(userData, undefined, 2));
+      const cartSizeResponse = await getCartSize(token);
+      dispatch(setCartCounter(cartSizeResponse?.data['data']));
+
       const { isAdmin, username, avatar } = profileResponse!.data['data'];
       dispatch(setUserData({ isAdmin, username, avatar }));
       handleCloseSignInModal();
