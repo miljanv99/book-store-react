@@ -2,12 +2,24 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
+export interface UserData {
+  isAdmin: boolean;
+  username: string;
+  avatar: string;
+}
+
 interface AuthState {
   token: string | null;
+  userData: UserData;
 }
 
 const initialState: AuthState = {
-  token: null
+  token: null,
+  userData: {
+    isAdmin: false,
+    username: '',
+    avatar: ''
+  }
 };
 
 export const authSlice = createSlice({
@@ -27,14 +39,19 @@ export const authSlice = createSlice({
     loadToken: (state) => {
       state.token =
         localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || null;
+    },
+    setUserData: (state, action: PayloadAction<UserData>) => {
+      state.userData.isAdmin = action.payload.isAdmin;
+      state.userData.username = action.payload.username;
+      state.userData.avatar = action.payload.avatar;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { setToken, clearToken, loadToken } = authSlice.actions;
+export const { setToken, clearToken, loadToken, setUserData } = authSlice.actions;
 
 export const selectAuthToken = (state: RootState) => state.authorization.token;
-
+export const selectUserData = (state: RootState) => state.authorization.userData;
 
 export default authSlice.reducer;

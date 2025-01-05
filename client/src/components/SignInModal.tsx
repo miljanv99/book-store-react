@@ -14,9 +14,9 @@ import {
   Text
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { setToken } from '../reducers/authSlice';
-import { userLogin } from '../services/User';
-import { useDispatch } from 'react-redux';
+import { selectUserData, setToken, setUserData } from '../reducers/authSlice';
+import { userLogin, userProfile } from '../services/User';
+import { useDispatch, useSelector } from 'react-redux';
 
 interface SignProps {
   isModalSignInOpen: boolean;
@@ -28,6 +28,7 @@ type ToastIdType = 'login_result_success' | 'login_result_fail';
 const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onDrawerClose }) => {
   const dispatch = useDispatch();
   const toast = useToast();
+  const profileData = useSelector(selectUserData);
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -89,6 +90,11 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       const token = response?.data['data'];
       dispatch(setToken(token));
       console.log('Token after login:', token);
+      const profileResponse = await userProfile(token, credentials.username);
+      // const userData = profileResponse?.data['data'];
+      // console.log('PROFILE DATA: ' + JSON.stringify(userData, undefined, 2));
+      const { isAdmin, username, avatar } = profileResponse!.data['data'];
+      dispatch(setUserData({ isAdmin, username, avatar }));
       handleCloseSignInModal();
       onDrawerClose();
       toast.isActive('login_result_fail')
@@ -108,6 +114,10 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       setDisableSignBtn(true);
     }
   }, [credentials]);
+
+  useEffect(() => {
+    console.log('Updated Profile Data:', profileData);
+  }, [profileData]);
 
   return (
     <Modal isCentered={true} isOpen={isModalSignInOpen} onClose={handleCloseSignInModal}>

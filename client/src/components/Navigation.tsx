@@ -1,19 +1,31 @@
-import { Box, useDisclosure, Flex, Link, Wrap, WrapItem, IconButton } from '@chakra-ui/react';
+import {
+  Box,
+  useDisclosure,
+  Flex,
+  Link,
+  Wrap,
+  WrapItem,
+  IconButton,
+  Avatar,
+  Spinner
+} from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
 import { HamburgerIcon } from '@chakra-ui/icons';
 import { FiShoppingCart } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
-import { selectAuthToken } from '../reducers/authSlice';
+import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import SignInModal from './SignInModal';
 import RegisterModal from './RegisterModal';
 import DrawerComponent from './drawer';
+import { useEffect, useState } from 'react';
 
 const Navigation = () => {
   const token = useSelector(selectAuthToken);
 
   // Drawer state
   const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
+  const userProfileData = useSelector(selectUserData);
 
   // Modal state sign
   const {
@@ -28,6 +40,16 @@ const Navigation = () => {
     onOpen: onModalRegisterOpen,
     onClose: onModalRegisterClose
   } = useDisclosure();
+
+  const [showSpinner, setShowSpinner] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSpinner(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -74,11 +96,22 @@ const Navigation = () => {
                 </Link>
               </WrapItem>
               {token ? (
-                <WrapItem>
-                  <Link href="/cart" color={'white'}>
-                    <IconButton aria-label="cart" icon={<FiShoppingCart size={18} />} />
-                  </Link>
-                </WrapItem>
+                <>
+                  <WrapItem>
+                    <Link href="/cart" color={'white'}>
+                      <IconButton aria-label="cart" icon={<FiShoppingCart size={18} />} />
+                    </Link>
+                  </WrapItem>
+                  <WrapItem>
+                    {showSpinner ? (
+                      <Spinner></Spinner>
+                    ) : (
+                      <Link>
+                        <Avatar size="md" src={userProfileData.avatar!} />
+                      </Link>
+                    )}
+                  </WrapItem>
+                </>
               ) : null}
             </Wrap>
           </Flex>
