@@ -26,11 +26,6 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setToken: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
-      localStorage.setItem('authToken', action.payload);
-      sessionStorage.setItem('authToken', action.payload);
-    },
     clearToken: (state) => {
       state.token = null;
       localStorage.removeItem('authToken');
@@ -49,7 +44,7 @@ export const authSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setToken, clearToken, loadToken, setUserData } = authSlice.actions;
+export const { clearToken, loadToken, setUserData } = authSlice.actions;
 
 export const selectAuthToken = (state: RootState) => state.authorization.token;
 export const selectUserData = (state: RootState) => state.authorization.userData;
