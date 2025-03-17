@@ -29,7 +29,6 @@ const DrawerComponent: FC<DrawerProps> = ({
   isDrawerOpen,
   onDrawerClose
 }) => {
-  
   const token = useSelector(selectAuthToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();

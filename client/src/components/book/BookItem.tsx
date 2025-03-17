@@ -4,12 +4,17 @@ import { COLORS } from '../../globalColors';
 import { useNavigate } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import BookRating from './BookRating';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { incrementCartCounter } from '../../reducers/cartSlice';
+import { addBookToCart } from '../../services/Cart';
+import { selectAuthToken } from '../../reducers/authSlice';
+import { useToastHandler } from '../../hooks/useToastHandler';
 
 function BookItem(props: Book) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const token = useSelector(selectAuthToken);
+  const showToast = useToastHandler();
 
   const description = () => {
     let maxLength = 120;
@@ -21,9 +26,16 @@ function BookItem(props: Book) {
     navigate(`/bookDetails/${props._id}`);
   }
 
-  function addToCart() {
-    dispatch(incrementCartCounter());
-    ////implementation
+  async function addToCart(bookID: string) {
+    const response = await addBookToCart(token!, bookID);
+    showToast(
+      response?.status === 200 || (response?.status === 400 && token)
+        ? response?.data['message']
+        : 'You have to login!',
+      response?.status === 200 ? 'success' : 'error'
+    );
+
+    response?.status === 200 ? dispatch(incrementCartCounter()) : () => {};
   }
 
   return (
@@ -47,7 +59,11 @@ function BookItem(props: Book) {
           <Text>{Number(props.currentRating).toFixed(2)} rating</Text>
           <Text mt={5}>{description()}</Text>
           <Flex direction={'column'} flex={1} justifyContent={'space-evenly'}>
-            <Button onClick={addToCart} w={'90%'} colorScheme="green" leftIcon={<AddIcon />}>
+            <Button
+              onClick={() => addToCart(props._id)}
+              w={'90%'}
+              colorScheme="green"
+              leftIcon={<AddIcon />}>
               Add To Cart
             </Button>
           </Flex>

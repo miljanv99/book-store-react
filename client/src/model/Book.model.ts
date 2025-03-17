@@ -16,4 +16,5 @@ export type Book = {
   pagesCount: number;
   price: number;
   creationDate?: Date;
+  quantity: number;
 };

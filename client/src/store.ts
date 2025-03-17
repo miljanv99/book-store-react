@@ -4,14 +4,24 @@ import cartCounterReducer from './reducers/cartSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
-const persistConfig = {
-  key: 'root',
+// Separate persistConfig for auth (keep it persisted)
+const persistConfigAuth = {
+  key: 'auth', // Use a separate key for the auth data
   storage
 };
 
+// Separate persistConfig for cartCounter (exclude cartCounterItem from persistence)
+const persistConfigCart = {
+  key: 'cart',
+  storage,
+  blacklist: ['cartCounterItem'] // Do not persist cartCounterItem state
+};
+
 // Apply redux-persist with auth reducer
-const persistedAuthReducer = persistReducer(persistConfig, authReducer);
-const persistedCartCounterReducer = persistReducer(persistConfig, cartCounterReducer);
+const persistedAuthReducer = persistReducer(persistConfigAuth, authReducer);
+
+// Apply redux-persist with cart reducer, but blacklist cartCounterItem
+const persistedCartCounterReducer = persistReducer(persistConfigCart, cartCounterReducer);
 
 export const store = configureStore({
   reducer: {
@@ -21,8 +31,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'], // Ignore the persist actions that may include non-serializable data
-        ignoredPaths: ['authorization'] // Optionally, you can ignore certain paths in the state if needed
+        ignoredActions: ['persist/PERSIST'], // Ignore persist actions that may include non-serializable data
+        ignoredPaths: ['authorization'] // Optionally, ignore paths in the state
       }
     })
 });

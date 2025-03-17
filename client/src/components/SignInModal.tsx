@@ -7,29 +7,25 @@ import {
   Stack,
   Input,
   ModalFooter,
-  Button,
-  CloseButton,
-  HStack,
-  useToast,
-  Text
+  Button
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { selectUserData, setToken, setUserData } from '../reducers/authSlice';
+import { selectUserData, setUserData } from '../reducers/authSlice';
 import { userLogin, userProfile } from '../services/User';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCartSize } from '../services/Cart';
 import { setCartCounter } from '../reducers/cartSlice';
+import { useToastHandler } from '../hooks/useToastHandler';
 
 interface SignProps {
   isModalSignInOpen: boolean;
   onModalSignInClose: () => void;
   onDrawerClose: () => void;
 }
-type ToastIdType = 'login_result_success' | 'login_result_fail';
 
 const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onDrawerClose }) => {
   const dispatch = useDispatch();
-  const toast = useToast();
+  const showToast = useToastHandler();
   const profileData = useSelector(selectUserData);
 
   const [credentials, setCredentials] = useState({
@@ -56,41 +52,12 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
     }
   };
 
-  const showLoginToast = (toastIdType: ToastIdType) => {
-    const toastId = toastIdType;
-    if (!toast.isActive(toastId)) {
-      toast({
-        id: toastId,
-        position: 'top',
-        duration: 3000,
-        isClosable: true,
-        render: ({ onClose }) => (
-          <HStack
-            p={3}
-            bg={toastIdType === 'login_result_fail' ? 'red.500' : 'green.500'}
-            color="white"
-            borderRadius="md"
-            justifyContent="space-between"
-            alignItems="center">
-            {toastIdType === 'login_result_fail' ? (
-              <Text>You've entered invalid username or password</Text>
-            ) : (
-              <Text>You successfully logged in</Text>
-            )}
-            <CloseButton onClick={onClose} />
-          </HStack>
-        )
-      });
-    }
-  };
-
   const handleLogin = async () => {
     console.log(credentials.username + ' ' + credentials.password);
     let response = await userLogin(credentials.username, credentials.password);
     if (response!.status === 200) {
       console.log(response!.data.message);
       const token = response?.data['data'];
-      dispatch(setToken(token));
       console.log('Token after login:', token);
       const profileResponse = await userProfile(token, credentials.username);
       const cartSizeResponse = await getCartSize(token);
@@ -100,16 +67,8 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       dispatch(setUserData({ isAdmin, username, avatar }));
       handleCloseSignInModal();
       onDrawerClose();
-      toast.isActive('login_result_fail')
-        ? toast.close('login_result_fail')
-        : (() => {
-            console.log('Failed login toast not active');
-          })();
-      showLoginToast('login_result_success');
-    } else {
-      showLoginToast('login_result_fail');
-      console.log('Login Failed');
     }
+    showToast(response?.data['message'], response?.status === 200 ? 'success' : 'error');
   };
 
   useEffect(() => {

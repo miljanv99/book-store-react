@@ -13,17 +13,12 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
-  ModalFooter,
-  CloseButton,
-  useToast,
-  Text
+  ModalFooter
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { userRegister } from '../services/User';
-import { useDispatch } from 'react-redux';
-import { setToken } from '../reducers/authSlice';
-import { AxiosResponse } from 'axios';
 import { COLORS } from '../globalColors';
+import { useToastHandler } from '../hooks/useToastHandler';
 
 interface RegisterProps {
   isModalRegisterOpen: boolean;
@@ -39,15 +34,14 @@ const RegisterModal: FC<RegisterProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
-  const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/\S*\.(jpg|jpeg|png|gif|bmp|webp))(\/\S*)?(\?[^\s]*)?$/;
+  const urlRegex =
+    /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/\S*\.(jpg|jpeg|png|gif|bmp|webp))(\/\S*)?(\?[^\s]*)?$/;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const [isValidAvatarURL, setIsValidAvatarURL] = useState<boolean>(false);
   const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
   const [previewAvatar, setPreviewAvatar] = useState<boolean>(false);
   const [isRegisterBtn, setRegisterBtn] = useState(true);
-
-  const dispatch = useDispatch();
-  const toast = useToast();
+  const showToast = useToastHandler();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -105,30 +99,6 @@ const RegisterModal: FC<RegisterProps> = ({
     handleResetAvatar();
   };
 
-  const showRegisterToast = (responseStatus: AxiosResponse, responseMessage: string) => {
-    const toastId = 'register-toast';
-    if (!toast.isActive(toastId)) {
-      toast({
-        id: toastId,
-        position: 'top',
-        duration: 3000,
-        isClosable: true,
-        render: ({ onClose }) => (
-          <HStack
-            p={3}
-            bg={responseStatus!.status === 400 ? 'red.500' : 'green.500'}
-            color="white"
-            borderRadius="md"
-            justifyContent="space-between"
-            alignItems="center">
-            <Text>{responseMessage}</Text>
-            <CloseButton onClick={onClose} />
-          </HStack>
-        )
-      });
-    }
-  };
-
   const handleRegister = async () => {
     let responseMessage: string = '';
 
@@ -141,8 +111,6 @@ const RegisterModal: FC<RegisterProps> = ({
     );
     if (response!.status === 200) {
       console.log(response!.data.message);
-      const token = response?.data['data'];
-      dispatch(setToken(token));
       handleCloseRegisterModal();
       responseMessage = response?.data['message'];
       onDrawerClose();
@@ -164,7 +132,7 @@ const RegisterModal: FC<RegisterProps> = ({
       }
     }
 
-    showRegisterToast(response!, responseMessage);
+    showToast(responseMessage, response?.status === 200 ? 'success' : 'error');
   };
 
   const handleAvatarPreview = () => {
@@ -257,9 +225,16 @@ const RegisterModal: FC<RegisterProps> = ({
               />
               {avatarUrl !== '' ? (
                 previewAvatar ? (
-                  <Button backgroundColor={'#fb2528'} color={'white'} onClick={handleResetAvatar}>Reset</Button>
+                  <Button backgroundColor={'#fb2528'} color={'white'} onClick={handleResetAvatar}>
+                    Reset
+                  </Button>
                 ) : isValidAvatarURL ? (
-                  <Button backgroundColor={COLORS.primaryColor} color={'white'} onClick={handleAvatarPreview}>Save</Button>
+                  <Button
+                    backgroundColor={COLORS.primaryColor}
+                    color={'white'}
+                    onClick={handleAvatarPreview}>
+                    Save
+                  </Button>
                 ) : null
               ) : null}
             </HStack>
