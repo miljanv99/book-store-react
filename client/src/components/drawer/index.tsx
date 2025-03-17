@@ -5,16 +5,13 @@ import {
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
-  DrawerOverlay,
-  CloseButton,
-  HStack,
-  useToast,
-  Text
+  DrawerOverlay
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearToken, selectAuthToken } from '../../reducers/authSlice';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToastHandler } from '../../hooks/useToastHandler';
 
 interface DrawerProps {
   onModalSignInOpen: () => void;
@@ -32,31 +29,14 @@ const DrawerComponent: FC<DrawerProps> = ({
   const token = useSelector(selectAuthToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const toast = useToast();
+  const showToast = useToastHandler();
 
   const handleSignOut = async () => {
     dispatch(clearToken());
     onDrawerClose();
     location.pathname === '/cart' ? navigate('/') : () => {};
 
-    toast({
-      position: 'top',
-      duration: 3000,
-      isClosable: true,
-      render: ({ onClose }) => (
-        <HStack
-          p={3}
-          bg={'green.500'}
-          color="white"
-          borderRadius="md"
-          justifyContent="space-between"
-          alignItems="center">
-          (<Text>You successfully logged out</Text>
-          )
-          <CloseButton onClick={onClose} />
-        </HStack>
-      )
-    });
+    showToast('You successfully logged out', 'success');
   };
 
   return (

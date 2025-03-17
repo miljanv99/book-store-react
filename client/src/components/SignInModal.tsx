@@ -10,7 +10,7 @@ import {
   Button
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { selectUserData, setUserData } from '../reducers/authSlice';
+import { selectUserData, setToken, setUserData } from '../reducers/authSlice';
 import { userLogin, userProfile } from '../services/User';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCartSize } from '../services/Cart';
@@ -58,6 +58,7 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
     if (response!.status === 200) {
       console.log(response!.data.message);
       const token = response?.data['data'];
+      dispatch(setToken(token));
       console.log('Token after login:', token);
       const profileResponse = await userProfile(token, credentials.username);
       const cartSizeResponse = await getCartSize(token);

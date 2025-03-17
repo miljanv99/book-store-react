@@ -5,22 +5,22 @@ import Navigation from './components/Navigation';
 import Store from './pages/Store';
 import BookDetails from './pages/BookDetails';
 import Cart from './pages/Cart';
-import { useDispatch, useSelector } from 'react-redux';
-import { loadToken, selectAuthToken } from './reducers/authSlice';
+import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
+import { selectAuthToken } from './reducers/authSlice';
 
 function App() {
-  const dispatch = useDispatch();
-  const token = useSelector(selectAuthToken);
+  //const token = useSelector(selectAuthToken);
   const [loading, setLoading] = useState(true);
+  const token = useSelector(selectAuthToken);
 
   useEffect(() => {
-    dispatch(loadToken());
+    !token ? setLoading(true) : setLoading(false);
     console.log('DISPATCH LOAD TOKEN: ' + token);
 
     setLoading(false);
-  }, [token]);
+  }, []);
 
   return (
     <BrowserRouter>
