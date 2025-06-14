@@ -14,11 +14,15 @@ export const CartCounterSlice = createSlice({
     },
     incrementCartCounter: (state) => {
       state.cartCounter += 1;
+    },
+    decrementCartCounter: (state) => {
+      state.cartCounter -= 1;
     }
   }
 });
 
-export const { setCartCounter, incrementCartCounter } = CartCounterSlice.actions;
+export const { setCartCounter, incrementCartCounter, decrementCartCounter } =
+  CartCounterSlice.actions;
 
 export const selectCartCounter = (state: RootState) => state.cartCounterItem.cartCounter;
 

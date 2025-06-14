@@ -1,14 +1,14 @@
-import { useToast } from '@chakra-ui/react';
+import { ToastPosition, useToast } from '@chakra-ui/react';
 import { HStack, Text, CloseButton } from '@chakra-ui/react';
 
 export const useToastHandler = () => {
   const toast = useToast();
 
-  const showToast = (message: string, status: 'success' | 'error') => {
+  const showToast = (message: string, status: 'success' | 'error', position?: ToastPosition) => {
     if (!toast.isActive(status)) {
       toast({
         id: status,
-        position: 'top',
+        position: position ? position : 'top',
         duration: 3000,
         isClosable: true,
         render: ({ onClose }) => (
