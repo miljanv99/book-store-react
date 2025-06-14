@@ -56,7 +56,7 @@ const Navigation = () => {
 
   return (
     <>
-      <Box w={'100%'} h={20} bg={COLORS.primaryColor} px={4}>
+      <Box w={'100%'} h={20} bg={COLORS.primaryColor} px={4} position={'fixed'} zIndex={10}>
         <Flex h={'100%'} alignItems={'center'} justifyContent={'space-between'}>
           <IconButton
             boxSize="12"

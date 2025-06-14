@@ -88,7 +88,7 @@ const CartScreen = () => {
       justifyContent="center"
       alignItems="center"
       width="100%"
-      padding={14}
+      padding={20}
       maxWidth={1920}
       margin="0 auto">
       <Stack width="100%">

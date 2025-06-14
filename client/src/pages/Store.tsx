@@ -18,7 +18,7 @@ const Store = () => {
 
   return (
     <>
-      <Text>Store Page</Text>
+      <Text mt={20}>Store Page</Text>
       <Wrap display={'flex'} justify={'center'}>
         {books.map((book) => (
           <BookItem
@@ -32,8 +32,7 @@ const Store = () => {
             genre={book.genre}
             price={book.price}
             year={book.year}
-            pagesCount={book.pagesCount}
-          ></BookItem>
+            pagesCount={book.pagesCount}></BookItem>
         ))}
       </Wrap>
     </>

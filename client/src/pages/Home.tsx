@@ -19,7 +19,7 @@ const Home = () => {
       theNewest: newsetBooks,
       theBestRated: bestBooks,
       theMostPurchased: purchasedBooks
-    })
+    });
   };
 
   useEffect(() => {
@@ -28,7 +28,9 @@ const Home = () => {
 
   return (
     <>
-      <Text {...headerText} mt={3}>The Newset Books</Text>
+      <Text {...headerText} mt={20}>
+        The Newset Books
+      </Text>
       <Wrap display={'flex'} justify={'center'}>
         {books.theNewest.map((book) => (
           <BookItem
@@ -42,11 +44,12 @@ const Home = () => {
             genre={book.genre}
             price={book.price}
             year={book.year}
-            pagesCount={book.pagesCount}
-          ></BookItem>
+            pagesCount={book.pagesCount}></BookItem>
         ))}
       </Wrap>
-      <Text {...headerText} mt={5}>The Best Rated Books</Text>
+      <Text {...headerText} mt={5}>
+        The Best Rated Books
+      </Text>
       <Wrap display={'flex'} justify={'center'}>
         {books.theBestRated.map((book) => (
           <BookItem
@@ -60,12 +63,13 @@ const Home = () => {
             genre={book.genre}
             price={book.price}
             year={book.year}
-            pagesCount={book.pagesCount}
-          ></BookItem>
+            pagesCount={book.pagesCount}></BookItem>
         ))}
       </Wrap>
 
-      <Text {...headerText} mt={5}>The Most Purchased Books</Text>
+      <Text {...headerText} mt={5}>
+        The Most Purchased Books
+      </Text>
       <Wrap display={'flex'} justify={'center'}>
         {books.theMostPurchased.map((book) => (
           <BookItem
@@ -79,8 +83,7 @@ const Home = () => {
             genre={book.genre}
             price={book.price}
             year={book.year}
-            pagesCount={book.pagesCount}
-          ></BookItem>
+            pagesCount={book.pagesCount}></BookItem>
         ))}
       </Wrap>
     </>
@@ -90,8 +93,7 @@ const Home = () => {
 const headerText = {
   textAlign: 'center' as const,
   fontSize: 'xx-large',
-  mb: 5,
+  mb: 5
 };
-
 
 export default Home;

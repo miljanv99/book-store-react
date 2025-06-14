@@ -38,57 +38,59 @@ const BookDetails = () => {
 
   return (
     <>
-      <IconButton
-        boxSize={12}
-        icon={<ArrowBackIcon />}
-        aria-label="back_arrow"
-        bg={COLORS.primaryColor}
-        color={'white'}
-        onClick={handleGoBack}></IconButton>
-      <Flex w="60%" mx={'auto'}>
-        <Image
-          boxShadow={'0px 8px 10px rgba(0, 0, 0, 0.25)'}
-          borderRadius={10}
-          w={{ base: '100%', sm: '80%', md: '60%', lg: '50%', xl: '40%' }}
-          h={{ base: 'auto', sm: 'auto', md: '500px', lg: '600px', xl: '750px' }}
-          src={book.cover}
-          alt={book.title}
-        />
-        <Flex textAlign={'justify'} flexDirection="column" ml={5}>
-          <Text fontWeight="bold" fontSize="xx-large">
-            {book.title}
-          </Text>
-          <Box>
-            <Flex justifyContent={'space-between'} alignItems={'center'}>
-              <Box>
-                <Text fontSize="x-large">{book.author}</Text>
+      <Box pt={20}>
+        <IconButton
+          boxSize={12}
+          icon={<ArrowBackIcon />}
+          aria-label="back_arrow"
+          bg={COLORS.primaryColor}
+          color={'white'}
+          onClick={handleGoBack}></IconButton>
+        <Flex w="60%" mx={'auto'}>
+          <Image
+            boxShadow={'0px 8px 10px rgba(0, 0, 0, 0.25)'}
+            borderRadius={10}
+            w={{ base: '100%', sm: '80%', md: '60%', lg: '50%', xl: '40%' }}
+            h={{ base: 'auto', sm: 'auto', md: '500px', lg: '600px', xl: '750px' }}
+            src={book.cover}
+            alt={book.title}
+          />
+          <Flex textAlign={'justify'} flexDirection="column" ml={5}>
+            <Text fontWeight="bold" fontSize="xx-large">
+              {book.title}
+            </Text>
+            <Box>
+              <Flex justifyContent={'space-between'} alignItems={'center'}>
+                <Box>
+                  <Text fontSize="x-large">{book.author}</Text>
 
-                <BookRating rating={Number(book.currentRating)} size={30} />
+                  <BookRating rating={Number(book.currentRating)} size={30} />
 
-                <Text>Number Of Purachases: {book.purchasesCount}</Text>
-              </Box>
-              <Text fontSize={'xx-large'}>{book.price}$</Text>
-            </Flex>
-          </Box>
-          <Flex h={'100%'} flexDirection={'column'} justifyContent={'space-evenly'}>
-            <Text>{book.description}</Text>
-            <Flex flexDirection={'column'} alignItems={'stretch'}>
-              <Text>Added To Store: {formattedDate}</Text>
-              <Text>Genre: {book.genre}</Text>
-              <Text>ISBN: {book.isbn}</Text>
-              <Text>Pages: {book.pagesCount}</Text>
-            </Flex>
-            <Flex mt={4} gap={2}>
-              <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
-                Add To Cart
-              </Button>
-              <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
-                Add To Favorite
-              </Button>
+                  <Text>Number Of Purachases: {book.purchasesCount}</Text>
+                </Box>
+                <Text fontSize={'xx-large'}>{book.price}$</Text>
+              </Flex>
+            </Box>
+            <Flex h={'100%'} flexDirection={'column'} justifyContent={'space-evenly'}>
+              <Text>{book.description}</Text>
+              <Flex flexDirection={'column'} alignItems={'stretch'}>
+                <Text>Added To Store: {formattedDate}</Text>
+                <Text>Genre: {book.genre}</Text>
+                <Text>ISBN: {book.isbn}</Text>
+                <Text>Pages: {book.pagesCount}</Text>
+              </Flex>
+              <Flex mt={4} gap={2}>
+                <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
+                  Add To Cart
+                </Button>
+                <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
+                  Add To Favorite
+                </Button>
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
-      </Flex>
+      </Box>
     </>
   );
 };
