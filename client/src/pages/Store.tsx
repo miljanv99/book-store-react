@@ -1,25 +1,31 @@
 import { Flex, Spinner, Text, Wrap } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import BookItem from '../components/book/BookItem';
 import { Book } from '../model/Book.model';
 import { getBooks } from '../services/Books';
 import { COLORS } from '../globalColors';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectFullBooksList, setAllBooks } from '../reducers/bookSlice';
 
 const Store = () => {
-  const [books, setBooks] = useState<Book[]>([]);
+  const fullBookList = useSelector(selectFullBooksList);
+  const dispatch = useDispatch();
 
   const fetchBooks = async () => {
-    let allBooks: Book[] = await getBooks();
-    setBooks(allBooks);
+    const allBooks: Book[] = await getBooks();
+    dispatch(setAllBooks(allBooks));
   };
 
   useEffect(() => {
-    fetchBooks();
+    if (fullBookList.length === 0) {
+      console.log('FETCHHHHH STORE SCREEN');
+      fetchBooks();
+    }
   }, []);
 
   return (
     <>
-      {books.length === 0 ? (
+      {fullBookList.length === 0 ? (
         <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
           <Spinner size={'xl'} color={COLORS.primaryColor}></Spinner>
         </Flex>
@@ -27,7 +33,7 @@ const Store = () => {
         <>
           <Text mt={20}>Store Page</Text>
           <Wrap display={'flex'} justify={'center'}>
-            {books.map((book) => (
+            {fullBookList.map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}

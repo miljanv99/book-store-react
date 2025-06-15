@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './reducers/authSlice';
 import cartCounterReducer from './reducers/cartSlice';
+import bookListReducer from './reducers/bookSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -23,10 +24,13 @@ const persistedAuthReducer = persistReducer(persistConfigAuth, authReducer);
 // Apply redux-persist with cart reducer, but blacklist cartCounterItem
 const persistedCartCounterReducer = persistReducer(persistConfigCart, cartCounterReducer);
 
+const persistedBookListReducer = persistReducer(persistConfigCart, bookListReducer);
+
 export const store = configureStore({
   reducer: {
     authorization: persistedAuthReducer,
-    cartCounterItem: persistedCartCounterReducer
+    cartCounterItem: persistedCartCounterReducer,
+    booksList: persistedBookListReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -47,23 +47,25 @@ const CartItem: React.FC<CartItemProps> = ({
             {/* Quantity Section */}
             <HStack width="160px" justifyContent="center">
               <IconButton
-                isDisabled={book.quantity === 0 || isNaN(book.quantity) ? true : false}
+                isDisabled={book.quantity === 0 || isNaN(book.quantity!) ? true : false}
                 aria-label="cart"
                 icon={<MinusIcon />}
                 onClick={() => handleDecrement(book._id)}></IconButton>
               <Input
                 borderColor={
-                  isNaN(book.quantity) || book.quantity === 0 || book.quantity > 99 ? 'red' : ''
+                  isNaN(book.quantity!) || book.quantity === 0 || book.quantity! > 99 ? 'red' : ''
                 }
                 focusBorderColor={
-                  isNaN(book.quantity) || book.quantity === 0 || book.quantity > 99 ? 'red.500' : ''
+                  isNaN(book.quantity!) || book.quantity === 0 || book.quantity! > 99
+                    ? 'red.500'
+                    : ''
                 }
                 type="number"
                 textAlign="center"
                 value={book.quantity}
                 onChange={(e) => handleQuantity(book._id, parseInt(e.target.value))}></Input>
               <IconButton
-                isDisabled={book.quantity >= 99 ? true : false}
+                isDisabled={book.quantity! >= 99 ? true : false}
                 aria-label="cart"
                 icon={<AddIcon />}
                 onClick={() => handleIncrement(book._id)}></IconButton>
@@ -76,7 +78,7 @@ const CartItem: React.FC<CartItemProps> = ({
 
             {/* Total */}
             <Text width="80px" textAlign="center">
-              ${(book.price * (isNaN(book.quantity) ? 1 : book.quantity)).toFixed(2)}
+              ${(book.price * (isNaN(book.quantity!) ? 1 : book.quantity!)).toFixed(2)}
             </Text>
 
             <Button

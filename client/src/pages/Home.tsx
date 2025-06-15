@@ -1,35 +1,48 @@
 import { Flex, Spinner, Text, Wrap } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getBooks } from '../services/Books';
 import { Book } from '../model/Book.model';
 import BookItem from '../components/book/BookItem';
 import { COLORS } from '../globalColors';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  selectTheNewestBooksList,
+  selectTheBestRatedBooksList,
+  selectTheMostPurchasedBooksList,
+  setTheNewest,
+  setTheBestRated,
+  setTheMostPurchased
+} from '../reducers/bookSlice';
 
 const Home = () => {
-  const [books, setBooks] = useState({
-    theNewest: [] as Book[],
-    theBestRated: [] as Book[],
-    theMostPurchased: [] as Book[]
-  });
+  const dispatch = useDispatch();
+  const theNewestBooks = useSelector(selectTheNewestBooksList);
+  const theBestRatedBooks = useSelector(selectTheBestRatedBooksList);
+  const theMostPurchasedBooks = useSelector(selectTheMostPurchasedBooksList);
 
   const fetchBooks = async () => {
-    let newsetBooks: Book[] = await getBooks('sort={"creationDate":-1}&limit=5');
-    let bestBooks: Book[] = await getBooks('sort={"currentRating":-1}&limit=5');
-    let purchasedBooks: Book[] = await getBooks('sort={"purchasesCount":-1}&limit=5');
-    setBooks({
-      theNewest: newsetBooks,
-      theBestRated: bestBooks,
-      theMostPurchased: purchasedBooks
-    });
+    const newsetBooks: Book[] = await getBooks('sort={"creationDate":-1}&limit=5');
+    const bestBooks: Book[] = await getBooks('sort={"currentRating":-1}&limit=5');
+    const purchasedBooks: Book[] = await getBooks('sort={"purchasesCount":-1}&limit=5');
+    dispatch(setTheNewest(newsetBooks));
+    dispatch(setTheBestRated(bestBooks));
+    dispatch(setTheMostPurchased(purchasedBooks));
   };
 
   useEffect(() => {
-    fetchBooks();
+    if (
+      theNewestBooks.length === 0 ||
+      theBestRatedBooks.length === 0 ||
+      theMostPurchasedBooks.length === 0
+    ) {
+      console.log('FETCHHHHH');
+      fetchBooks();
+    }
   }, []);
 
   return (
     <>
-      {books.theNewest.length === 0 ? (
+      {theNewestBooks.length === 0 ? (
         <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
           <Spinner size={'xl'} color={COLORS.primaryColor}></Spinner>
         </Flex>
@@ -39,7 +52,7 @@ const Home = () => {
             The Newset Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {books.theNewest.map((book) => (
+            {theNewestBooks.map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}
@@ -58,7 +71,7 @@ const Home = () => {
             The Best Rated Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {books.theBestRated.map((book) => (
+            {theBestRatedBooks.map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}
@@ -78,7 +91,7 @@ const Home = () => {
             The Most Purchased Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {books.theMostPurchased.map((book) => (
+            {theMostPurchasedBooks.map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}

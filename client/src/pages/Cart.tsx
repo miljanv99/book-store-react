@@ -43,9 +43,9 @@ const CartScreen = () => {
     setCartBooks((prevBooks) =>
       prevBooks.map((book) =>
         book._id === bookId
-          ? isNaN(book.quantity)
+          ? isNaN(book.quantity!)
             ? { ...book, quantity: 1 }
-            : { ...book, quantity: book.quantity + 1 }
+            : { ...book, quantity: book.quantity! + 1 }
           : book
       )
     );
@@ -54,7 +54,7 @@ const CartScreen = () => {
   const handleDecrement = useCallback((bookId: string) => {
     setCartBooks((prevBooks) =>
       prevBooks.map((book) =>
-        book._id === bookId ? { ...book, quantity: book.quantity - 1 } : book
+        book._id === bookId ? { ...book, quantity: book.quantity! - 1 } : book
       )
     );
   }, []);
@@ -62,7 +62,7 @@ const CartScreen = () => {
   const calculateTotalPrice = useMemo<number>(() => {
     const newTotalPrice = cartBooks.reduce(
       (previousBookValue, currentBookValue) =>
-        previousBookValue + currentBookValue.price * currentBookValue.quantity,
+        previousBookValue + currentBookValue.price * currentBookValue.quantity!,
       0
     );
 
