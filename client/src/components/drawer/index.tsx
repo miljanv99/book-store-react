@@ -5,13 +5,17 @@ import {
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
-  DrawerOverlay
+  DrawerOverlay,
+  DrawerFooter,
+  Switch,
+  useColorMode
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearToken, selectAuthToken } from '../../reducers/authSlice';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToastHandler } from '../../hooks/useToastHandler';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 
 interface DrawerProps {
   onModalSignInOpen: () => void;
@@ -30,6 +34,8 @@ const DrawerComponent: FC<DrawerProps> = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const showToast = useToastHandler();
+
+  const { colorMode, toggleColorMode } = useColorMode();
 
   const handleSignOut = async () => {
     dispatch(clearToken());
@@ -62,6 +68,19 @@ const DrawerComponent: FC<DrawerProps> = ({
             ) : null}
           </VStack>
         </DrawerBody>
+        <DrawerFooter justifyContent={'center'}>
+          {colorMode === 'dark' ? (
+            <SunIcon fontSize={35}></SunIcon>
+          ) : (
+            <MoonIcon fontSize={35}></MoonIcon>
+          )}
+          <Switch
+            animation={'forwards'}
+            size={'lg'}
+            isChecked={colorMode === 'dark'}
+            onChange={toggleColorMode}
+            ml={5}></Switch>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

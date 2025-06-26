@@ -39,7 +39,13 @@ function BookItem(props: Book) {
   }
 
   return (
-    <Box background={COLORS.primaryColor} borderRadius={10} w={520} h={380} boxShadow={'2xl'}>
+    <Box
+      textColor={'black'}
+      background={COLORS.primaryColor}
+      borderRadius={10}
+      w={520}
+      h={380}
+      boxShadow={'2xl'}>
       <Flex>
         <Box display={'flex'} w={'50%'} h={350} alignItems="center" justifyContent={'center'}>
           <Image
@@ -60,9 +66,12 @@ function BookItem(props: Book) {
           <Text mt={5}>{description()}</Text>
           <Flex direction={'column'} flex={1} justifyContent={'space-evenly'}>
             <Button
+              _hover={{ textColor: 'black' }}
+              _active={{ textColor: 'black', bg: 'transparent' }}
+              textColor={'white'}
               onClick={() => addToCart(props._id)}
               w={'90%'}
-              colorScheme="green"
+              backgroundColor={'green'}
               leftIcon={<AddIcon />}>
               Add To Cart
             </Button>

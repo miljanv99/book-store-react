@@ -1,5 +1,14 @@
 import { MinusIcon, AddIcon } from '@chakra-ui/icons';
-import { VStack, HStack, IconButton, Input, Button, Image, Text } from '@chakra-ui/react';
+import {
+  VStack,
+  HStack,
+  IconButton,
+  Input,
+  Button,
+  Image,
+  Text,
+  useColorMode
+} from '@chakra-ui/react';
 import { Book } from '../../model/Book.model';
 import React from 'react';
 
@@ -22,11 +31,13 @@ const CartItem: React.FC<CartItemProps> = ({
 }) => {
   const isCheckoutDisabled = books.some((book) => book.quantity === 0);
 
+  const { colorMode } = useColorMode();
+
   return (
     <VStack width="100%" fontSize={'larger'}>
       {books.map((book) => (
         <HStack
-          _hover={{ bg: 'whitesmoke' }}
+          _hover={{ bg: colorMode === 'light' ? 'whitesmoke' : 'slategray' }}
           borderRadius={10}
           mt={4}
           width="100%"

@@ -8,6 +8,12 @@ import { format } from 'date-fns';
 import BookRating from '../components/book/BookRating';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 
+const buttonStyles = {
+  color: 'black',
+  borderRadius: 20,
+  backgroundColor: COLORS.primaryColor
+};
+
 const BookDetails = () => {
   const { bookId } = useParams();
   const navigation = useNavigate();
@@ -80,12 +86,8 @@ const BookDetails = () => {
                 <Text>Pages: {book.pagesCount}</Text>
               </Flex>
               <Flex mt={4} gap={2}>
-                <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
-                  Add To Cart
-                </Button>
-                <Button borderRadius={20} backgroundColor={COLORS.primaryColor}>
-                  Add To Favorite
-                </Button>
+                <Button {...buttonStyles}>Add To Cart</Button>
+                <Button {...buttonStyles}>Add To Favorite</Button>
               </Flex>
             </Flex>
           </Flex>

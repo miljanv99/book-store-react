@@ -115,7 +115,13 @@ const Navigation = () => {
                           </Circle>
                         ) : null}
 
-                        <IconButton aria-label="cart" icon={<FiShoppingCart size={18} />} />
+                        <IconButton
+                          _hover={{ bg: COLORS.darkPrimaryColor }}
+                          _active={{ bg: COLORS.darkPrimaryColor }}
+                          backgroundColor={'transparent'}
+                          aria-label="cart"
+                          icon={<FiShoppingCart color="white" size={25} />}
+                        />
                       </Box>
                     </Link>
                   </WrapItem>

@@ -7,7 +7,7 @@ import { Book } from '../model/Book.model';
 import { decrementCartCounter, selectCartCounter } from '../reducers/cartSlice';
 import { Cart } from '../model/Cart.model';
 import { useToastHandler } from '../hooks/useToastHandler';
-import emptyCartImg from '../assets/empty cart.jpg';
+import emptyCartImg from '../assets/empty_cart.webp';
 import CartItem from '../components/cart/CartItem';
 
 const CartScreen = () => {
