@@ -18,7 +18,6 @@ interface CartItemProps {
   handleDecrement: (bookId: string) => void;
   handleIncrement: (bookId: string) => void;
   handleRemoveItem: (bookId: string) => void;
-  calculateTotalPrice: number;
 }
 
 const CartItem: React.FC<CartItemProps> = ({
@@ -26,11 +25,8 @@ const CartItem: React.FC<CartItemProps> = ({
   handleQuantity,
   handleDecrement,
   handleIncrement,
-  handleRemoveItem,
-  calculateTotalPrice
+  handleRemoveItem
 }) => {
-  const isCheckoutDisabled = books.some((book) => book.quantity === 0);
-
   const { colorMode } = useColorMode();
 
   return (
@@ -102,19 +98,6 @@ const CartItem: React.FC<CartItemProps> = ({
           </HStack>
         </HStack>
       ))}
-      <VStack width={'100%'} alignItems={'end'} fontSize={'x-large'} fontWeight={'bold'}>
-        <HStack>
-          <Text>Total Amount:</Text>
-          <Text>{calculateTotalPrice.toFixed(2)}</Text>
-        </HStack>
-        <Button
-          isDisabled={isCheckoutDisabled}
-          _hover={{ bg: 'darkgreen' }}
-          bg={'green'}
-          color={'white'}>
-          Checkout
-        </Button>
-      </VStack>
     </VStack>
   );
 };
