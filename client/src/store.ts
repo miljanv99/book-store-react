@@ -18,19 +18,24 @@ const persistConfigCart = {
   blacklist: ['cartCounterItem'] // Do not persist cartCounterItem state
 };
 
+const persistConfigBookList = {
+  key: 'bookList', // Use a separate key for the auth data
+  storage
+};
+
 // Apply redux-persist with auth reducer
 const persistedAuthReducer = persistReducer(persistConfigAuth, authReducer);
 
 // Apply redux-persist with cart reducer, but blacklist cartCounterItem
 const persistedCartCounterReducer = persistReducer(persistConfigCart, cartCounterReducer);
 
-const persistedBookListReducer = persistReducer(persistConfigCart, bookListReducer);
+const persistedBookListReducer = persistReducer(persistConfigBookList, bookListReducer);
 
 export const store = configureStore({
   reducer: {
     authorization: persistedAuthReducer,
     cartCounterItem: persistedCartCounterReducer,
-    booksList: persistedBookListReducer
+    booksList: bookListReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

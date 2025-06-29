@@ -7,6 +7,7 @@ import { COLORS } from '../globalColors';
 import { format } from 'date-fns';
 import BookRating from '../components/book/BookRating';
 import { ArrowBackIcon } from '@chakra-ui/icons';
+import { useAddToCart } from '../hooks/useAddToCart';
 
 const buttonStyles = {
   color: 'black',
@@ -17,6 +18,7 @@ const buttonStyles = {
 const BookDetails = () => {
   const { bookId } = useParams();
   const navigation = useNavigate();
+  const addToCart = useAddToCart();
 
   const [book, setBook] = useState<Book | null>();
 
@@ -86,7 +88,9 @@ const BookDetails = () => {
                 <Text>Pages: {book.pagesCount}</Text>
               </Flex>
               <Flex mt={4} gap={2}>
-                <Button {...buttonStyles}>Add To Cart</Button>
+                <Button {...buttonStyles} onClick={() => addToCart(book._id)}>
+                  Add To Cart
+                </Button>
                 <Button {...buttonStyles}>Add To Favorite</Button>
               </Flex>
             </Flex>

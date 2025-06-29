@@ -4,17 +4,11 @@ import { COLORS } from '../../globalColors';
 import { useNavigate } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import BookRating from './BookRating';
-import { useDispatch, useSelector } from 'react-redux';
-import { incrementCartCounter } from '../../reducers/cartSlice';
-import { addBookToCart } from '../../services/Cart';
-import { selectAuthToken } from '../../reducers/authSlice';
-import { useToastHandler } from '../../hooks/useToastHandler';
+import { useAddToCart } from '../../hooks/useAddToCart';
 
 function BookItem(props: Book) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const token = useSelector(selectAuthToken);
-  const showToast = useToastHandler();
+  const addToCart = useAddToCart();
 
   const description = () => {
     let maxLength = 120;
@@ -24,18 +18,6 @@ function BookItem(props: Book) {
 
   function showBookDetails() {
     navigate(`/bookDetails/${props._id}`);
-  }
-
-  async function addToCart(bookID: string) {
-    const response = await addBookToCart(token!, bookID);
-    showToast(
-      response?.status === 200 || (response?.status === 400 && token)
-        ? response?.data['message']
-        : 'You have to login!',
-      response?.status === 200 ? 'success' : 'error'
-    );
-
-    response?.status === 200 ? dispatch(incrementCartCounter()) : () => {};
   }
 
   return (

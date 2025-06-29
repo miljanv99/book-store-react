@@ -57,10 +57,18 @@ const CartScreen = () => {
   };
 
   const handleQuantity = useCallback((bookId: string, value: number) => {
+    // Parse to string to check if the number starts with 0
+    let quantityValue: string = String(value);
+    // Only remove leading zeros if value starts with 0 and has more than 1 digit
+    if (quantityValue.startsWith('0')) {
+      quantityValue = quantityValue.replace(/^0+/, '');
+    }
+    const parsed = parseInt(quantityValue);
+
     setCartBooks((prevBooks) =>
       prevBooks.map((book) =>
         book._id === bookId
-          ? { ...book, quantity: value > 99 ? 99 : Number.isNaN(value) ? 0 : value }
+          ? { ...book, quantity: parsed > 99 ? 99 : Number.isNaN(parsed) ? 0 : parsed }
           : book
       )
     );

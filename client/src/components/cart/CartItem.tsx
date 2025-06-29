@@ -67,10 +67,12 @@ const CartItem: React.FC<CartItemProps> = ({
                     ? 'red.500'
                     : ''
                 }
-                type="number"
+                type="text"
                 textAlign="center"
                 value={book.quantity}
-                onChange={(e) => handleQuantity(book._id, parseInt(e.target.value))}></Input>
+                onChange={(e) => {
+                  handleQuantity(book._id, parseInt(e.target.value));
+                }}></Input>
               <IconButton
                 isDisabled={book.quantity! >= 99 ? true : false}
                 aria-label="cart"
