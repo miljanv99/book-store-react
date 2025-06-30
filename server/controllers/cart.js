@@ -149,15 +149,26 @@ module.exports = {
       .populate("books")
       .then((cart) => {
         for (let book of cart.books) {
-          totalPrice += book.price * req.body[book._id.toString()];
+          let qty = req.body[book._id.toString()]
+          totalPrice += book.price * qty;
           products.push({
             id: book._id,
             title: book.title,
             author: book.author,
             cover: book.cover,
             price: book.price,
-            qty: req.body[book._id.toString()],
+            qty: qty,
           });
+
+         BOOK.updateOne(
+          {_id: book._id},
+          {$inc: {purchasesCount: qty}}
+         ).then((res)=>{
+          console.log(`Purchases count updated: ${book.title} - added qty: ${qty}`, res)
+         }).catch((err)=>{
+          console.log('Purchases count erro: ', err)
+         })
+
         }
 
         RECEIPT.create({
