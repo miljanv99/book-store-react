@@ -177,7 +177,7 @@ module.exports = {
           totalPrice: totalPrice,
         })
           .then((receipt) => {
-            USER.update(
+            USER.updateOne(
               { _id: userId },
               { $push: { receipts: receipt._id } },
             ).then(() => {

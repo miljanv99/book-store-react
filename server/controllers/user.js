@@ -218,7 +218,7 @@ module.exports = {
       });
     }
 
-    USER.update({ _id: userToChange }, { $set: { avatar: newAvatar } })
+    USER.updateOne({ _id: userToChange }, { $set: { avatar: newAvatar } })
       .then(() => {
         return res.status(200).json({
           message: "Avatar changed successfully!",
