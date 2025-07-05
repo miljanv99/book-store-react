@@ -1,14 +1,14 @@
-import apiConfig from './index';
+import { apiConfig, domain } from '.';
 import { Book } from '../model/Book.model';
 
-const searchBookEndpoint = `${apiConfig.domain}/book/search`;
-const getSingleBookEndpoint = `${apiConfig.domain}/book/details/`;
-const rateBookEndpoint = `${apiConfig.domain}/book/rate/`;
-const addToFavoritesEndpoint = `${apiConfig.domain}/book/addToFavorites/`;
+export const searchBookEndpoint = '/book/search';
+const getSingleBookEndpoint = `${domain}/book/details/`;
+const rateBookEndpoint = `${domain}/book/rate/`;
+const addToFavoritesEndpoint = `${domain}/book/addToFavorites/`;
 
 export async function getBooks(query?: string): Promise<Book[]> {
   try {
-    const response = await apiConfig.URL.get(`${searchBookEndpoint}?${query}`);
+    const response = await apiConfig.get(`${searchBookEndpoint}?${query}`);
     return response.data.data;
   } catch (error) {
     console.log('Error while getting books');
@@ -18,7 +18,7 @@ export async function getBooks(query?: string): Promise<Book[]> {
 
 export async function getSingleBook(bookID: string): Promise<Book> {
   try {
-    const response = await apiConfig.URL.get(`${getSingleBookEndpoint}${bookID}`);
+    const response = await apiConfig.get(`${getSingleBookEndpoint}${bookID}`);
     console.log('Book Details: ' + response.data.data['title']);
     return response.data.data;
   } catch (error) {

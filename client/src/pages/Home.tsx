@@ -1,48 +1,49 @@
 import { Flex, Spinner, Text, Wrap } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { getBooks } from '../services/Books';
+import { searchBookEndpoint } from '../services/Books';
 import { Book } from '../model/Book.model';
 import BookItem from '../components/book/BookItem';
 import { COLORS } from '../globalColors';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectTheNewestBooksList,
-  selectTheBestRatedBooksList,
-  selectTheMostPurchasedBooksList,
-  setTheNewest,
-  setTheBestRated,
-  setTheMostPurchased
-} from '../reducers/bookSlice';
+
+import { useApi } from '../hooks/useApi';
+
+type ApiBookResponse = {
+  message: string;
+  data: Book[];
+  itemCount: number;
+};
 
 const Home = () => {
-  const dispatch = useDispatch();
-  const theNewestBooks = useSelector(selectTheNewestBooksList);
-  const theBestRatedBooks = useSelector(selectTheBestRatedBooksList);
-  const theMostPurchasedBooks = useSelector(selectTheMostPurchasedBooksList);
+  const { data: theNewestBooks1, sendRequest: fetchTheNewestBooks } = useApi<ApiBookResponse>();
+  const { data: theBestRatedBooks1, sendRequest: fetchTheBestRatedBooks } =
+    useApi<ApiBookResponse>();
+  const { data: theMostPurchasedBooks1, sendRequest: fetchTheMostPurchasedBooksBooks } =
+    useApi<ApiBookResponse>();
 
-  const fetchBooks = async () => {
-    const newsetBooks: Book[] = await getBooks('sort={"creationDate":-1}&limit=5');
-    const bestBooks: Book[] = await getBooks('sort={"currentRating":-1}&limit=5');
-    const purchasedBooks: Book[] = await getBooks('sort={"purchasesCount":-1}&limit=5');
-    dispatch(setTheNewest(newsetBooks));
-    dispatch(setTheBestRated(bestBooks));
-    dispatch(setTheMostPurchased(purchasedBooks));
+  const fetchBooks = () => {
+    fetchTheNewestBooks({
+      method: 'GET',
+      url: `${searchBookEndpoint}?sort={"creationDate":-1}&limit=5`
+    });
+    fetchTheBestRatedBooks({
+      method: 'GET',
+      url: `${searchBookEndpoint}?sort={"currentRating":-1}&limit=5`
+    });
+    fetchTheMostPurchasedBooksBooks({
+      method: 'GET',
+      url: `${searchBookEndpoint}?sort={"purchasesCount":-1}&limit=5`
+    });
   };
 
   useEffect(() => {
-    if (
-      theNewestBooks.length === 0 ||
-      theBestRatedBooks.length === 0 ||
-      theMostPurchasedBooks.length === 0
-    ) {
-      console.log('FETCHHHHH');
-      fetchBooks();
-    }
+    fetchBooks();
   }, []);
 
   return (
     <>
-      {theNewestBooks.length === 0 ? (
+      {theNewestBooks1 === null ||
+      theBestRatedBooks1 === null ||
+      theMostPurchasedBooks1 === null ? (
         <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
           <Spinner size={'xl'} color={COLORS.primaryColor}></Spinner>
         </Flex>
@@ -52,7 +53,7 @@ const Home = () => {
             The Newset Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {theNewestBooks.map((book) => (
+            {theNewestBooks1['data'].map((book: any) => (
               <BookItem
                 key={book._id}
                 _id={book._id}
@@ -71,7 +72,7 @@ const Home = () => {
             The Best Rated Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {theBestRatedBooks.map((book) => (
+            {theBestRatedBooks1['data'].map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}
@@ -91,7 +92,7 @@ const Home = () => {
             The Most Purchased Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {theMostPurchasedBooks.map((book) => (
+            {theMostPurchasedBooks1['data'].map((book) => (
               <BookItem
                 key={book._id}
                 _id={book._id}

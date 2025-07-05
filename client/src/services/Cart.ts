@@ -1,15 +1,15 @@
 import axios from 'axios';
-import apiConfig from './index';
+import { apiConfig, domain } from '.';
 
-const cartSizeEndpoint = `${apiConfig.domain}/cart/getSize`;
-const getCartItemsEndpoint = `${apiConfig.domain}/user/cart`;
-const getAddBookToCartEndpoint = `${apiConfig.domain}/user/cart/add/`;
-const deleteBookToCartEndpoint = `${apiConfig.domain}/user/cart/delete/`;
-const checkoutEndpoint = `${apiConfig.domain}/user/cart/checkout`;
+const cartSizeEndpoint = `${domain}/cart/getSize`;
+const getCartItemsEndpoint = `${domain}/user/cart`;
+const getAddBookToCartEndpoint = `${domain}/user/cart/add/`;
+const deleteBookToCartEndpoint = `${domain}/user/cart/delete/`;
+const checkoutEndpoint = `${domain}/user/cart/checkout`;
 
 export async function getCartSize(token: string) {
   try {
-    const response = await apiConfig.URL.get(cartSizeEndpoint, {
+    const response = await apiConfig.get(cartSizeEndpoint, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -25,7 +25,7 @@ export async function getCartSize(token: string) {
 }
 export async function getCartItems(token: string) {
   try {
-    const response = await apiConfig.URL.get(getCartItemsEndpoint, {
+    const response = await apiConfig.get(getCartItemsEndpoint, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -42,7 +42,7 @@ export async function getCartItems(token: string) {
 
 export async function addBookToCart(token: string, bookId: string) {
   try {
-    const response = await apiConfig.URL.post(`${getAddBookToCartEndpoint}${bookId}`, undefined, {
+    const response = await apiConfig.post(`${getAddBookToCartEndpoint}${bookId}`, undefined, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -59,7 +59,7 @@ export async function addBookToCart(token: string, bookId: string) {
 
 export async function removeBook(token: string, bookId: string) {
   try {
-    const response = await apiConfig.URL.delete(`${deleteBookToCartEndpoint}${bookId}`, {
+    const response = await apiConfig.delete(`${deleteBookToCartEndpoint}${bookId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -76,7 +76,7 @@ export async function removeBook(token: string, bookId: string) {
 
 export async function checkout(token: string, books: Record<string, number>) {
   try {
-    const response = await apiConfig.URL.post(`${checkoutEndpoint}`, books, {
+    const response = await apiConfig.post(`${checkoutEndpoint}`, books, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'

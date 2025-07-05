@@ -204,14 +204,22 @@ const CartScreen = () => {
                 <Text>Total Amount:</Text>
                 <Text>${calculateTotalPrice.toFixed(2)}</Text>
               </HStack>
-              <Button
-                onClick={onModalOpen}
-                isDisabled={isCheckoutDisabled}
-                _hover={{ bg: 'darkgreen' }}
-                bg={'green'}
-                color={'white'}>
-                Checkout
-              </Button>
+              <HStack>
+                {cartBooks.length > 1 ? (
+                  <Button _hover={{ bg: 'rgb(180, 0, 0)' }} bg={'rgb(245, 57, 54)'} color={'white'}>
+                    Remove All
+                  </Button>
+                ) : null}
+
+                <Button
+                  onClick={onModalOpen}
+                  isDisabled={isCheckoutDisabled}
+                  _hover={{ bg: 'darkgreen' }}
+                  bg={'green'}
+                  color={'white'}>
+                  Checkout
+                </Button>
+              </HStack>
             </VStack>
           </Flex>
         </>

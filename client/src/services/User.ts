@@ -1,13 +1,13 @@
 import axios from 'axios';
-import apiConfig from './index';
+import { apiConfig, domain } from '.';
 
-const userLoginEndpoint = `${apiConfig.domain}/user/login`;
-const userRegisterEndpoint = `${apiConfig.domain}/user/register`;
-const userProfileEndpoint = `${apiConfig.domain}/user/profile/`;
+const userLoginEndpoint = `${domain}/user/login`;
+const userRegisterEndpoint = `${domain}/user/register`;
+const userProfileEndpoint = `${domain}/user/profile/`;
 
 export async function userLogin(username: string, password: string) {
   try {
-    const response = await apiConfig.URL.post(userLoginEndpoint, {
+    const response = await apiConfig.post(userLoginEndpoint, {
       username: username,
       password: password
     });
@@ -30,7 +30,7 @@ export async function userRegister(
   avatar?: string
 ) {
   try {
-    const response = await apiConfig.URL.post(userRegisterEndpoint, {
+    const response = await apiConfig.post(userRegisterEndpoint, {
       email: email,
       username: username,
       password: password,
@@ -50,7 +50,7 @@ export async function userRegister(
 
 export async function userProfile(token: string, username: string) {
   try {
-    const response = await apiConfig.URL.get(`${userProfileEndpoint}${username}`, {
+    const response = await apiConfig.get(`${userProfileEndpoint}${username}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }

@@ -14,8 +14,7 @@ const persistConfigAuth = {
 // Separate persistConfig for cartCounter (exclude cartCounterItem from persistence)
 const persistConfigCart = {
   key: 'cart',
-  storage,
-  blacklist: ['cartCounterItem'] // Do not persist cartCounterItem state
+  storage
 };
 
 const persistConfigBookList = {
