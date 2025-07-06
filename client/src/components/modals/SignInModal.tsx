@@ -10,12 +10,12 @@ import {
   Button
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { selectUserData, setToken, setUserData } from '../reducers/authSlice';
-import { userLogin, userProfile } from '../services/User';
+import { selectUserData, setToken, setUserData } from '../../reducers/authSlice';
+import { userLogin, userProfile } from '../../services/User';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCartSize } from '../services/Cart';
-import { setCartCounter } from '../reducers/cartSlice';
-import { useToastHandler } from '../hooks/useToastHandler';
+import { getCartSize } from '../../services/Cart';
+import { setCartCounter } from '../../reducers/cartSlice';
+import { useToastHandler } from '../../hooks/useToastHandler';
 
 interface SignProps {
   isModalSignInOpen: boolean;

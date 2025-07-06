@@ -16,9 +16,9 @@ import {
   ModalFooter
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { userRegister } from '../services/User';
-import { COLORS } from '../globalColors';
-import { useToastHandler } from '../hooks/useToastHandler';
+import { userRegister } from '../../services/User';
+import { COLORS } from '../../globalColors';
+import { useToastHandler } from '../../hooks/useToastHandler';
 
 interface RegisterProps {
   isModalRegisterOpen: boolean;

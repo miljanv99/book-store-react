@@ -1,17 +1,10 @@
 import {
   Button,
-  Center,
   Divider,
   Flex,
   Heading,
   HStack,
   Image,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Stack,
   Text,
   useDisclosure,
@@ -28,6 +21,8 @@ import { useToastHandler } from '../hooks/useToastHandler';
 import emptyCartImg from '../assets/empty_cart.webp';
 import CartItem from '../components/cart/CartItem';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '../hooks/useApi';
+import ConfirmationModal from '../components/modals/ConfirmationModal';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -35,10 +30,25 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const toast = useToastHandler();
   const navigate = useNavigate();
-  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
+  const {
+    isOpen: isCheckoutModalOpen,
+    onOpen: onCheckoutModalOpen,
+    onClose: onCheckoutModalClose
+  } = useDisclosure();
+  const {
+    isOpen: isRemoveAllModalOpen,
+    onOpen: onRemoveAllModalOpen,
+    onClose: onRemoveAllModalClose
+  } = useDisclosure();
 
   const [cartBooks, setCartBooks] = useState<Book[]>([]);
   const isCheckoutDisabled = cartBooks.some((book) => book.quantity === 0);
+
+  const {
+    sendRequest: removeAllItems,
+    status: removeAllStatus,
+    message: removeAllMessage
+  } = useApi();
 
   let cartItems: Cart;
   let booksInCart: Book[];
@@ -123,6 +133,14 @@ const CartScreen = () => {
     [dispatch, cartBooks, toast, token]
   );
 
+  const handleRemoveAll = async () => {
+    await removeAllItems({
+      method: 'DELETE',
+      url: '/user/cart/deleteAll',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  };
+
   const handleCheckout = async () => {
     const getBookAndQuantity = cartBooks.reduce(
       (acc, book) => {
@@ -147,6 +165,17 @@ const CartScreen = () => {
   useEffect(() => {
     fetchCartItems();
   }, []);
+
+  useEffect(() => {
+    if (removeAllStatus === 'success') {
+      setCartBooks([]);
+      dispatch(setCartCounter(0));
+      onRemoveAllModalClose();
+      toast(removeAllMessage, 'success');
+    } else if (removeAllStatus === 'error') {
+      console.error('Something went wrong!');
+    }
+  }, [removeAllStatus, removeAllMessage, setCartBooks, dispatch]);
 
   return (
     <>
@@ -206,13 +235,17 @@ const CartScreen = () => {
               </HStack>
               <HStack>
                 {cartBooks.length > 1 ? (
-                  <Button _hover={{ bg: 'rgb(180, 0, 0)' }} bg={'rgb(245, 57, 54)'} color={'white'}>
+                  <Button
+                    _hover={{ bg: 'rgb(180, 0, 0)' }}
+                    bg={'rgb(245, 57, 54)'}
+                    color={'white'}
+                    onClick={onRemoveAllModalOpen}>
                     Remove All
                   </Button>
                 ) : null}
 
                 <Button
-                  onClick={onModalOpen}
+                  onClick={onCheckoutModalOpen}
                   isDisabled={isCheckoutDisabled}
                   _hover={{ bg: 'darkgreen' }}
                   bg={'green'}
@@ -234,24 +267,24 @@ const CartScreen = () => {
         </Flex>
       )}
 
-      <Modal isCentered={true} isOpen={isModalOpen} onClose={onModalClose}>
-        <ModalOverlay></ModalOverlay>
-        <ModalContent>
-          <ModalHeader textAlign={'center'}>
-            You're about to purchase {cartCounter} items for a total of $
-            {calculateTotalPrice.toFixed(2)}.
-          </ModalHeader>
-          <ModalBody>
-            <Center>Would you like to proceed with the checkout?</Center>
-          </ModalBody>
-          <ModalFooter>
-            <HStack justifyContent={'center'}>
-              <Button onClick={handleCheckout}>Confirm Purchase</Button>
-              <Button onClick={onModalClose}>Cancel</Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ConfirmationModal
+        isModalOpen={isRemoveAllModalOpen}
+        onClose={onRemoveAllModalClose}
+        headerText="Remove All Items"
+        bodyText="Are you sure that you want to remove all items from cart?"
+        onCloseBtnText="Cancel"
+        onConfirm={handleRemoveAll}
+        onConfirmBtnText="Yes, I am sure"></ConfirmationModal>
+
+      <ConfirmationModal
+        isModalOpen={isCheckoutModalOpen}
+        onClose={onCheckoutModalClose}
+        headerText={`You're about to purchase ${cartCounter} items for a total of $
+            ${calculateTotalPrice.toFixed(2)}`}
+        bodyText="Would you like to proceed with the checkout?"
+        onCloseBtnText="Cancel"
+        onConfirm={handleCheckout}
+        onConfirmBtnText="Confirm Purchase"></ConfirmationModal>
     </>
   );
 };
