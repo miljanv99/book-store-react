@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@chakra-ui/react';
 import { selectAuthToken } from './reducers/authSlice';
+import UserProfile from './pages/UserProfile';
 
 function App() {
   //const token = useSelector(selectAuthToken);
@@ -49,6 +50,25 @@ function App() {
             }
           />
           <Route path="bookDetails/:bookId" element={<BookDetails />} />
+          <Route
+            path="profile/"
+            element={
+              loading ? (
+                <Spinner
+                  thickness="4px"
+                  speed="0.65s"
+                  emptyColor="gray.200"
+                  size="xl"
+                  alignSelf="center"
+                  margin="auto"
+                  display="block"
+                />
+              ) : token ? (
+                <UserProfile />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }></Route>
         </Route>
       </Routes>
     </BrowserRouter>

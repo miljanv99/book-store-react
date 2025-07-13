@@ -40,7 +40,11 @@ const DrawerComponent: FC<DrawerProps> = ({
   const handleSignOut = async () => {
     dispatch(clearToken());
     onDrawerClose();
-    location.pathname === '/cart' ? navigate('/') : () => {};
+    location.pathname === '/cart'
+      ? navigate('/')
+      : location.pathname === '/profile'
+        ? navigate('/')
+        : () => {};
 
     showToast('You successfully logged out', 'success');
   };

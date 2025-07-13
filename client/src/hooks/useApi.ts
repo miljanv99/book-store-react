@@ -33,6 +33,7 @@ export const useApi = <T = any>(): ApiResponseResult<T> => {
   }, []);
 
   useEffect(() => {
+    console.log('useAPI data: ', data);
     console.log('useAPI status: ', status);
     console.log('useAPI message: ', message);
   }, [status, message]);

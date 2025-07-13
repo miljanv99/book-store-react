@@ -129,7 +129,7 @@ const Navigation = () => {
                     {showSpinner ? (
                       <Spinner></Spinner>
                     ) : (
-                      <Link>
+                      <Link href="/profile">
                         <Avatar size="md" src={userProfileData.avatar!} />
                       </Link>
                     )}
