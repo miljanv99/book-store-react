@@ -16,9 +16,11 @@ import {
   ModalFooter
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
-import { userRegister } from '../../services/User';
 import { COLORS } from '../../globalColors';
 import { useToastHandler } from '../../hooks/useToastHandler';
+import { useApi } from '../../hooks/useApi';
+import { ApiResponse } from '../../model/ApiResponse.model';
+import { API_ROUTES } from '../../constants/apiConstants';
 
 interface RegisterProps {
   isModalRegisterOpen: boolean;
@@ -42,6 +44,7 @@ const RegisterModal: FC<RegisterProps> = ({
   const [previewAvatar, setPreviewAvatar] = useState<boolean>(false);
   const [isRegisterBtn, setRegisterBtn] = useState(true);
   const showToast = useToastHandler();
+  const userRegister = useApi<ApiResponse<string>>();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -100,39 +103,23 @@ const RegisterModal: FC<RegisterProps> = ({
   };
 
   const handleRegister = async () => {
-    let responseMessage: string = '';
-
-    let response = await userRegister(
-      requiredInputs.email,
-      requiredInputs.username,
-      requiredInputs.password,
-      requiredInputs.confirm,
-      avatarUrl
-    );
+    const response = await userRegister({
+      method: 'POST',
+      url: API_ROUTES.register,
+      data: {
+        email: requiredInputs.email,
+        username: requiredInputs.username,
+        password: requiredInputs.password,
+        confirmPassword: requiredInputs.confirm,
+        avatar: avatarUrl
+      }
+    });
     if (response!.status === 200) {
       console.log(response!.data.message);
       handleCloseRegisterModal();
-      responseMessage = response?.data['message'];
       onDrawerClose();
-    } else {
-      console.log(response!.data['errors']);
-
-      // Handle validation errors
-      if (response!.data.message === 'Registration failed!') {
-        responseMessage = response!.data.errors['taken'];
-        console.log('TAKEN: ' + response!.data.errors['taken']);
-      }
-      //password validation
-      if (
-        response!.data.message === 'Register form validation failed!' &&
-        response!.data.errors['password']
-      ) {
-        responseMessage = response!.data.errors['password'];
-        console.log('Validation error: ' + response!.data.errors['password']);
-      }
     }
-
-    showToast(responseMessage, response?.status === 200 ? 'success' : 'error');
+    showToast(response?.data.message, response?.status === 200 ? 'success' : 'error');
   };
 
   const handleAvatarPreview = () => {

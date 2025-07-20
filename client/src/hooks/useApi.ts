@@ -1,42 +1,32 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { useCallback, useEffect, useState } from 'react';
-import { apiConfig } from '../services';
+import { useCallback } from 'react';
 
-type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+const domain = 'http://localhost:8000';
 
-type ApiResponseResult<T> = {
-  data: T | null;
-  sendRequest: (config: AxiosRequestConfig) => Promise<void>;
-  status: RequestStatus;
-  message: string;
-};
+const apiConfig = axios.create({
+  baseURL: domain,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
-export const useApi = <T = any>(): ApiResponseResult<T> => {
-  const [data, setData] = useState<T | null>(null);
-  const [status, setStatus] = useState<RequestStatus>('idle');
-  const [message, setMessage] = useState<string>('');
+export const useApi = <T = any>() => {
   const sendRequest = useCallback(async (config: AxiosRequestConfig) => {
     try {
-      const response = await apiConfig(config);
-      setData(response.data);
-      setStatus('success');
-      setMessage(response.data['message']);
+      const response = await apiConfig<T>(config);
+      return {
+        data: response.data,
+        status: response.status
+      };
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log(error.response);
+        return error.response;
       } else {
         console.log(error);
       }
-      setData(null);
-      setStatus('error');
     }
   }, []);
 
-  useEffect(() => {
-    console.log('useAPI data: ', data);
-    console.log('useAPI status: ', status);
-    console.log('useAPI message: ', message);
-  }, [status, message]);
-
-  return { data, sendRequest, status, message };
+  return sendRequest;
 };

@@ -28,11 +28,8 @@ import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { Receipt } from '../model/Receipts.model';
 import { COLORS } from '../globalColors';
-
-type ApiResponse<Profile> = {
-  message: string;
-  data: Profile;
-};
+import { API_ROUTES } from '../constants/apiConstants';
+import { ApiResponse } from '../model/ApiResponse.model';
 
 const cardTextStyle: TextProps = {
   textAlign: 'center',
@@ -40,9 +37,12 @@ const cardTextStyle: TextProps = {
 };
 
 const UserProfile = () => {
-  const { data: profileData, sendRequest } = useApi<ApiResponse<User>>();
-  const { data: purchaseHistory, sendRequest: purchaseHistoryRequest } =
-    useApi<ApiResponse<Receipt[]>>();
+  const profileData = useApi<ApiResponse<User>>();
+  const purchaseHistory = useApi<ApiResponse<Receipt[]>>();
+
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [profile, setProfile] = useState<User>();
+
   const userData = useSelector(selectUserData);
   const token = useSelector(selectAuthToken);
   const navigate = useNavigate();
@@ -53,28 +53,28 @@ const UserProfile = () => {
 
   const showDetails = (receiptId: string) => {
     onOpen();
-    const receipt = purchaseHistory?.data.find((rec) => rec._id === receiptId);
+    const receipt = receipts.find((rec) => rec._id === receiptId);
     setSelectedReceipt(receipt);
   };
 
   useEffect(() => {
-    sendRequest({
-      method: 'GET',
-      url: `/user/profile/${userData.username}`,
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const fetchProfile = async () => {
+      const profileResponse = await profileData({
+        method: 'GET',
+        url: API_ROUTES.getProfile(userData.username),
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    purchaseHistoryRequest({
-      method: 'GET',
-      url: '/user/purchaseHistory',
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      const purchaseResponse = await purchaseHistory({
+        method: 'GET',
+        url: API_ROUTES.getPurchaseHistory,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProfile(profileResponse?.data.data!);
+      setReceipts(purchaseResponse?.data.data!);
+    };
+    fetchProfile();
   }, []);
-
-  useEffect(() => {
-    console.log('PROFILE: ', profileData);
-    console.log('PURCHASE: ', purchaseHistory?.data);
-  }, [profileData, purchaseHistory]);
 
   useEffect(() => {
     console.log('AFTER: ', isExpand);
@@ -86,18 +86,18 @@ const UserProfile = () => {
         <Card w={'500px'}>
           <CardHeader display={'flex'} justifyContent={'center'}>
             <VStack>
-              <Avatar boxSize={'200px'} src={profileData?.data.avatar}></Avatar>
+              <Avatar boxSize={'200px'} src={profile?.avatar}></Avatar>
               <Text {...cardTextStyle} fontWeight={'600'}>
-                {profileData?.data.username}
+                {profile?.username}
               </Text>
             </VStack>
           </CardHeader>
           <CardBody>
             <VStack>
               <Text {...cardTextStyle}>
-                User Type: {profileData?.data.isAdmin.toString() === 'false' ? 'User' : 'Admin'}
+                User Type: {profile?.isAdmin.toString() === 'false' ? 'User' : 'Admin'}
               </Text>
-              <Text {...cardTextStyle}>{profileData?.data.email}</Text>
+              <Text {...cardTextStyle}>{profile?.email}</Text>
             </VStack>
           </CardBody>
           <CardFooter display={'flex'} justifyContent={'center'}>
@@ -115,7 +115,7 @@ const UserProfile = () => {
             </CardHeader>
             <CardBody>
               <Wrap display={'flex'} justify={'center'}>
-                {profileData?.data.favoriteBooks.map((book) => (
+                {profile?.favoriteBooks.map((book) => (
                   <Image
                     key={book._id}
                     w={200}
@@ -140,7 +140,7 @@ const UserProfile = () => {
             </CardHeader>
             <CardBody>
               <Wrap display={'flex'} justify={'space-evenly'}>
-                {purchaseHistory?.data.map((receipt, index) => (
+                {receipts?.map((receipt, index) => (
                   <>
                     <VStack>
                       <Text

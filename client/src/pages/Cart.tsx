@@ -13,7 +13,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuthToken } from '../reducers/authSlice';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { checkout, getCartItems, removeBook } from '../services/Cart';
 import { Book } from '../model/Book.model';
 import { decrementCartCounter, selectCartCounter, setCartCounter } from '../reducers/cartSlice';
 import { Cart } from '../model/Cart.model';
@@ -23,6 +22,9 @@ import CartItem from '../components/cart/CartItem';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import ConfirmationModal from '../components/modals/ConfirmationModal';
+import { API_ROUTES } from '../constants/apiConstants';
+import { ApiResponse } from '../model/ApiResponse.model';
+import { Receipt } from '../model/Receipts.model';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -42,20 +44,23 @@ const CartScreen = () => {
   } = useDisclosure();
 
   const [cartBooks, setCartBooks] = useState<Book[]>([]);
+  const [isRemovedAll, setIsRemovedAll] = useState<boolean>(false);
   const isCheckoutDisabled = cartBooks.some((book) => book.quantity === 0);
+  const getCartItems = useApi<ApiResponse<Cart>>();
+  const removeBook = useApi<ApiResponse<string>>();
+  const checkout = useApi<ApiResponse<Receipt>>();
 
-  const {
-    sendRequest: removeAllItems,
-    status: removeAllStatus,
-    message: removeAllMessage
-  } = useApi();
+  const removeAllItems = useApi();
 
-  let cartItems: Cart;
   let booksInCart: Book[];
 
   const fetchCartItems = async () => {
-    cartItems = await getCartItems(token!);
-    booksInCart = cartItems['books'];
+    const cartItems = await getCartItems({
+      method: 'GET',
+      url: API_ROUTES.getCartItems,
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    booksInCart = cartItems?.data.data.books;
 
     const booksInCartWithQuantity = booksInCart.map((book) => ({
       ...book,
@@ -117,7 +122,11 @@ const CartScreen = () => {
 
   const handleRemoveItem = useCallback(
     (id: string) => {
-      removeBook(token!, id)
+      removeBook({
+        method: 'DELETE',
+        url: API_ROUTES.removeBookFromCart(id),
+        headers: { Authorization: `Bearer ${token}` }
+      })
         .then((res) => {
           setCartBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
           dispatch(decrementCartCounter());
@@ -133,12 +142,17 @@ const CartScreen = () => {
     [dispatch, cartBooks, toast, token]
   );
 
-  const handleRemoveAll = async () => {
-    await removeAllItems({
+  const handleRemoveAll = () => {
+    removeAllItems({
       method: 'DELETE',
-      url: '/user/cart/deleteAll',
+      url: API_ROUTES.deleteAllFromCart,
       headers: { Authorization: `Bearer ${token}` }
-    });
+    })
+      .then(() => {
+        setCartBooks([]);
+        setIsRemovedAll(true);
+      })
+      .catch((error) => console.error(error));
   };
 
   const handleCheckout = async () => {
@@ -151,15 +165,18 @@ const CartScreen = () => {
     );
     console.log('BOOKS ID AND QUANTITY: ' + JSON.stringify(getBookAndQuantity, undefined, 2));
 
-    const response = await checkout(token!, getBookAndQuantity);
-
+    const response = await checkout({
+      method: 'POST',
+      url: API_ROUTES.checkout,
+      headers: { Authorization: `Bearer ${token}` },
+      data: getBookAndQuantity
+    });
+    console.log('AAA', response?.status);
     if (response?.status === 200) {
       dispatch(setCartCounter(0));
       navigate('/');
-      toast(response.data['message'], 'success');
-    } else {
-      toast('Something went wrong, please contact our support center', 'error');
     }
+    toast(response?.data.message, `${response?.status === 200 ? 'success' : 'error'}`);
   };
 
   useEffect(() => {
@@ -167,15 +184,12 @@ const CartScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (removeAllStatus === 'success') {
-      setCartBooks([]);
+    if (isRemovedAll) {
       dispatch(setCartCounter(0));
       onRemoveAllModalClose();
-      toast(removeAllMessage, 'success');
-    } else if (removeAllStatus === 'error') {
-      console.error('Something went wrong!');
+      toast('You successfully empty the cart', 'success');
     }
-  }, [removeAllStatus, removeAllMessage, setCartBooks, dispatch]);
+  }, [isRemovedAll, setCartBooks, dispatch]);
 
   return (
     <>

@@ -2,37 +2,42 @@ import { Flex, Input, Spinner, VStack, Wrap, Text } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import BookItem from '../components/book/BookItem';
 import { Book } from '../model/Book.model';
-import { searchBookEndpoint } from '../services/Books';
 import { COLORS } from '../globalColors';
 import { useApi } from '../hooks/useApi';
+import { API_ROUTES } from '../constants/apiConstants';
 
-type ApiBookResponse = {
+type ApiBookResponse<T> = {
+  data: T;
   message: string;
-  data: Book[];
-  itemCount: number;
 };
 
 const Store = () => {
-  const { data: bookData, sendRequest } = useApi<ApiBookResponse>();
+  const fetchAllBooks = useApi<ApiBookResponse<Book[]>>();
+  const [books, setBooks] = useState<Book[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchBooks = async () => {
-    await sendRequest({ method: 'GET', url: searchBookEndpoint });
+    setIsLoading(true);
+    const response = await fetchAllBooks({ method: 'GET', url: API_ROUTES.getAllBooks });
+    setBooks(response?.data.data!);
+
+    setIsLoading(false);
   };
 
   const filteredBooks = useMemo(() => {
     if (searchValue === '') {
-      return bookData?.data;
+      return books;
     }
 
     const query = searchValue.toLowerCase().split(' ');
 
-    return bookData?.data.filter((book) => {
+    return books.filter((book) => {
       const title = book.title.toLowerCase();
       const author = book.author.toLowerCase();
       return query.every((word) => title.includes(word) || author.includes(word));
     });
-  }, [bookData?.data, searchValue]);
+  }, [books, searchValue]);
 
   useEffect(() => {
     console.log('FETCHHHHH STORE SCREEN');
@@ -48,7 +53,7 @@ const Store = () => {
           mt={'80px'}
           placeholder="Enter Title or Author"
           onChange={(e) => setSearchValue(e.target.value)}></Input>
-        {!filteredBooks ? (
+        {isLoading ? (
           <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
             <Spinner size={'xl'} color={COLORS.primaryColor}></Spinner>
           </Flex>

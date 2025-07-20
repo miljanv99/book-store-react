@@ -11,11 +11,13 @@ import {
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { selectUserData, setToken, setUserData } from '../../reducers/authSlice';
-import { userLogin, userProfile } from '../../services/User';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCartSize } from '../../services/Cart';
 import { setCartCounter } from '../../reducers/cartSlice';
 import { useToastHandler } from '../../hooks/useToastHandler';
+import { useApi } from '../../hooks/useApi';
+import { ApiResponse } from '../../model/ApiResponse.model';
+import { API_ROUTES } from '../../constants/apiConstants';
+import { User } from '../../model/User.model';
 
 interface SignProps {
   isModalSignInOpen: boolean;
@@ -27,6 +29,9 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
   const dispatch = useDispatch();
   const showToast = useToastHandler();
   const profileData = useSelector(selectUserData);
+  const userLogin = useApi<ApiResponse<string>>();
+  const userProfile = useApi<ApiResponse<User>>();
+  const getCartSize = useApi<ApiResponse<number>>();
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -54,22 +59,38 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
 
   const handleLogin = async () => {
     console.log(credentials.username + ' ' + credentials.password);
-    let response = await userLogin(credentials.username, credentials.password);
-    if (response!.status === 200) {
-      console.log(response!.data.message);
-      const token = response?.data['data'];
+    const response = await userLogin({
+      method: 'POST',
+      url: API_ROUTES.login,
+      data: { username: credentials.username, password: credentials.password }
+    });
+
+    if (response?.status! === 200) {
+      console.log(response?.data.message);
+      const token = response?.data.data!;
       dispatch(setToken(token));
       console.log('Token after login:', token);
-      const profileResponse = await userProfile(token, credentials.username);
-      const cartSizeResponse = await getCartSize(token);
-      dispatch(setCartCounter(cartSizeResponse?.data['data']));
+      const profileResponse = await userProfile({
+        method: 'GET',
+        url: API_ROUTES.getProfile(credentials.username),
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const cartSizeResponse = await getCartSize({
+        method: 'GET',
+        url: API_ROUTES.getCartSize,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      dispatch(setCartCounter(cartSizeResponse?.data.data));
 
-      const { isAdmin, username, avatar } = profileResponse!.data['data'];
+      const { isAdmin, username, avatar } = profileResponse?.data.data!;
       dispatch(setUserData({ isAdmin, username, avatar }));
       handleCloseSignInModal();
       onDrawerClose();
     }
-    showToast(response?.data['message'], response?.status === 200 ? 'success' : 'error');
+
+    console.log('Toast message', response?.data.message);
+
+    showToast(response?.data.message!, response?.status === 200 ? 'success' : 'error');
   };
 
   useEffect(() => {
@@ -100,6 +121,7 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
               onChange={handleCredentials}
               variant="flushed"
               placeholder="Password"
+              type="password"
             />
           </Stack>
         </ModalBody>
