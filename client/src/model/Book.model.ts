@@ -9,7 +9,7 @@ export type Book = {
   ratedCount?: number;
   //ratedBy:
   purchasesCount?: number;
-  //comments:
+  comments?: Comment[];
   genre: string;
   year: number;
   isbn?: string;

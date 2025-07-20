@@ -1,4 +1,15 @@
-import { Box, Button, Flex, HStack, IconButton, Image, Text } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  HStack,
+  IconButton,
+  Image,
+  Input,
+  Text,
+  VStack
+} from '@chakra-ui/react';
 import { Book } from '../model/Book.model';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
@@ -15,6 +26,8 @@ import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import { useToastHandler } from '../hooks/useToastHandler';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
+import { Comment } from '../model/Comment.model';
+import React from 'react';
 
 const buttonStyles = {
   color: 'black',
@@ -33,11 +46,17 @@ const BookDetails = () => {
   const getProfileData = useApi<ApiResponse<User>>();
   const toggleFavorite = useApi<ApiResponse<void>>();
   const getSingleBook = useApi<ApiResponse<Book>>();
+  const getBookComments = useApi<ApiResponse<Comment[]>>();
+  const addBookComment = useApi<ApiResponse<Comment>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
   const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
   const [favoriteMessage, setFavoriteMessage] = useState('');
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [numberOfComment, setNumberOfComment] = useState<number>(0);
+  const [inputCommentInFocus, setInputCommentInFocus] = useState<boolean>(false);
+  const [inputCommentValue, setInputCommentValue] = useState<string>('');
 
   const getBookDetails = async () => {
     const response = await getSingleBook({
@@ -45,6 +64,14 @@ const BookDetails = () => {
       url: API_ROUTES.getSingleBook(`${bookId}`)
     });
     setSingleBook(response?.data.data!);
+  };
+
+  const getComments = async () => {
+    const response = await getBookComments({
+      method: 'GET',
+      url: API_ROUTES.getComments(bookId!, 0)
+    });
+    setComments(response?.data.data!);
   };
 
   const checkIfBookIsFavorite = useMemo<boolean>(() => {
@@ -69,9 +96,44 @@ const BookDetails = () => {
     setFavoriteMessage(response?.data.message!);
   };
 
+  const addNewComment = () => {
+    addBookComment({
+      method: 'POST',
+      url: API_ROUTES.addComment(bookId!),
+      headers: { Authorization: `Bearer ${token}` },
+      data: {
+        content: inputCommentValue
+      }
+    })
+      .then((res) => {
+        const newComment: Comment = {
+          _id: res?.data.data._id,
+          book: res?.data.data.book,
+          content: inputCommentValue,
+          creationDate: new Date(),
+          user: profileData!
+        };
+
+        setComments((prev) => [newComment, ...prev]);
+        setInputCommentValue('');
+        setInputCommentInFocus(false);
+        toast('Comment posted successfully!', 'success');
+      })
+      .catch((error) => {
+        toast(error, 'error');
+        console.error(error);
+      });
+  };
+
   useEffect(() => {
     getBookDetails();
+    getComments();
+    scrollTo({ top: 0 });
   }, [bookId]);
+
+  useEffect(() => {
+    setNumberOfComment(comments.length);
+  }, [comments]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -107,9 +169,9 @@ const BookDetails = () => {
     return <Text>Book with this ID: ${bookId} does not exist!</Text>;
   }
 
-  const formattedDate = singleBook.creationDate
-    ? format(new Date(singleBook.creationDate), 'dd MMMM yyyy')
-    : '';
+  const formattedDate = (date: Date): string => {
+    return format(new Date(date), 'dd MMMM yyyy');
+  };
 
   const handleGoBack = () => {
     navigation(-1);
@@ -168,7 +230,7 @@ const BookDetails = () => {
             <Flex h={'100%'} flexDirection={'column'} justifyContent={'space-evenly'}>
               <Text>{singleBook.description}</Text>
               <Flex flexDirection={'column'} alignItems={'stretch'}>
-                <Text>Added To Store: {formattedDate}</Text>
+                <Text>Added To Store: {formattedDate(singleBook.creationDate!)}</Text>
                 <Text>Genre: {singleBook.genre}</Text>
                 <Text>ISBN: {singleBook.isbn}</Text>
                 <Text>Pages: {singleBook.pagesCount}</Text>
@@ -182,6 +244,64 @@ const BookDetails = () => {
           </Flex>
         </Flex>
       </Box>
+
+      <VStack w="70%" mx={'auto'} mt={'18px'}>
+        <VStack w={'100%'} alignItems={'start'}>
+          <Text fontSize={'x-large'}>
+            {numberOfComment} {numberOfComment > 1 ? 'Comments' : 'Comment'}
+          </Text>
+          {token ? (
+            <HStack w={'100%'} mb={'25px'}>
+              <Avatar boxSize={'50px'} src={profileData?.avatar}></Avatar>
+              <Input
+                value={inputCommentValue}
+                name="comment_input"
+                placeholder="Add a comment"
+                border={'none'}
+                borderBottom={'1px solid'}
+                borderRadius={'none'}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const inputValue = e.target.value;
+                  setInputCommentValue(inputValue);
+                }}
+                onClick={() => setInputCommentInFocus(true)}
+                _focus={{ boxShadow: 'none' }}></Input>
+            </HStack>
+          ) : null}
+
+          {inputCommentInFocus ? (
+            <>
+              <HStack w={'100%'} justifyContent={'end'}>
+                <Button
+                  onClick={() => {
+                    setInputCommentInFocus(false);
+                    setInputCommentValue('');
+                  }}>
+                  Cancel
+                </Button>
+                <Button isDisabled={!inputCommentValue} onClick={addNewComment}>
+                  Comment
+                </Button>
+              </HStack>
+            </>
+          ) : null}
+        </VStack>
+
+        <VStack width={'100%'} alignItems={'start'} spacing={'25px'}>
+          {comments.map((comment) => (
+            <HStack w={'100%'} key={comment._id}>
+              <Avatar boxSize={'70px'} src={comment.user.avatar}></Avatar>
+              <VStack alignItems={'start'} gap={0}>
+                <HStack>
+                  <Text>{comment.user.username}</Text>
+                  <Text textColor={'lightslategray'}>{formattedDate(comment.creationDate)}</Text>
+                </HStack>
+                <Text>{comment.content}</Text>
+              </VStack>
+            </HStack>
+          ))}
+        </VStack>
+      </VStack>
     </>
   );
 };

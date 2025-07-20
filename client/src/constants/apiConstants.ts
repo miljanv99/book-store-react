@@ -14,5 +14,8 @@ export const API_ROUTES = {
   login: '/user/login',
   register: '/user/register',
   getProfile: (username: string) => `/user/profile/${username}`,
-  getPurchaseHistory: '/user/purchaseHistory'
+  getPurchaseHistory: '/user/purchaseHistory',
+  //Comment
+  getComments: (bookId: string, skipCount: number) => `/comment/${bookId}/${skipCount}`,
+  addComment: (bookId: string) => `/comment/add/${bookId}`
 };
