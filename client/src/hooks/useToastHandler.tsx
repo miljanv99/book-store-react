@@ -5,9 +5,9 @@ export const useToastHandler = () => {
   const toast = useToast();
 
   const showToast = (message: string, status: 'success' | 'error', position?: ToastPosition) => {
-    if (!toast.isActive(status)) {
+    if (!toast.isActive(message)) {
       toast({
-        id: status,
+        id: message,
         position: position ? position : 'top',
         duration: 3000,
         isClosable: true,
