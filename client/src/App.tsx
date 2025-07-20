@@ -6,22 +6,12 @@ import Store from './pages/Store';
 import BookDetails from './pages/BookDetails';
 import Cart from './pages/Cart';
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
-import { Spinner } from '@chakra-ui/react';
 import { selectAuthToken } from './reducers/authSlice';
 import UserProfile from './pages/UserProfile';
 
 function App() {
   //const token = useSelector(selectAuthToken);
-  const [loading, setLoading] = useState(true);
   const token = useSelector(selectAuthToken);
-
-  useEffect(() => {
-    !token ? setLoading(true) : setLoading(false);
-    console.log('DISPATCH LOAD TOKEN: ' + token);
-
-    setLoading(false);
-  }, []);
 
   return (
     <BrowserRouter>
@@ -29,46 +19,11 @@ function App() {
         <Route path="/" element={<Navigation />}>
           <Route index element={<Home />} />
           <Route path="store" element={<Store />} />
-          <Route
-            path="cart"
-            element={
-              loading ? (
-                <Spinner
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="gray.200"
-                  size="xl"
-                  alignSelf="center"
-                  margin="auto"
-                  display="block"
-                />
-              ) : token ? (
-                <Cart />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            }
-          />
+          <Route path="cart" element={token ? <Cart /> : <Navigate to="/" replace />} />
           <Route path="bookDetails/:bookId" element={<BookDetails />} />
           <Route
             path="profile/"
-            element={
-              loading ? (
-                <Spinner
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="gray.200"
-                  size="xl"
-                  alignSelf="center"
-                  margin="auto"
-                  display="block"
-                />
-              ) : token ? (
-                <UserProfile />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            }></Route>
+            element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
