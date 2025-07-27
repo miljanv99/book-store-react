@@ -7,14 +7,14 @@ import {
   IconButton,
   Image,
   Input,
+  Skeleton,
   Text,
   VStack
 } from '@chakra-ui/react';
 import { Book } from '../model/Book.model';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from '../globalColors';
-import { format } from 'date-fns';
 import BookRating from '../components/book/BookRating';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { useAddToCart } from '../hooks/useAddToCart';
@@ -28,11 +28,19 @@ import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
 import { Comment } from '../model/Comment.model';
 import React from 'react';
+import { formattedDate } from '../utils/formatDate';
+import CommentItem from '../components/comment/CommentItem';
 
 const buttonStyles = {
   color: 'black',
   borderRadius: 20,
   backgroundColor: COLORS.primaryColor
+};
+
+type ApiResponseComment<T> = {
+  message: string;
+  totalCount: number;
+  data?: T;
 };
 
 const BookDetails = () => {
@@ -46,7 +54,7 @@ const BookDetails = () => {
   const getProfileData = useApi<ApiResponse<User>>();
   const toggleFavorite = useApi<ApiResponse<void>>();
   const getSingleBook = useApi<ApiResponse<Book>>();
-  const getBookComments = useApi<ApiResponse<Comment[]>>();
+  const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
@@ -57,6 +65,11 @@ const BookDetails = () => {
   const [numberOfComment, setNumberOfComment] = useState<number>(0);
   const [inputCommentInFocus, setInputCommentInFocus] = useState<boolean>(false);
   const [inputCommentValue, setInputCommentValue] = useState<string>('');
+  const COMMENTS_LIMIT = 10;
+  const [skipCount, setSkipCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   const getBookDetails = async () => {
     const response = await getSingleBook({
@@ -67,11 +80,37 @@ const BookDetails = () => {
   };
 
   const getComments = async () => {
-    const response = await getBookComments({
-      method: 'GET',
-      url: API_ROUTES.getComments(bookId!, 0)
-    });
-    setComments(response?.data.data!);
+    setLoading(true);
+    try {
+      const response = await getBookComments({
+        method: 'GET',
+        url: API_ROUTES.getComments(bookId!, skipCount)
+      });
+
+      setSkipCount((prev) => prev + COMMENTS_LIMIT);
+
+      const fetchedComments = response?.data.data;
+      const totalCount = response?.data.totalCount;
+
+      console.log('BOOKS: ', fetchedComments);
+      setComments((prev) => [...prev, ...fetchedComments]);
+      setNumberOfComment(totalCount);
+
+      console.log('SKIP COUNT: ', skipCount);
+      console.log('TOTAL COUNT: ', totalCount);
+
+      if (totalCount > 10) {
+        setHasMore(true);
+      }
+
+      if (totalCount < skipCount) {
+        console.log('NO MORE COMMENTS');
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error during fetching commets!', error);
+    }
+    setLoading(false);
   };
 
   const checkIfBookIsFavorite = useMemo<boolean>(() => {
@@ -117,6 +156,7 @@ const BookDetails = () => {
         setComments((prev) => [newComment, ...prev]);
         setInputCommentValue('');
         setInputCommentInFocus(false);
+        setNumberOfComment((prev) => prev + 1);
         toast('Comment posted successfully!', 'success');
       })
       .catch((error) => {
@@ -129,11 +169,7 @@ const BookDetails = () => {
     getBookDetails();
     getComments();
     scrollTo({ top: 0 });
-  }, [bookId]);
-
-  useEffect(() => {
-    setNumberOfComment(comments.length);
-  }, [comments]);
+  }, [token]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -165,13 +201,35 @@ const BookDetails = () => {
     }
   }, [favoriteMessage]);
 
+  //observe the skeleton element for fetching additional comments
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          console.log('Element is visible!');
+          setTimeout(() => {
+            getComments();
+          }, 1000);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loaderRef.current) {
+      console.log('TRIGGER OBSERVE');
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      console.log('CLEAN UP');
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [loading]);
+
   if (!singleBook) {
     return <Text>Book with this ID: ${bookId} does not exist!</Text>;
   }
-
-  const formattedDate = (date: Date): string => {
-    return format(new Date(date), 'dd MMMM yyyy');
-  };
 
   const handleGoBack = () => {
     navigation(-1);
@@ -252,7 +310,7 @@ const BookDetails = () => {
           </Text>
           {token ? (
             <HStack w={'100%'} mb={'25px'}>
-              <Avatar boxSize={'50px'} src={profileData?.avatar}></Avatar>
+              <Avatar boxSize={'50px'} src={userDataSelector.avatar}></Avatar>
               <Input
                 value={inputCommentValue}
                 name="comment_input"
@@ -273,13 +331,14 @@ const BookDetails = () => {
             <>
               <HStack w={'100%'} justifyContent={'end'}>
                 <Button
+                  {...buttonStyles}
                   onClick={() => {
                     setInputCommentInFocus(false);
                     setInputCommentValue('');
                   }}>
                   Cancel
                 </Button>
-                <Button isDisabled={!inputCommentValue} onClick={addNewComment}>
+                <Button {...buttonStyles} isDisabled={!inputCommentValue} onClick={addNewComment}>
                   Comment
                 </Button>
               </HStack>
@@ -289,18 +348,15 @@ const BookDetails = () => {
 
         <VStack width={'100%'} alignItems={'start'} spacing={'25px'}>
           {comments.map((comment) => (
-            <HStack w={'100%'} key={comment._id}>
-              <Avatar boxSize={'70px'} src={comment.user.avatar}></Avatar>
-              <VStack alignItems={'start'} gap={0}>
-                <HStack>
-                  <Text>{comment.user.username}</Text>
-                  <Text textColor={'lightslategray'}>{formattedDate(comment.creationDate)}</Text>
-                </HStack>
-                <Text>{comment.content}</Text>
-              </VStack>
-            </HStack>
+            <CommentItem key={comment._id} comment={comment}></CommentItem>
           ))}
         </VStack>
+        {hasMore ? (
+          <VStack ref={loaderRef} width="100%">
+            <Skeleton height="12px" width="120px" />
+            <Skeleton height="14px" width="100%" />
+          </VStack>
+        ) : null}
       </VStack>
     </>
   );

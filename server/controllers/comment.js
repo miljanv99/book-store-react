@@ -11,10 +11,10 @@ function validateCommentForm(payload) {
   if (
     !payload ||
     typeof payload.content !== "string" ||
-    payload.content.trim().length < 3
+    payload.content.trim().length < 1
   ) {
     isFormValid = false;
-    errors.content = "Comment must be more than 3 symbols long.";
+    errors.content = "Comment must be more than 1 symbol long.";
   }
   if (
     !payload ||
@@ -32,28 +32,33 @@ function validateCommentForm(payload) {
 }
 
 module.exports = {
-  getComments: (req, res) => {
+  getComments: async (req, res) => {
     let bookId = req.params.bookId;
     let skipCount = !isNaN(Number(req.params.skipCount))
       ? Number(req.params.skipCount)
       : 0;
 
-    COMMENT.find({ book: bookId })
-      .populate({ path: "user", select: "username avatar" })
-      .sort({ creationDate: -1 })
-      .skip(skipCount)
-      .then((comments) => {
-        res.status(200).json({
-          message: "",
-          data: comments,
-        });
-      })
-      .catch((err) => {
+      try {
+        const [totalComments, comments] = await Promise.all([
+            COMMENT.countDocuments({book: bookId}),
+            COMMENT.find({ book: bookId })
+            .populate({ path: "user", select: "username avatar" })
+            .sort({ creationDate: -1 })
+            .skip(skipCount)
+            .limit(10)
+          ])
+
+          res.status(200).json({
+              message: "",
+              totalCount: totalComments,
+              data: comments,
+            });        
+      } catch (error) {
         console.log(err);
         return res.status(400).json({
           message: "Something went wrong, please try again.",
         });
-      });
+      }
   },
 
   getLatestFiveByUser: (req, res) => {

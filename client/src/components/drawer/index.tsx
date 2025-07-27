@@ -11,7 +11,7 @@ import {
   useColorMode
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearToken, selectAuthToken } from '../../reducers/authSlice';
+import { clearToken, selectAuthToken, setUserData } from '../../reducers/authSlice';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToastHandler } from '../../hooks/useToastHandler';
@@ -45,6 +45,14 @@ const DrawerComponent: FC<DrawerProps> = ({
       : location.pathname === '/profile'
         ? navigate('/')
         : () => {};
+
+    dispatch(
+      setUserData({
+        isAdmin: false,
+        username: '',
+        avatar: ''
+      })
+    );
 
     showToast('You successfully logged out', 'success');
   };
