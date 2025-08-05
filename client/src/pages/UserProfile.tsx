@@ -161,11 +161,8 @@ const UserProfile = () => {
                         dispatch(
                           setUserData({
                             ...userData,
-                            username:
-                              profileInputs.username !== ''
-                                ? profileInputs.username
-                                : userData.username,
-                            email: profileInputs.email !== '' ? profileInputs.email : userData.email
+                            username: profileInputs.username,
+                            email: profileInputs.email
                           })
                         );
                         setIsEdit(false);
