@@ -5,56 +5,64 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
-  Flex,
   HStack,
-  Image,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Input,
   Text,
-  TextProps,
   useDisclosure,
-  VStack,
-  Wrap
+  VStack
 } from '@chakra-ui/react';
 import { useApi } from '../hooks/useApi';
 import { User } from '../model/User.model';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectAuthToken, selectUserData } from '../reducers/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectAuthToken, selectUserData, setUserData } from '../reducers/authSlice';
 import { Receipt } from '../model/Receipts.model';
-import { COLORS } from '../globalColors';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
-
-const cardTextStyle: TextProps = {
-  textAlign: 'center',
-  fontSize: 'x-large'
-};
+import { useToastHandler } from '../hooks/useToastHandler';
+import { buttonStyles, cardTextStyle } from '../globalStyles';
+import ReceiptItem from '../components/receipt/ReceiptItem';
+import FavoriteBookItem from '../components/book/FavoriteBookItem';
+import ReceiptsModal from '../components/modals/ReceiptsModal';
 
 const UserProfile = () => {
   const profileData = useApi<ApiResponse<User>>();
   const purchaseHistory = useApi<ApiResponse<Receipt[]>>();
+  const editProfile = useApi<ApiResponse<Record<string, string>>>();
 
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [profile, setProfile] = useState<User>();
 
   const userData = useSelector(selectUserData);
   const token = useSelector(selectAuthToken);
-  const navigate = useNavigate();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const dispatch = useDispatch();
+  const toast = useToastHandler();
 
-  const [isExpand, setIsExpand] = useState<Record<string, boolean>>({});
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt>();
+  const [isEdit, setIsEdit] = useState<boolean>(false);
 
-  const showDetails = (receiptId: string) => {
-    onOpen();
-    const receipt = receipts.find((rec) => rec._id === receiptId);
-    setSelectedReceipt(receipt);
+  const [profileInputs, setProfileInputs] = useState({
+    username: '',
+    email: ''
+  });
+
+  const [isEmailValid, setIsEmailValid] = useState<boolean>(true);
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const handleUsernameAndEmailInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === 'email') {
+      setIsEmailValid(emailRegex.test(value));
+    }
+
+    setProfileInputs((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+
+    console.log('VALID: ', isEmailValid);
   };
 
   useEffect(() => {
@@ -74,22 +82,28 @@ const UserProfile = () => {
       setReceipts(purchaseResponse?.data.data!);
     };
     fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    console.log('AFTER: ', isExpand);
-  }, [isExpand]);
+  }, [userData]);
 
   return (
     <>
       <VStack mt={'80px'}>
         <Card w={'500px'}>
           <CardHeader display={'flex'} justifyContent={'center'}>
-            <VStack>
+            <VStack width={'100%'}>
               <Avatar boxSize={'200px'} src={profile?.avatar}></Avatar>
-              <Text {...cardTextStyle} fontWeight={'600'}>
-                {profile?.username}
-              </Text>
+              {isEdit ? (
+                <Input
+                  width={'90%'}
+                  name="username"
+                  placeholder="Username"
+                  onChange={handleUsernameAndEmailInput}
+                  defaultValue={profile?.username}
+                  isInvalid={!profileInputs.username}></Input>
+              ) : (
+                <Text {...cardTextStyle} fontWeight={'600'}>
+                  {profile?.username}
+                </Text>
+              )}
             </VStack>
           </CardHeader>
           <CardBody>
@@ -97,124 +111,109 @@ const UserProfile = () => {
               <Text {...cardTextStyle}>
                 User Type: {profile?.isAdmin.toString() === 'false' ? 'User' : 'Admin'}
               </Text>
-              <Text {...cardTextStyle}>{profile?.email}</Text>
+
+              {isEdit ? (
+                <Input
+                  width={'90%'}
+                  name="email"
+                  placeholder="Email"
+                  onChange={handleUsernameAndEmailInput}
+                  defaultValue={profile?.email}
+                  isInvalid={!isEmailValid}></Input>
+              ) : (
+                <Text {...cardTextStyle}>{profile?.email}</Text>
+              )}
             </VStack>
           </CardBody>
           <CardFooter display={'flex'} justifyContent={'center'}>
-            <Button>Change Profile Information</Button>
+            {isEdit ? (
+              <>
+                <HStack>
+                  <Button
+                    {...buttonStyles}
+                    onClick={() => {
+                      setIsEdit(false);
+                      setIsEmailValid(true);
+                    }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    isDisabled={
+                      !isEmailValid ||
+                      !profileInputs.username ||
+                      !profileInputs.email ||
+                      (profileInputs.username === profile?.username &&
+                        profileInputs.email === profile?.email)
+                    }
+                    {...buttonStyles}
+                    onClick={async () => {
+                      const response = await editProfile({
+                        method: 'PATCH',
+                        url: API_ROUTES.editProfile,
+                        headers: { Authorization: `Bearer ${token}` },
+                        data: {
+                          id: userData.id,
+                          username: profileInputs.username,
+                          email: profileInputs.email
+                        }
+                      });
+                      if (response?.status === 200) {
+                        dispatch(
+                          setUserData({
+                            ...userData,
+                            username:
+                              profileInputs.username !== ''
+                                ? profileInputs.username
+                                : userData.username,
+                            email: profileInputs.email !== '' ? profileInputs.email : userData.email
+                          })
+                        );
+                        setIsEdit(false);
+                        toast('You successfully changed profile data', 'success');
+                      } else {
+                        toast('Something went wrong', 'error');
+                      }
+                    }}>
+                    Save
+                  </Button>
+                </HStack>
+              </>
+            ) : (
+              <Button
+                {...buttonStyles}
+                onClick={() => {
+                  setIsEdit(true);
+                  if (profile) {
+                    setProfileInputs({
+                      username: profile.username,
+                      email: profile.email
+                    });
+                  }
+                }}>
+                Change Profile Information
+              </Button>
+            )}
           </CardFooter>
         </Card>
 
         <HStack w={'100%'} justifyContent={'center'} alignItems={'start'}>
           {/* Favorite Books */}
-          <Card w={'900px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
-            <CardHeader display={'flex'} justifyContent={'center'}>
-              <Text {...cardTextStyle} fontWeight={'600'}>
-                Favorite Books
-              </Text>
-            </CardHeader>
-            <CardBody>
-              <Wrap display={'flex'} justify={'center'}>
-                {profile?.favoriteBooks.map((book) => (
-                  <Image
-                    key={book._id}
-                    w={200}
-                    h={300}
-                    src={book.cover}
-                    cursor={'pointer'}
-                    onClick={async () => {
-                      navigate(`/bookDetails/${book._id}`);
-                      scrollTo({ top: 0, behavior: 'instant' });
-                    }}></Image>
-                ))}
-              </Wrap>
-            </CardBody>
-          </Card>
+          <FavoriteBookItem profile={profile}></FavoriteBookItem>
 
           {/* Receipts */}
-          <Card w={'900px'} display={'flex'}>
-            <CardHeader display={'flex'} justifyContent={'center'}>
-              <Text {...cardTextStyle} fontWeight={'600'}>
-                Purchase History
-              </Text>
-            </CardHeader>
-            <CardBody>
-              <Wrap display={'flex'} justify={'space-evenly'}>
-                {receipts?.map((receipt, index) => (
-                  <>
-                    <VStack>
-                      <Text
-                        key={receipt._id}
-                        _active={{ color: 'grey' }}
-                        fontWeight={600}
-                        cursor={'pointer'}
-                        onClick={() => {
-                          console.log('BEFORE: ', isExpand);
-                          setIsExpand((prevState) => ({
-                            ...prevState,
-                            [receipt._id]: !prevState[receipt._id]
-                          }));
-                        }}>
-                        {index + 1}. {receipt._id}
-                      </Text>
-
-                      <VStack>
-                        {isExpand[receipt._id] ? (
-                          <>
-                            <HStack>
-                              <Text>
-                                {receipt.productsInfo.length > 1 ? 'Items' : 'Item'}:{' '}
-                                {receipt.productsInfo.length}
-                              </Text>
-                              <Text>Total price: {receipt.totalPrice.toFixed(2)}$</Text>
-                            </HStack>
-                            <Button
-                              onClick={() => showDetails(receipt._id)}
-                              backgroundColor={COLORS.darkPrimaryColor}>
-                              View Details
-                            </Button>
-                          </>
-                        ) : null}
-                      </VStack>
-                    </VStack>
-                  </>
-                ))}
-              </Wrap>
-            </CardBody>
-          </Card>
+          <ReceiptItem
+            onOpen={onOpen}
+            receipts={receipts}
+            setSelectedReceipt={setSelectedReceipt}></ReceiptItem>
         </HStack>
       </VStack>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered={true}>
-        <ModalOverlay>
-          <ModalContent maxW={'800px'}>
-            <ModalHeader textAlign={'center'}>Receipt ID: {selectedReceipt?._id}</ModalHeader>
-            <ModalBody>
-              {selectedReceipt?.productsInfo.map((product) => (
-                <VStack>
-                  <HStack w={'100%'}>
-                    <Image height={'100px'} mt={'8px'} src={product.cover}></Image>
-                    <Flex flex={1}>
-                      <Text w={'50%'}>{product.title}</Text>
-                      <HStack flex={1} justify="space-between">
-                        <Text>Qty: {product.qty}</Text>
-                        <Text>{product.price}$</Text>
-                        <Text>{(product.price * product.qty).toFixed(2)}$</Text>
-                      </HStack>
-                    </Flex>
-                  </HStack>
-                </VStack>
-              ))}
-              <Text textAlign={'end'} fontSize={'x-large'} fontWeight={600}>
-                {selectedReceipt?.totalPrice.toFixed(2)}$
-              </Text>
-            </ModalBody>
-            <ModalFooter>
-              <Button onClick={onClose}>Close</Button>
-            </ModalFooter>
-          </ModalContent>
-        </ModalOverlay>
-      </Modal>
+      {/* Receipt Modal */}
+      <ReceiptsModal
+        isCentered={true}
+        isOpen={isOpen}
+        onClose={onClose}
+        selectedReceipt={selectedReceipt}></ReceiptsModal>
     </>
   );
 };

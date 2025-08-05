@@ -30,12 +30,7 @@ import { Comment } from '../model/Comment.model';
 import React from 'react';
 import { formattedDate } from '../utils/formatDate';
 import CommentItem from '../components/comment/CommentItem';
-
-const buttonStyles = {
-  color: 'black',
-  borderRadius: 20,
-  backgroundColor: COLORS.primaryColor
-};
+import { buttonStyles } from '../globalStyles';
 
 type ApiResponseComment<T> = {
   message: string;
@@ -114,7 +109,7 @@ const BookDetails = () => {
   };
 
   const checkIfBookIsFavorite = useMemo<boolean>(() => {
-    return favoriteBooks?.some((book) => book._id === bookId) ?? false;
+    return favoriteBooks.some((book) => book._id === bookId) ?? false;
   }, [favoriteBooks, bookId]);
 
   const toggleFavoriteBook = async () => {
@@ -192,7 +187,13 @@ const BookDetails = () => {
   }, [token]);
 
   useEffect(() => {
-    setFavoriteBooks(profileData?.favoriteBooks!);
+    console.log('FAVORITE BOOKS !!!!!!');
+
+    if (profileData?.favoriteBooks) {
+      setFavoriteBooks(profileData.favoriteBooks);
+    }
+
+    console.log('FAVORITE BOOKS !!!!!!: ', favoriteBooks);
   }, [profileData]);
 
   useEffect(() => {

@@ -197,6 +197,60 @@ module.exports = {
       });
   },
 
+  editProfile: (req, res) => {
+    let requesterId = req.user.id;
+    let userToChange = req.body.id;
+    let username = req.body.username;
+    let email = req.body.email;
+
+    const update = {};
+
+    if (requesterId !== userToChange) {
+      return res.status(401).json({
+        message: "You're not allowed to change other user data!"
+      });
+    }
+
+    if (!username && !email) {
+      return res.status(400).json({
+        message: 'You have not entered username and email!'
+      });
+    }
+
+    if (username) {
+      update.username = username;
+    }
+    if (email) {
+      update.email = email;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({
+        message: 'No fields updated!'
+      });
+    }
+
+    USER.findByIdAndUpdate(userToChange, update, {
+      new: true,
+      runValidators: true
+    })
+      .then((updatedUser) => {
+        if (!updatedUser) {
+          return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const changedFields = {};
+        for (const key in update) {
+          changedFields[key] = update[key];
+        }
+
+        return res.json({ message: 'User updated', data: changedFields });
+      })
+      .catch((error) => {
+        return res.status(400).json({ message: error });
+      });
+  },
+
   changeAvatar: (req, res) => {
     let requesterId = req.user.id;
     let requesterIsAdmin = req.user.isAdmin;

@@ -82,8 +82,8 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       });
       dispatch(setCartCounter(cartSizeResponse?.data.data));
 
-      const { isAdmin, username, avatar } = profileResponse?.data.data!;
-      dispatch(setUserData({ isAdmin, username, avatar }));
+      const { id, isAdmin, username, avatar, email } = profileResponse?.data.data!;
+      dispatch(setUserData({ id, isAdmin, username, avatar, email }));
       handleCloseSignInModal();
       onDrawerClose();
     }

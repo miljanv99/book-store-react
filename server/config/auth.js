@@ -13,6 +13,7 @@ function verifyToken(req) {
       }
 
       req.user = decoded.sub;
+      console.log('TEST:', req.user);
       resolve();
     });
   });

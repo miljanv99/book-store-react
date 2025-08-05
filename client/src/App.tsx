@@ -22,7 +22,7 @@ function App() {
           <Route path="cart" element={token ? <Cart /> : <Navigate to="/" replace />} />
           <Route path="bookDetails/:bookId" element={<BookDetails />} />
           <Route
-            path="profile/"
+            path="profile/:username"
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
         </Route>
       </Routes>

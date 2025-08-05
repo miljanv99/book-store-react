@@ -3,9 +3,11 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 export interface UserData {
+  id: string;
   isAdmin: boolean;
   username: string;
   avatar: string;
+  email: string;
 }
 
 interface AuthState {
@@ -16,9 +18,11 @@ interface AuthState {
 const initialState: AuthState = {
   token: null,
   userData: {
+    id: '',
     isAdmin: false,
     username: '',
-    avatar: ''
+    avatar: '',
+    email: ''
   }
 };
 
@@ -33,9 +37,11 @@ export const authSlice = createSlice({
       state.token = null;
     },
     setUserData: (state, action: PayloadAction<UserData>) => {
+      state.userData.id = action.payload.id;
       state.userData.isAdmin = action.payload.isAdmin;
       state.userData.username = action.payload.username;
       state.userData.avatar = action.payload.avatar;
+      state.userData.email = action.payload.email;
     }
   }
 });

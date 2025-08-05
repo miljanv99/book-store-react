@@ -10,6 +10,7 @@ import {
   Spinner,
   Circle
 } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
 import { HamburgerIcon } from '@chakra-ui/icons';
@@ -129,7 +130,7 @@ const Navigation = () => {
                     {showSpinner ? (
                       <Spinner></Spinner>
                     ) : (
-                      <Link href="/profile">
+                      <Link as={RouterLink} to={`/profile/${userProfileData.username}`}>
                         <Avatar size="md" src={userProfileData.avatar!} />
                       </Link>
                     )}
