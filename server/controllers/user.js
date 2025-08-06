@@ -202,6 +202,7 @@ module.exports = {
     let userToChange = req.body.id;
     let username = req.body.username;
     let email = req.body.email;
+    let avatar = req.body.avatar;
 
     const update = {};
 
@@ -222,6 +223,9 @@ module.exports = {
     }
     if (email) {
       update.email = email;
+    }
+    if (avatar) {
+      update.avatar = avatar;
     }
 
     if (Object.keys(update).length === 0) {
@@ -250,41 +254,7 @@ module.exports = {
         return res.status(400).json({ message: error });
       });
   },
-
-  changeAvatar: (req, res) => {
-    let requesterId = req.user.id;
-    let requesterIsAdmin = req.user.isAdmin;
-    let userToChange = req.body.id;
-    let newAvatar = req.body.avatar;
-
-    let validationResult = validateAvatarForm(req.body);
-
-    if (!validationResult.success) {
-      return res.status(400).json({
-        message: "Avatar form validation failed!",
-        errors: validationResult.errors,
-      });
-    }
-
-    if (requesterId !== userToChange && !requesterIsAdmin) {
-      return res.status(401).json({
-        message: "You're not allowed to change other user avatar!",
-      });
-    }
-
-    USER.updateOne({ _id: userToChange }, { $set: { avatar: newAvatar } })
-      .then(() => {
-        return res.status(200).json({
-          message: "Avatar changed successfully!",
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(400).json({
-          message: "Something went wrong, please try again.",
-        });
-      });
-  },
+  
 
   blockComments: (req, res) => {
     let adminId = req.params.userId; // Assuming you have a way to identify the admin

@@ -15,7 +15,6 @@ module.exports = (APP) => {
     USER_CONTROLLER.getPurchaseHistory,
   );
   APP.patch('/user/editProfile', AUTH.isAuth, USER_CONTROLLER.editProfile);
-  APP.post("/user/changeAvatar", AUTH.isAuth, USER_CONTROLLER.changeAvatar);
   APP.post(
     "/user/blockComments/:userId",
     AUTH.isInRole("Admin"),

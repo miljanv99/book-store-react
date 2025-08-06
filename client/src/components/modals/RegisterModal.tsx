@@ -21,6 +21,7 @@ import { useToastHandler } from '../../hooks/useToastHandler';
 import { useApi } from '../../hooks/useApi';
 import { ApiResponse } from '../../model/ApiResponse.model';
 import { API_ROUTES } from '../../constants/apiConstants';
+import { emailRegex, urlRegex } from '../../constants/regex';
 
 interface RegisterProps {
   isModalRegisterOpen: boolean;
@@ -36,9 +37,6 @@ const RegisterModal: FC<RegisterProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
-  const urlRegex =
-    /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/\S*\.(jpg|jpeg|png|gif|bmp|webp))(\/\S*)?(\?[^\s]*)?$/;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const [isValidAvatarURL, setIsValidAvatarURL] = useState<boolean>(false);
   const [isValidEmail, setIsValidEmail] = useState<boolean>(false);
   const [previewAvatar, setPreviewAvatar] = useState<boolean>(false);
