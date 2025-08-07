@@ -279,7 +279,13 @@ const BookDetails = () => {
                 <Box>
                   <Text fontSize="x-large">{singleBook.author}</Text>
 
-                  <BookRating rating={Number(singleBook.currentRating)} size={30} />
+                  <BookRating
+                    bookId={singleBook._id}
+                    calledInComponent={BookDetails}
+                    currentRating={Number(singleBook.currentRating)}
+                    ratedBy={singleBook.ratedBy}
+                    size={30}
+                  />
 
                   <Text>Number Of Purachases: {singleBook.purchasesCount}</Text>
                 </Box>
@@ -362,5 +368,7 @@ const BookDetails = () => {
     </>
   );
 };
+
+BookDetails.displayName = 'BookDetails';
 
 export default BookDetails;

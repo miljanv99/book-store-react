@@ -42,9 +42,8 @@ function BookItem(props: Book) {
           <Text fontWeight={'bolder'}>{props.title}</Text>
           <Text fontStyle={'italic'}>by {props.author}</Text>
 
-          <BookRating rating={Number(props.currentRating)} />
+          <BookRating calledInComponent={BookItem} currentRating={Number(props.currentRating)} />
 
-          <Text>{Number(props.currentRating).toFixed(2)} rating</Text>
           <Text mt={5}>{description()}</Text>
           <Flex direction={'column'} flex={1} justifyContent={'space-evenly'}>
             <Button
@@ -63,5 +62,7 @@ function BookItem(props: Book) {
     </Box>
   );
 }
+
+BookItem.displayName = 'BookItem';
 
 export default BookItem;

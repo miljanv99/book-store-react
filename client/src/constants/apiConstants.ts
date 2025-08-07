@@ -3,6 +3,7 @@ export const API_ROUTES = {
   getAllBooks: '/book/search',
   getSingleBook: (bookId: string) => `/book/details/${bookId}`,
   addBookToFavorite: (bookId: string) => `/book/addToFavorites/${bookId}`,
+  rateBook: (bookId: string) => `/book/rate/${bookId}`,
   //Cart
   deleteAllFromCart: '/user/cart/deleteAll',
   removeBookFromCart: (bookId: string) => `/user/cart/delete/${bookId}`,

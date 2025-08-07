@@ -7,7 +7,7 @@ export type Book = {
   currentRating: number;
   ratingPoints?: number;
   ratedCount?: number;
-  //ratedBy:
+  ratedBy: string[];
   purchasesCount?: number;
   comments?: Comment[];
   genre: string;
