@@ -67,18 +67,7 @@ const Store = () => {
           <VStack>
             <Wrap display={'flex'} justify={'center'}>
               {filteredBooks.map((book) => (
-                <BookItem
-                  key={book._id}
-                  _id={book._id}
-                  cover={book.cover}
-                  title={book.title}
-                  author={book.author}
-                  currentRating={book.currentRating}
-                  description={book.description}
-                  genre={book.genre}
-                  price={book.price}
-                  year={book.year}
-                  pagesCount={book.pagesCount}></BookItem>
+                <BookItem key={book._id} {...book}></BookItem>
               ))}
             </Wrap>
           </VStack>

@@ -6,6 +6,8 @@ import { COLORS } from '../globalColors';
 import { useApi } from '../hooks/useApi';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
+import { useSelector } from 'react-redux';
+import { selectUserData } from '../reducers/authSlice';
 
 const Home = () => {
   const fetchTheNewestBooks = useApi<ApiResponse<Book[]>>();
@@ -16,6 +18,8 @@ const Home = () => {
   const [bestRatedBooks, setBestRatedBooks] = useState<Book[]>([]);
   const [mostPurchasedBooks, setMostPurchasedBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isAdmin = useSelector(selectUserData).isAdmin;
 
   const fetchBooks = async () => {
     setIsLoading(true);
@@ -56,18 +60,7 @@ const Home = () => {
           </Text>
           <Wrap display={'flex'} justify={'center'}>
             {newestBooks.map((book: any) => (
-              <BookItem
-                key={book._id}
-                _id={book._id}
-                cover={book.cover}
-                title={book.title}
-                author={book.author}
-                currentRating={book.currentRating}
-                description={book.description}
-                genre={book.genre}
-                price={book.price}
-                year={book.year}
-                pagesCount={book.pagesCount}></BookItem>
+              <BookItem key={book._id} {...book}></BookItem>
             ))}
           </Wrap>
           <Text {...headerText} mt={5}>
@@ -75,18 +68,7 @@ const Home = () => {
           </Text>
           <Wrap display={'flex'} justify={'center'}>
             {bestRatedBooks.map((book) => (
-              <BookItem
-                key={book._id}
-                _id={book._id}
-                cover={book.cover}
-                title={book.title}
-                author={book.author}
-                currentRating={book.currentRating}
-                description={book.description}
-                genre={book.genre}
-                price={book.price}
-                year={book.year}
-                pagesCount={book.pagesCount}></BookItem>
+              <BookItem key={book._id} {...book}></BookItem>
             ))}
           </Wrap>
 
@@ -95,18 +77,7 @@ const Home = () => {
           </Text>
           <Wrap display={'flex'} justify={'center'}>
             {mostPurchasedBooks.map((book) => (
-              <BookItem
-                key={book._id}
-                _id={book._id}
-                cover={book.cover}
-                title={book.title}
-                author={book.author}
-                currentRating={book.currentRating}
-                description={book.description}
-                genre={book.genre}
-                price={book.price}
-                year={book.year}
-                pagesCount={book.pagesCount}></BookItem>
+              <BookItem key={book._id} {...book}></BookItem>
             ))}
           </Wrap>
         </>

@@ -4,13 +4,14 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  Center,
   Text,
   ModalFooter,
   HStack,
   Button
 } from '@chakra-ui/react';
 import { FC } from 'react';
+import { buttonStyles } from '../../globalStyles';
+import { COLORS } from '../../globalColors';
 
 interface BaseModalProps {
   headerText: string;
@@ -45,10 +46,17 @@ const ConfirmationModal: FC<ModalProps> = ({
           <ModalFooter>
             <HStack justifyContent={'center'}>
               {onConfirm !== undefined ? (
-                <Button onClick={onConfirm}>{onConfirmBtnText}</Button>
+                <Button
+                  {...buttonStyles}
+                  backgroundColor={COLORS.darkerPrimaryColor}
+                  onClick={onConfirm}>
+                  {onConfirmBtnText}
+                </Button>
               ) : null}
 
-              <Button onClick={onClose}>{onCloseBtnText}</Button>
+              <Button {...buttonStyles} onClick={onClose}>
+                {onCloseBtnText}
+              </Button>
             </HStack>
           </ModalFooter>
         </ModalContent>
