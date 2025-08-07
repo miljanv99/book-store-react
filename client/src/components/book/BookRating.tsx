@@ -64,29 +64,36 @@ const BookRating: React.FC<BookRatingProps> = ({
                   ? async () => {
                       const rating = hoveredRatingIndex + 1;
 
-                      const response = await rateBook({
-                        method: 'POST',
-                        url: bookId && API_ROUTES.rateBook(bookId),
-                        headers: { Authorization: `Bearer ${token}` },
-                        data: {
-                          rating: rating
-                        }
-                      });
-                      if (response?.status === 200) {
-                        const currentRating = response.data.data.currentRating;
-                        setNumberOfStars(currentRating - 1);
-                        setCurrentBookRating(currentRating);
-                        setIsRated(true);
-                        toast(
-                          `You've successfully sent ${rating} ${rating === 1 ? 'star' : 'stars'} rating`,
-                          'success'
-                        );
-                        setTimeout(() => {
+                      try {
+                        const response = await rateBook({
+                          method: 'POST',
+                          url: bookId && API_ROUTES.rateBook(bookId),
+                          headers: { Authorization: `Bearer ${token}` },
+                          data: {
+                            rating: rating
+                          }
+                        });
+
+                        if (response && response.status === 200) {
+                          const currentRating = response && response.data.data.currentRating;
+                          setNumberOfStars(currentRating - 1);
+                          setCurrentBookRating(currentRating);
+                          setIsRated(true);
                           toast(
-                            `The avarage rating has been updated to ${Number(currentRating).toFixed(2)} ${currentRating === 1 ? 'star' : 'stars'}`,
+                            `You've successfully sent ${rating} ${rating === 1 ? 'star' : 'stars'} rating`,
                             'success'
                           );
-                        }, 2000);
+                          setTimeout(() => {
+                            toast(
+                              `The avarage rating has been updated to ${Number(currentRating).toFixed(2)} ${currentRating === 1 ? 'star' : 'stars'}`,
+                              'success'
+                            );
+                          }, 2000);
+                        } else {
+                          toast(`${response && response?.data.message}`, 'error');
+                        }
+                      } catch (error) {
+                        console.error(error);
                       }
                     }
                   : undefined
