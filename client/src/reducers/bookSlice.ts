@@ -23,6 +23,9 @@ const booksSlice = createSlice({
     setTheNewest: (state, action: PayloadAction<Book[]>) => {
       state.theNewest = action.payload;
     },
+    addToTheNewest: (state, action: PayloadAction<Book>) => {
+      state.theNewest.unshift(action.payload);
+    },
     setTheBestRated: (state, action: PayloadAction<Book[]>) => {
       state.theBestRated = action.payload;
     },
@@ -31,11 +34,20 @@ const booksSlice = createSlice({
     },
     setAllBooks: (state, action: PayloadAction<Book[]>) => {
       state.FullList = action.payload;
+    },
+    addToAllBooks: (state, action: PayloadAction<Book>) => {
+      state.FullList.unshift(action.payload);
     }
   }
 });
-export const { setTheNewest, setTheBestRated, setTheMostPurchased, setAllBooks } =
-  booksSlice.actions;
+export const {
+  setTheNewest,
+  addToTheNewest,
+  setTheBestRated,
+  setTheMostPurchased,
+  setAllBooks,
+  addToAllBooks
+} = booksSlice.actions;
 export const selectTheNewestBooksList = (state: RootState) => state.booksList.theNewest;
 export const selectTheBestRatedBooksList = (state: RootState) => state.booksList.theBestRated;
 export const selectTheMostPurchasedBooksList = (state: RootState) =>

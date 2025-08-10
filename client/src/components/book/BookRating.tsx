@@ -91,7 +91,9 @@ const BookRating: React.FC<BookRatingProps> = ({
             .map((_, i) => (
               <IconButton
                 key={i}
-                cursor={isAlreadyRated || isRated || !token ? 'default' : 'pointer'}
+                cursor={
+                  isAlreadyRated || isRated || !token || !isBookDetails ? 'default' : 'pointer'
+                }
                 _disabled={{ backgroundColor: 'transparent' }}
                 _hover={{ backgroundColor: 'transparent' }}
                 backgroundColor={'transparent'}

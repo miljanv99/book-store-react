@@ -9,17 +9,18 @@ import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from './reducers/authSlice';
 import UserProfile from './pages/UserProfile';
 import { AddIcon } from '@chakra-ui/icons';
-import { IconButton } from '@chakra-ui/react';
+import { IconButton, useDisclosure } from '@chakra-ui/react';
 import { buttonStyles } from './globalStyles';
 import { COLORS } from './globalColors';
+import AddBookModal from './components/modals/AddBookModal';
 
 function App() {
   const token = useSelector(selectAuthToken);
   const isAdmin = useSelector(selectUserData).isAdmin;
   const location = useLocation();
   const currentPath = location.pathname;
-
   const showFloatingButton = ['/', '/store'].includes(currentPath);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
@@ -36,10 +37,13 @@ function App() {
           left={'92%'}
           borderRadius={30}
           aria-label={'floating_button_add'}
-          padding={'12px'}>
+          padding={'12px'}
+          onClick={onOpen}>
           Add Now Book
         </IconButton>
       )}
+      {/* Modal for add new books */}
+      <AddBookModal isOpen={isOpen} onClose={onClose}></AddBookModal>
 
       <Routes>
         <Route path="/" element={<Navigation />}>

@@ -13,7 +13,9 @@ function BookItem(props: Book) {
   const description = () => {
     let maxLength = 120;
 
-    return props.description?.substring(0, maxLength) + '...';
+    return props.description.length > maxLength
+      ? props.description?.substring(0, maxLength) + '...'
+      : props.description;
   };
 
   function showBookDetails() {
@@ -44,15 +46,19 @@ function BookItem(props: Book) {
 
           <BookRating calledInComponent={BookItem} currentRating={Number(props.currentRating)} />
 
-          <Text mt={5}>{description()}</Text>
+          <Text height={'100%'} mt={5}>
+            {description()}
+          </Text>
           <Flex direction={'column'} flex={1} justifyContent={'space-evenly'}>
             <Button
-              _hover={{ textColor: 'black' }}
-              _active={{ textColor: 'black', bg: 'transparent' }}
+              _hover={{ backgroundColor: COLORS.lightGreenColor }}
+              _active={{
+                backgroundColor: COLORS.greenColor
+              }}
               textColor={'white'}
               onClick={() => addToCart(props._id)}
               w={'90%'}
-              backgroundColor={'green'}
+              backgroundColor={COLORS.greenColor}
               leftIcon={<AddIcon />}>
               Add To Cart
             </Button>

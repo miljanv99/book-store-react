@@ -346,6 +346,7 @@ module.exports = {
                     .sort(searchParams.sort)
                     .skip(searchParams.skip)
                     .limit(searchParams.limit)
+                    .select('-comments') 
                     .then((result) => {
                         return res.status(200).json({
                             message: "",

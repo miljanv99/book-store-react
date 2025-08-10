@@ -246,16 +246,15 @@ const BookDetails = () => {
           bg={COLORS.primaryColor}
           color={'white'}
           onClick={handleGoBack}></IconButton>
-        <Flex w="60%" mx={'auto'}>
+        <Flex justifyContent={'center'}>
           <Image
             boxShadow={'0px 8px 10px rgba(0, 0, 0, 0.25)'}
             borderRadius={10}
-            w={{ base: '100%', sm: '80%', md: '60%', lg: '50%', xl: '40%' }}
-            h={{ base: 'auto', sm: 'auto', md: '500px', lg: '600px', xl: '750px' }}
+            width={'400px'}
             src={singleBook.cover}
             alt={singleBook.title}
           />
-          <Flex textAlign={'justify'} flexDirection="column" ml={5}>
+          <Flex width={'600px'} textAlign={'justify'} flexDirection="column" ml={5}>
             <HStack align={'center'}>
               <Text fontWeight="bold" fontSize="xx-large" textAlign={'center'}>
                 {singleBook.title}
@@ -288,12 +287,16 @@ const BookDetails = () => {
                   />
 
                   <Text>Number Of Purachases: {singleBook.purchasesCount}</Text>
+                  <Text>Year: {singleBook.year}</Text>
                 </Box>
                 <Text fontSize={'xx-large'}>{singleBook.price}$</Text>
               </Flex>
             </Box>
             <Flex h={'100%'} flexDirection={'column'} justifyContent={'space-evenly'}>
-              <Text>{singleBook.description}</Text>
+              <Text>
+                Plot: <br />
+                {singleBook.description}
+              </Text>
               <Flex flexDirection={'column'} alignItems={'stretch'}>
                 <Text>Added To Store: {formattedDate(singleBook.creationDate!)}</Text>
                 <Text>Genre: {singleBook.genre}</Text>

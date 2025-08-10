@@ -34,7 +34,7 @@ export const store = configureStore({
   reducer: {
     authorization: persistedAuthReducer,
     cartCounterItem: persistedCartCounterReducer,
-    booksList: bookListReducer
+    booksList: persistedBookListReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

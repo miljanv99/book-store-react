@@ -6,7 +6,8 @@ export const buttonStyles = {
   color: 'black',
   borderRadius: 20,
   backgroundColor: COLORS.primaryColor,
-  _hover: { backgroundColor: COLORS.darkPrimaryColor }
+  _hover: { backgroundColor: COLORS.darkPrimaryColor },
+  _active: { backgroundColor: COLORS.darkerPrimaryColor }
 };
 
 export const cardTextStyle: TextProps = {

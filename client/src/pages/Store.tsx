@@ -5,6 +5,8 @@ import { Book } from '../model/Book.model';
 import { COLORS } from '../globalColors';
 import { useApi } from '../hooks/useApi';
 import { API_ROUTES } from '../constants/apiConstants';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectFullBooksList, setAllBooks } from '../reducers/bookSlice';
 
 type ApiBookResponse<T> = {
   data: T;
@@ -13,31 +15,35 @@ type ApiBookResponse<T> = {
 
 const Store = () => {
   const fetchAllBooks = useApi<ApiBookResponse<Book[]>>();
-  const [books, setBooks] = useState<Book[]>([]);
+
+  const dispatch = useDispatch();
+  const allBooks = useSelector(selectFullBooksList);
+
   const [searchValue, setSearchValue] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchBooks = async () => {
     setIsLoading(true);
     const response = await fetchAllBooks({ method: 'GET', url: API_ROUTES.getAllBooks });
-    setBooks(response?.data.data!);
+
+    dispatch(setAllBooks(response && response.data.data));
 
     setIsLoading(false);
   };
 
   const filteredBooks = useMemo(() => {
     if (searchValue === '') {
-      return books;
+      return allBooks;
     }
 
     const query = searchValue.toLowerCase().split(' ');
 
-    return books.filter((book) => {
+    return allBooks.filter((book) => {
       const title = book.title.toLowerCase();
       const author = book.author.toLowerCase();
       return query.every((word) => title.includes(word) || author.includes(word));
     });
-  }, [books, searchValue]);
+  }, [allBooks, searchValue]);
 
   useEffect(() => {
     console.log('FETCHHHHH STORE SCREEN');

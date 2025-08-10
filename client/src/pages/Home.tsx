@@ -6,20 +6,20 @@ import { COLORS } from '../globalColors';
 import { useApi } from '../hooks/useApi';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
-import { useSelector } from 'react-redux';
-import { selectUserData } from '../reducers/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectTheNewestBooksList, setTheNewest } from '../reducers/bookSlice';
 
 const Home = () => {
   const fetchTheNewestBooks = useApi<ApiResponse<Book[]>>();
   const fetchTheBestRatedBooks = useApi<ApiResponse<Book[]>>();
   const fetchTheMostPurchasedBooksBooks = useApi<ApiResponse<Book[]>>();
 
-  const [newestBooks, setNewestBooks] = useState<Book[]>([]);
   const [bestRatedBooks, setBestRatedBooks] = useState<Book[]>([]);
   const [mostPurchasedBooks, setMostPurchasedBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAdmin = useSelector(selectUserData).isAdmin;
+  const theNewestBooks = useSelector(selectTheNewestBooksList);
+  const dispatch = useDispatch();
 
   const fetchBooks = async () => {
     setIsLoading(true);
@@ -36,7 +36,8 @@ const Home = () => {
       url: `${API_ROUTES.getAllBooks}?sort={"purchasesCount":-1}&limit=5`
     });
 
-    setNewestBooks(newest?.data.data!);
+    dispatch(setTheNewest(newest && newest.data.data));
+
     setBestRatedBooks(bestRated?.data.data!);
     setMostPurchasedBooks(mostPurchase?.data.data!);
 
@@ -59,7 +60,7 @@ const Home = () => {
             The Newset Books
           </Text>
           <Wrap display={'flex'} justify={'center'}>
-            {newestBooks.map((book: any) => (
+            {theNewestBooks.map((book) => (
               <BookItem key={book._id} {...book}></BookItem>
             ))}
           </Wrap>
