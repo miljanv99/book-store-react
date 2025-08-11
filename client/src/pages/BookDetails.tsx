@@ -9,6 +9,7 @@ import {
   Input,
   Skeleton,
   Text,
+  useDisclosure,
   VStack
 } from '@chakra-ui/react';
 import { Book } from '../model/Book.model';
@@ -16,12 +17,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from '../globalColors';
 import BookRating from '../components/book/BookRating';
-import { ArrowBackIcon } from '@chakra-ui/icons';
+import { ArrowBackIcon, EditIcon } from '@chakra-ui/icons';
 import { useAddToCart } from '../hooks/useAddToCart';
 import { FaHeart } from 'react-icons/fa6';
 import { useApi } from '../hooks/useApi';
 import { User } from '../model/User.model';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import { useToastHandler } from '../hooks/useToastHandler';
 import { API_ROUTES } from '../constants/apiConstants';
@@ -31,6 +32,8 @@ import React from 'react';
 import { formattedDate } from '../utils/formatDate';
 import CommentItem from '../components/comment/CommentItem';
 import { buttonStyles } from '../globalStyles';
+import ConfirmationModal from '../components/modals/ConfirmationModal';
+import { decrementCartCounter, removeCartItem, selectCartItemsBookId } from '../reducers/cartSlice';
 
 type ApiResponseComment<T> = {
   message: string;
@@ -44,17 +47,22 @@ const BookDetails = () => {
   const addToCart = useAddToCart();
   const userDataSelector = useSelector(selectUserData);
   const token = useSelector(selectAuthToken);
+  const cartItemsBookId = useSelector(selectCartItemsBookId);
   const toast = useToastHandler();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const dispatch = useDispatch();
 
   const getProfileData = useApi<ApiResponse<User>>();
   const toggleFavorite = useApi<ApiResponse<void>>();
   const getSingleBook = useApi<ApiResponse<Book>>();
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
+  const removeBook = useApi<ApiResponse<Book>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
   const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
+  const [isBookInCart, setIsBookInCart] = useState<boolean>(false);
   const [favoriteMessage, setFavoriteMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [numberOfComment, setNumberOfComment] = useState<number>(0);
@@ -175,7 +183,7 @@ const BookDetails = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        setProfileData(response?.data.data);
+        setProfileData(response && response.data.data);
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
@@ -247,13 +255,27 @@ const BookDetails = () => {
           color={'white'}
           onClick={handleGoBack}></IconButton>
         <Flex justifyContent={'center'}>
-          <Image
-            boxShadow={'0px 8px 10px rgba(0, 0, 0, 0.25)'}
-            borderRadius={10}
-            width={'400px'}
-            src={singleBook.cover}
-            alt={singleBook.title}
-          />
+          <Box position={'relative'} p={'10px'}>
+            <Box>
+              {userDataSelector.isAdmin && (
+                <IconButton
+                  {...buttonStyles}
+                  boxSize={12}
+                  position={'absolute'}
+                  right={'0px'}
+                  top={'0px'}
+                  aria-label="edit_icon"
+                  icon={<EditIcon boxSize={6} />}></IconButton>
+              )}
+              <Image
+                boxShadow={'0px 8px 10px rgba(0, 0, 0, 0.25)'}
+                borderRadius={10}
+                width={'400px'}
+                src={singleBook.cover}
+                alt={singleBook.title}
+              />
+            </Box>
+          </Box>
           <Flex width={'600px'} textAlign={'justify'} flexDirection="column" ml={5}>
             <HStack align={'center'}>
               <Text fontWeight="bold" fontSize="xx-large" textAlign={'center'}>
@@ -304,9 +326,27 @@ const BookDetails = () => {
                 <Text>Pages: {singleBook.pagesCount}</Text>
               </Flex>
               <Flex mt={4} gap={2}>
-                <Button {...buttonStyles} onClick={() => addToCart(singleBook._id)}>
+                <Button
+                  {...buttonStyles}
+                  onClick={async () => {
+                    await addToCart(singleBook._id);
+                  }}>
                   Add To Cart
                 </Button>
+                {userDataSelector.isAdmin && (
+                  <Button
+                    {...buttonStyles}
+                    _hover={{ bg: COLORS.darkRed }}
+                    bg={COLORS.lightRed}
+                    _active={{ bg: COLORS.darkRed }}
+                    onClick={() => {
+                      const bookIsInCart = cartItemsBookId.some((id) => id === bookId);
+                      setIsBookInCart(bookIsInCart);
+                      onOpen();
+                    }}>
+                    Remove From Store
+                  </Button>
+                )}
               </Flex>
             </Flex>
           </Flex>
@@ -368,6 +408,48 @@ const BookDetails = () => {
           </VStack>
         ) : null}
       </VStack>
+
+      <ConfirmationModal
+        isModalOpen={isOpen}
+        onClose={onClose}
+        headerText={isBookInCart ? 'The book is in your cart!' : 'Are you sure?'}
+        bodyText={
+          <>
+            <strong>{singleBook.title}</strong> will be removed permanently from{' '}
+            <strong>store</strong>
+            {isBookInCart && (
+              <>
+                {' and'}
+                <strong> your cart</strong>
+              </>
+            )}
+            !
+          </>
+        }
+        onCloseBtnText="Cancel"
+        onConfirmBtnText="Confirm"
+        onConfirm={async () => {
+          try {
+            const response = await removeBook({
+              method: 'DELETE',
+              url: API_ROUTES.deleteBook(`${bookId}`),
+              headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response && response.status === 200) {
+              onClose();
+              if (isBookInCart) {
+                //remove book id from redux state and decrement the cart counter
+                dispatch(removeCartItem(`${bookId}`));
+                dispatch(decrementCartCounter());
+              }
+              toast(`${response.data.message}`, 'success');
+              navigation('/');
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        }}></ConfirmationModal>
     </>
   );
 };

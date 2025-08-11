@@ -88,7 +88,7 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
     if (response && response.status === 200) {
       onClose();
       setIsDisabled(true);
-      toast('You successfully added new bok in store', 'success');
+      toast('You successfully added new book in store', 'success');
       currentLocation === '/store'
         ? dispatch(addToAllBooks(response.data.data))
         : //else the location is '/' and add to the newest book list
@@ -100,7 +100,7 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
     const { name, value } = e.target;
     setFormInputs((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value.trim()
     }));
 
     if (name === 'cover') {

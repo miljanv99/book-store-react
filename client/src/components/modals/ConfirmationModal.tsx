@@ -9,13 +9,13 @@ import {
   HStack,
   Button
 } from '@chakra-ui/react';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { buttonStyles } from '../../globalStyles';
 import { COLORS } from '../../globalColors';
 
 interface BaseModalProps {
   headerText: string;
-  bodyText: string;
+  bodyText: ReactNode;
   isModalOpen: boolean;
   onCloseBtnText: string;
   onClose: () => void;

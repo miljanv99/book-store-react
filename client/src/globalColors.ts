@@ -3,5 +3,7 @@ export const COLORS = {
   darkPrimaryColor: '#54c5dc',
   darkerPrimaryColor: '#00b1d4ff',
   greenColor: '#008000',
-  lightGreenColor: '#00a700ff'
+  lightGreenColor: '#00a700ff',
+  darkRed: '#B40000',
+  lightRed: '#F53936'
 };

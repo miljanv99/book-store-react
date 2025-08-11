@@ -12,12 +12,14 @@ import {
 import { FC, useEffect, useState } from 'react';
 import { selectUserData, setToken, setUserData } from '../../reducers/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCartCounter } from '../../reducers/cartSlice';
+import { setCartCounter, setCartItems } from '../../reducers/cartSlice';
 import { useToastHandler } from '../../hooks/useToastHandler';
 import { useApi } from '../../hooks/useApi';
 import { ApiResponse } from '../../model/ApiResponse.model';
 import { API_ROUTES } from '../../constants/apiConstants';
 import { User } from '../../model/User.model';
+import { Cart } from '../../model/Cart.model';
+import { Book } from '../../model/Book.model';
 
 interface SignProps {
   isModalSignInOpen: boolean;
@@ -32,6 +34,7 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
   const userLogin = useApi<ApiResponse<string>>();
   const userProfile = useApi<ApiResponse<User>>();
   const getCartSize = useApi<ApiResponse<number>>();
+  const getCartItems = useApi<ApiResponse<Cart>>();
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -80,6 +83,22 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
         url: API_ROUTES.getCartSize,
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      const cartItems = await getCartItems({
+        method: 'GET',
+        url: API_ROUTES.getCartItems,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const cartItemsBooks: Book[] = cartItems && cartItems.data.data.books;
+      const cartItemsBookId: string[] = [];
+      for (const book of cartItemsBooks) {
+        cartItemsBookId.push(book._id);
+      }
+
+      dispatch(setCartItems(cartItemsBookId));
+      console.log('PPPPPP: ', cartItemsBookId);
+
       dispatch(setCartCounter(cartSizeResponse?.data.data));
 
       const { id, isAdmin, username, avatar, email } = profileResponse?.data.data!;

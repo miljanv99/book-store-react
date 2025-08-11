@@ -26,14 +26,14 @@ const persistConfigBookList = {
 const persistedAuthReducer = persistReducer(persistConfigAuth, authReducer);
 
 // Apply redux-persist with cart reducer, but blacklist cartCounterItem
-const persistedCartCounterReducer = persistReducer(persistConfigCart, cartCounterReducer);
+const persistedCartReducer = persistReducer(persistConfigCart, cartCounterReducer);
 
 const persistedBookListReducer = persistReducer(persistConfigBookList, bookListReducer);
 
 export const store = configureStore({
   reducer: {
     authorization: persistedAuthReducer,
-    cartCounterItem: persistedCartCounterReducer,
+    cart: persistedCartReducer,
     booksList: persistedBookListReducer
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useToastHandler } from '../hooks/useToastHandler';
 import { selectAuthToken } from '../reducers/authSlice';
-import { incrementCartCounter } from '../reducers/cartSlice';
+import { incrementCartCounter, setCartItems } from '../reducers/cartSlice';
 import { useApi } from './useApi';
 import { API_ROUTES } from '../constants/apiConstants';
 
@@ -17,14 +17,19 @@ export function useAddToCart() {
       url: API_ROUTES.addBookToCart(bookID),
       headers: { Authorization: `Bearer ${token}` }
     });
-    showToast(
-      response?.status === 200 || (response?.status === 400 && token)
-        ? response?.data['message']
-        : 'You have to login!',
-      response?.status === 200 ? 'success' : 'error'
-    );
 
-    response?.status === 200 ? dispatch(incrementCartCounter()) : () => {};
+    //set books id in redux cart item state
+    response && response.status === 200 && dispatch(setCartItems(response.data.data.books));
+
+    response &&
+      showToast(
+        response.status === 200 || (response.status === 400 && token)
+          ? response.data['message']
+          : 'You have to login!',
+        response.status === 200 ? 'success' : 'error'
+      );
+
+    response && response.status === 200 ? dispatch(incrementCartCounter()) : () => {};
   };
 
   return addToCart;

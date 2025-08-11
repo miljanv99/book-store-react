@@ -205,7 +205,7 @@ module.exports = {
     delete: (req, res) => {
         let bookId = req.params.bookId;
 
-        BOOK.findByIdAndRemove(bookId)
+        BOOK.findByIdAndDelete(bookId)
             .then((deletedBook) => {
                 if (!deletedBook) {
                     return res.status(400).json({

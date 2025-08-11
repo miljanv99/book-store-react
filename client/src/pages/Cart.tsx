@@ -14,7 +14,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAuthToken } from '../reducers/authSlice';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Book } from '../model/Book.model';
-import { decrementCartCounter, selectCartCounter, setCartCounter } from '../reducers/cartSlice';
+import {
+  decrementCartCounter,
+  emptyCartItems,
+  removeCartItem,
+  selectCartCounter,
+  setCartCounter
+} from '../reducers/cartSlice';
 import { Cart } from '../model/Cart.model';
 import { useToastHandler } from '../hooks/useToastHandler';
 import emptyCartImg from '../assets/empty_cart.webp';
@@ -25,6 +31,7 @@ import ConfirmationModal from '../components/modals/ConfirmationModal';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
 import { Receipt } from '../model/Receipts.model';
+import { COLORS } from '../globalColors';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -44,7 +51,6 @@ const CartScreen = () => {
   } = useDisclosure();
 
   const [cartBooks, setCartBooks] = useState<Book[]>([]);
-  const [isRemovedAll, setIsRemovedAll] = useState<boolean>(false);
   const isCheckoutDisabled = cartBooks.some((book) => book.quantity === 0);
   const getCartItems = useApi<ApiResponse<Cart>>();
   const removeBook = useApi<ApiResponse<string>>();
@@ -130,8 +136,10 @@ const CartScreen = () => {
         .then((res) => {
           setCartBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
           dispatch(decrementCartCounter());
+          console.log('ID: ', id);
+          dispatch(removeCartItem(id));
           const book = cartBooks.find((book) => book._id === id);
-          const bookName = book?.title;
+          const bookName = book && book.title;
           toast(`${bookName} has been removed from cart`, 'success', 'bottom');
           console.log(res?.status + '\n' + 'Book successfully removed');
         })
@@ -150,7 +158,10 @@ const CartScreen = () => {
     })
       .then(() => {
         setCartBooks([]);
-        setIsRemovedAll(true);
+        dispatch(setCartCounter(0));
+        dispatch(emptyCartItems());
+        onRemoveAllModalClose();
+        toast('You successfully empty the cart', 'success');
       })
       .catch((error) => console.error(error));
   };
@@ -182,14 +193,6 @@ const CartScreen = () => {
   useEffect(() => {
     fetchCartItems();
   }, []);
-
-  useEffect(() => {
-    if (isRemovedAll) {
-      dispatch(setCartCounter(0));
-      onRemoveAllModalClose();
-      toast('You successfully empty the cart', 'success');
-    }
-  }, [isRemovedAll, setCartBooks, dispatch]);
 
   return (
     <>
@@ -250,8 +253,8 @@ const CartScreen = () => {
               <HStack>
                 {cartBooks.length > 1 ? (
                   <Button
-                    _hover={{ bg: 'rgb(180, 0, 0)' }}
-                    bg={'rgb(245, 57, 54)'}
+                    _hover={{ bg: COLORS.darkRed }}
+                    bg={COLORS.lightRed}
                     color={'white'}
                     onClick={onRemoveAllModalOpen}>
                     Remove All

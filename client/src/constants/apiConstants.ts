@@ -5,6 +5,7 @@ export const API_ROUTES = {
   addBookToFavorite: (bookId: string) => `/book/addToFavorites/${bookId}`,
   rateBook: (bookId: string) => `/book/rate/${bookId}`,
   addBook: '/book/add',
+  deleteBook: (bookId: string) => `/book/delete/${bookId}`,
   //Cart
   deleteAllFromCart: '/user/cart/deleteAll',
   removeBookFromCart: (bookId: string) => `/user/cart/delete/${bookId}`,
