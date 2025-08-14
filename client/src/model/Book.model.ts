@@ -11,7 +11,7 @@ export type Book = {
   purchasesCount?: number;
   genre: string;
   year: number;
-  isbn?: string;
+  isbn: string;
   pagesCount: number;
   price: number;
   creationDate?: Date;

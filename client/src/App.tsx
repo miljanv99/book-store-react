@@ -12,7 +12,7 @@ import { AddIcon } from '@chakra-ui/icons';
 import { IconButton, useDisclosure } from '@chakra-ui/react';
 import { buttonStyles } from './globalStyles';
 import { COLORS } from './globalColors';
-import AddBookModal from './components/modals/AddBookModal';
+import BookModal from './components/modals/BookModal';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -42,8 +42,8 @@ function App() {
           Add Now Book
         </IconButton>
       )}
-      {/* Modal for add new books */}
-      <AddBookModal isOpen={isOpen} onClose={onClose}></AddBookModal>
+      {/* Modal for adding new books */}
+      <BookModal isOpen={isOpen} onClose={onClose}></BookModal>
 
       <Routes>
         <Route path="/" element={<Navigation />}>

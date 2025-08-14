@@ -34,6 +34,7 @@ import CommentItem from '../components/comment/CommentItem';
 import { buttonStyles } from '../globalStyles';
 import ConfirmationModal from '../components/modals/ConfirmationModal';
 import { decrementCartCounter, removeCartItem, selectCartItemsBookId } from '../reducers/cartSlice';
+import BookModal from '../components/modals/BookModal';
 
 type ApiResponseComment<T> = {
   message: string;
@@ -50,6 +51,12 @@ const BookDetails = () => {
   const cartItemsBookId = useSelector(selectCartItemsBookId);
   const toast = useToastHandler();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenEditModal,
+    onOpen: onOpenEditModal,
+    onClose: onCloseEditModal
+  } = useDisclosure();
+
   const dispatch = useDispatch();
 
   const getProfileData = useApi<ApiResponse<User>>();
@@ -265,6 +272,7 @@ const BookDetails = () => {
                   right={'0px'}
                   top={'0px'}
                   aria-label="edit_icon"
+                  onClick={onOpenEditModal}
                   icon={<EditIcon boxSize={6} />}></IconButton>
               )}
               <Image
@@ -450,6 +458,13 @@ const BookDetails = () => {
             console.error(error);
           }
         }}></ConfirmationModal>
+
+      <BookModal
+        isOpen={isOpenEditModal}
+        onClose={onCloseEditModal}
+        isEdit={true}
+        initialBook={singleBook}
+        editedBook={setSingleBook}></BookModal>
     </>
   );
 };

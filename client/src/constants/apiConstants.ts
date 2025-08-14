@@ -6,6 +6,7 @@ export const API_ROUTES = {
   rateBook: (bookId: string) => `/book/rate/${bookId}`,
   addBook: '/book/add',
   deleteBook: (bookId: string) => `/book/delete/${bookId}`,
+  editBook: (bookId: string) => `/book/edit/${bookId}`,
   //Cart
   deleteAllFromCart: '/user/cart/deleteAll',
   removeBookFromCart: (bookId: string) => `/user/cart/delete/${bookId}`,

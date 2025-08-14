@@ -24,27 +24,46 @@ import { useLocation } from 'react-router-dom';
 import { addToAllBooks, addToTheNewest } from '../../reducers/bookSlice';
 import { urlRegex } from '../../constants/regex';
 
-interface AddBookModalProps {
+interface BaseBookModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
+interface AddBookModalProps extends BaseBookModalProps {
+  isEdit?: false;
+  initialBook?: never;
+  editedBook?: never;
+}
+interface EditBookModalProps extends BaseBookModalProps {
+  isEdit: true;
+  initialBook: Book;
+  editedBook: (book: Book) => void;
+}
+
+type BookModalProps = AddBookModalProps | EditBookModalProps;
+
+const BookModal: React.FC<BookModalProps> = ({
+  isOpen,
+  onClose,
+  isEdit,
+  initialBook,
+  editedBook
+}) => {
   const [formInputs, setFormInputs] = useState({
-    title: '',
-    author: '',
-    genre: '',
-    year: '',
-    description: '',
-    cover: '',
-    isbn: '',
-    pagesCount: '',
-    price: ''
+    title: initialBook ? initialBook.title : '',
+    author: initialBook ? initialBook.author : '',
+    genre: initialBook ? initialBook.genre : '',
+    year: initialBook ? initialBook.year : '',
+    description: initialBook ? initialBook.description : '',
+    cover: initialBook ? initialBook.cover : '',
+    isbn: initialBook ? initialBook.isbn : '',
+    pagesCount: initialBook ? initialBook.pagesCount : '',
+    price: initialBook ? initialBook.price : ''
   });
 
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
-  const addBook = useApi<ApiResponse<Book>>();
+  const bookHandler = useApi<ApiResponse<Book>>();
   const token = useSelector(selectAuthToken);
   const dispatch = useDispatch();
   const toast = useToastHandler();
@@ -53,7 +72,7 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
   const [isValidYear, setIsValidYear] = useState<boolean>(true);
   const [isValidDescription, setIsValidDescription] = useState<boolean>(true);
 
-  const addNewBook = async () => {
+  const handleBook = async () => {
     const coverValid = urlRegex.test(formInputs.cover);
     const yearValid =
       Number(formInputs.year) >= 1000 && Number(formInputs.year) <= new Date().getFullYear();
@@ -64,35 +83,53 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
     setIsValidDescription(descriptionValid);
 
     if (!coverValid || !yearValid || !descriptionValid) {
-      setIsDisabled(true);
+      //setIsDisabled(true);
       return;
     }
 
-    const response = await addBook({
-      method: 'POST',
-      url: API_ROUTES.addBook,
+    const response = await bookHandler({
+      method: isEdit ? 'PUT' : 'POST',
+      url: isEdit ? API_ROUTES.editBook(initialBook._id) : API_ROUTES.addBook,
       headers: { Authorization: `Bearer ${token}` },
       data: {
-        title: formInputs.title,
-        author: formInputs.author,
-        genre: formInputs.genre,
+        title: formInputs.title.trim(),
+        author: formInputs.author.trim(),
+        genre: formInputs.genre.trim(),
         year: formInputs.year,
-        description: formInputs.description,
-        cover: formInputs.cover,
-        isbn: formInputs.isbn,
+        description: formInputs.description.trim(),
+        cover: formInputs.cover.trim(),
+        isbn: formInputs.isbn.trim(),
         pagesCount: formInputs.pagesCount,
         price: formInputs.price
       }
     });
 
-    if (response && response.status === 200) {
+    try {
       onClose();
       setIsDisabled(true);
-      toast('You successfully added new book in store', 'success');
-      currentLocation === '/store'
-        ? dispatch(addToAllBooks(response.data.data))
-        : //else the location is '/' and add to the newest book list
-          dispatch(addToTheNewest(response.data.data));
+      toast(response && response.data.message, 'success');
+      !isEdit
+        ? // if the location is '/' and add to the newest book list, else ad to the full books list
+          currentLocation === '/store'
+          ? dispatch(addToAllBooks(response && response.data.data))
+          : dispatch(addToTheNewest(response && response.data.data))
+        : // set editedBook callback
+          editedBook(response && response.data.data);
+
+      !isEdit &&
+        setFormInputs({
+          title: '',
+          author: '',
+          genre: '',
+          year: '',
+          description: '',
+          cover: '',
+          isbn: '',
+          pagesCount: '',
+          price: ''
+        });
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -100,7 +137,7 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
     const { name, value } = e.target;
     setFormInputs((prevState) => ({
       ...prevState,
-      [name]: value.trim()
+      [name]: value
     }));
 
     if (name === 'cover') {
@@ -120,21 +157,48 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
     Object.values(formInputs).some((value) => value === '')
       ? setIsDisabled(true)
       : setIsDisabled(false);
+
+    const isSameAsInitital =
+      initialBook &&
+      (Object.keys(formInputs) as (keyof typeof formInputs)[]).every((key) => {
+        const formValue = formInputs[key] && formInputs[key].toString().trim();
+        const initialValue = initialBook[key] && initialBook[key].toString().trim();
+
+        return formValue === initialValue;
+      });
+
+    isSameAsInitital && setIsDisabled(isSameAsInitital);
   }, [formInputs]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader textAlign={'center'}>Add New Book</ModalHeader>
+        <ModalHeader textAlign={'center'}>{isEdit ? 'Edit Book' : 'Add New Book'}</ModalHeader>
         <ModalBody display={'flex'} flexDirection={'column'} gap={4}>
-          <Input onChange={handleRequiredInputs} placeholder="Title" name="title"></Input>
-          <Input onChange={handleRequiredInputs} placeholder="Author" name="author"></Input>
+          <Input
+            value={formInputs.title}
+            onChange={handleRequiredInputs}
+            onBlur={(e) => setFormInputs((prev) => ({ ...prev, title: e.target.value.trim() }))}
+            placeholder="Title"
+            name="title"></Input>
+          <Input
+            value={formInputs.author}
+            onChange={handleRequiredInputs}
+            onBlur={(e) => setFormInputs((prev) => ({ ...prev, author: e.target.value.trim() }))}
+            placeholder="Author"
+            name="author"></Input>
           <VStack gap={0}>
             <HStack>
-              <Input onChange={handleRequiredInputs} placeholder="Genre" name="genre"></Input>
+              <Input
+                value={formInputs.genre}
+                onChange={handleRequiredInputs}
+                onBlur={(e) => setFormInputs((prev) => ({ ...prev, genre: e.target.value.trim() }))}
+                placeholder="Genre"
+                name="genre"></Input>
               <Input
                 type="number"
+                value={formInputs.year}
                 isInvalid={!isValidYear}
                 onChange={handleRequiredInputs}
                 placeholder="Release Year"
@@ -148,11 +212,15 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
           </VStack>
           <VStack gap={0}>
             <Textarea
+              value={formInputs.description}
               size={'md'}
               placeholder="Enter your description here..."
               name="description"
               isInvalid={!isValidDescription}
-              onChange={handleRequiredInputs}></Textarea>
+              onChange={handleRequiredInputs}
+              onBlur={(e) =>
+                setFormInputs((prev) => ({ ...prev, description: e.target.value.trim() }))
+              }></Textarea>
             {!isValidDescription && (
               <Text width={'100%'} fontSize={'small'} textColor={'red'} textAlign={'start'}>
                 The description must have at least 10 characters.
@@ -161,7 +229,9 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
           </VStack>
           <VStack alignItems={'start'} gap={0}>
             <Input
+              value={formInputs.cover}
               onChange={handleRequiredInputs}
+              onBlur={(e) => setFormInputs((prev) => ({ ...prev, cover: e.target.value.trim() }))}
               placeholder="Cover"
               name="cover"
               isInvalid={!isValidCoverURL}></Input>
@@ -171,15 +241,22 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
               </Text>
             )}
           </VStack>
-          <Input onChange={handleRequiredInputs} placeholder="Isbn" name="isbn"></Input>
+          <Input
+            value={formInputs.isbn}
+            onChange={handleRequiredInputs}
+            onBlur={(e) => setFormInputs((prev) => ({ ...prev, isbn: e.target.value.trim() }))}
+            placeholder="Isbn"
+            name="isbn"></Input>
           <HStack>
             <Input
               type="number"
+              value={formInputs.pagesCount}
               onChange={handleRequiredInputs}
               placeholder="Number Of Pages"
               name="pagesCount"></Input>
             <Input
               type="number"
+              value={formInputs.price}
               onChange={handleRequiredInputs}
               placeholder="Price $$$"
               name="price"></Input>
@@ -189,8 +266,8 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
           <HStack>
             <Button
               isDisabled={isDisabled || !isValidCoverURL || !isValidYear || !isValidDescription}
-              onClick={addNewBook}>
-              Add
+              onClick={handleBook}>
+              {!isEdit ? 'Add' : 'Edit'}
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </HStack>
@@ -200,4 +277,4 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default AddBookModal;
+export default BookModal;
