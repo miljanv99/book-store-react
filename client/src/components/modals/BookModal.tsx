@@ -17,8 +17,7 @@ import { useApi } from '../../hooks/useApi';
 import { ApiResponse } from '../../model/ApiResponse.model';
 import { Book } from '../../model/Book.model';
 import { API_ROUTES } from '../../constants/apiConstants';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthToken } from '../../reducers/authSlice';
+import { useDispatch } from 'react-redux';
 import { useToastHandler } from '../../hooks/useToastHandler';
 import { useLocation } from 'react-router-dom';
 import { addToAllBooks, addToTheNewest } from '../../reducers/bookSlice';
@@ -64,7 +63,6 @@ const BookModal: React.FC<BookModalProps> = ({
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
   const bookHandler = useApi<ApiResponse<Book>>();
-  const token = useSelector(selectAuthToken);
   const dispatch = useDispatch();
   const toast = useToastHandler();
   const currentLocation = useLocation().pathname;
@@ -90,7 +88,6 @@ const BookModal: React.FC<BookModalProps> = ({
     const response = await bookHandler({
       method: isEdit ? 'PUT' : 'POST',
       url: isEdit ? API_ROUTES.editBook(initialBook._id) : API_ROUTES.addBook,
-      headers: { Authorization: `Bearer ${token}` },
       data: {
         title: formInputs.title.trim(),
         author: formInputs.author.trim(),

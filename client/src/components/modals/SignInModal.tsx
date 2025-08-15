@@ -68,48 +68,51 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
       data: { username: credentials.username, password: credentials.password }
     });
 
-    if (response?.status! === 200) {
-      console.log(response?.data.message);
-      const token = response?.data.data!;
-      dispatch(setToken(token));
-      console.log('Token after login:', token);
-      const profileResponse = await userProfile({
-        method: 'GET',
-        url: API_ROUTES.getProfile(credentials.username),
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const cartSizeResponse = await getCartSize({
-        method: 'GET',
-        url: API_ROUTES.getCartSize,
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    if (response) {
+      try {
+        const token = response.data.data;
+        dispatch(setToken(token));
+        console.log('Token after login:', token);
+        const [profileResponse, cartSizeResponse, cartItems] = await Promise.all([
+          await userProfile({
+            method: 'GET',
+            url: API_ROUTES.getProfile(credentials.username)
+          }),
 
-      const cartItems = await getCartItems({
-        method: 'GET',
-        url: API_ROUTES.getCartItems,
-        headers: { Authorization: `Bearer ${token}` }
-      });
+          await getCartSize({
+            method: 'GET',
+            url: API_ROUTES.getCartSize
+          }),
 
-      const cartItemsBooks: Book[] = cartItems && cartItems.data.data.books;
-      const cartItemsBookId: string[] = [];
-      for (const book of cartItemsBooks) {
-        cartItemsBookId.push(book._id);
+          await getCartItems({
+            method: 'GET',
+            url: API_ROUTES.getCartItems
+          })
+        ]);
+
+        const cartItemsBooks: Book[] = cartItems && cartItems.data.data.books;
+        const cartItemsBookId: string[] = [];
+        for (const book of cartItemsBooks) {
+          cartItemsBookId.push(book._id);
+        }
+
+        dispatch(setCartItems(cartItemsBookId));
+        console.log('PPPPPP: ', cartItemsBookId);
+
+        dispatch(setCartCounter(cartSizeResponse?.data.data));
+
+        const { id, isAdmin, username, avatar, email } = profileResponse?.data.data!;
+        dispatch(setUserData({ id, isAdmin, username, avatar, email }));
+        handleCloseSignInModal();
+        onDrawerClose();
+        console.log('Toast message', response.data.message);
+      } catch (error) {
+        console.log(error);
       }
-
-      dispatch(setCartItems(cartItemsBookId));
-      console.log('PPPPPP: ', cartItemsBookId);
-
-      dispatch(setCartCounter(cartSizeResponse?.data.data));
-
-      const { id, isAdmin, username, avatar, email } = profileResponse?.data.data!;
-      dispatch(setUserData({ id, isAdmin, username, avatar, email }));
-      handleCloseSignInModal();
-      onDrawerClose();
+      showToast(response.data.message, response.status === 200 ? 'success' : 'error');
+    } else {
+      console.error(response);
     }
-
-    console.log('Toast message', response?.data.message);
-
-    showToast(response?.data.message!, response?.status === 200 ? 'success' : 'error');
   };
 
   useEffect(() => {

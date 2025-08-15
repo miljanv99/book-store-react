@@ -88,14 +88,12 @@ const UserProfile = () => {
     const fetchProfile = async () => {
       const profileResponse = await profileData({
         method: 'GET',
-        url: API_ROUTES.getProfile(userData.username),
-        headers: { Authorization: `Bearer ${token}` }
+        url: API_ROUTES.getProfile(userData.username)
       });
 
       const purchaseResponse = await purchaseHistory({
         method: 'GET',
-        url: API_ROUTES.getPurchaseHistory,
-        headers: { Authorization: `Bearer ${token}` }
+        url: API_ROUTES.getPurchaseHistory
       });
       if (profileResponse && purchaseResponse) {
         setProfile(profileResponse.data.data);
@@ -220,7 +218,6 @@ const UserProfile = () => {
                         const response = await editProfile({
                           method: 'PATCH',
                           url: API_ROUTES.editProfile,
-                          headers: { Authorization: `Bearer ${token}` },
                           data: {
                             id: userData.id,
                             username: profileInputs.username,

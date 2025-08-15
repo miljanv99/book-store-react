@@ -65,12 +65,12 @@ const BookDetails = () => {
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
   const removeBook = useApi<ApiResponse<Book>>();
+  const removeBookFromCart = useApi<ApiResponse<string>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
   const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
   const [isBookInCart, setIsBookInCart] = useState<boolean>(false);
-  const [favoriteMessage, setFavoriteMessage] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
   const [numberOfComment, setNumberOfComment] = useState<number>(0);
   const [inputCommentInFocus, setInputCommentInFocus] = useState<boolean>(false);
@@ -86,7 +86,7 @@ const BookDetails = () => {
       method: 'GET',
       url: API_ROUTES.getSingleBook(`${bookId}`)
     });
-    setSingleBook(response?.data.data!);
+    setSingleBook(response && response.data.data);
   };
 
   const getComments = async () => {
@@ -125,31 +125,33 @@ const BookDetails = () => {
 
   const checkIfBookIsFavorite = useMemo<boolean>(() => {
     return favoriteBooks.some((book) => book._id === bookId) ?? false;
-  }, [favoriteBooks, bookId]);
+  }, [favoriteBooks, bookId, token]);
 
   const toggleFavoriteBook = async () => {
-    const response = await toggleFavorite({
-      method: 'POST',
-      url: API_ROUTES.addBookToFavorite(`${bookId}`),
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setFavoriteBooks((prev) => {
-      const alreadyFavorite = prev.some((book) => book._id === bookId);
-      if (alreadyFavorite) {
-        return prev?.filter((book) => book._id !== bookId);
-      } else {
-        return [...prev!, singleBook!];
-      }
-    });
-
-    setFavoriteMessage(response?.data.message!);
+    try {
+      const response = await toggleFavorite({
+        method: 'POST',
+        url: API_ROUTES.addBookToFavorite(`${bookId}`),
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFavoriteBooks((books) => {
+        const alreadyFavorite = books.some((book) => book._id === bookId);
+        if (alreadyFavorite) {
+          return books.filter((book) => book._id !== bookId);
+        } else {
+          return [...books, singleBook!];
+        }
+      });
+      toast(response && response.data.message, 'success');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const addNewComment = () => {
     addBookComment({
       method: 'POST',
       url: API_ROUTES.addComment(bookId!),
-      headers: { Authorization: `Bearer ${token}` },
       data: {
         content: inputCommentValue
       }
@@ -186,36 +188,20 @@ const BookDetails = () => {
       try {
         const response = await getProfileData({
           method: 'GET',
-          url: API_ROUTES.getProfile(userDataSelector.username),
-          headers: { Authorization: `Bearer ${token}` }
+          url: API_ROUTES.getProfile(userDataSelector.username)
         });
 
         setProfileData(response && response.data.data);
+        setFavoriteBooks(response && response.data.data.favoriteBooks);
       } catch (error) {
         console.error('Error fetching profile:', error);
       }
     };
-    if (token) {
+    if (token && userDataSelector.username) {
       fetchProfile();
       console.log('Fetched profile data');
     }
-  }, [token]);
-
-  useEffect(() => {
-    console.log('FAVORITE BOOKS !!!!!!');
-
-    if (profileData?.favoriteBooks) {
-      setFavoriteBooks(profileData.favoriteBooks);
-    }
-
-    console.log('FAVORITE BOOKS !!!!!!: ', favoriteBooks);
-  }, [profileData]);
-
-  useEffect(() => {
-    if (favoriteMessage !== '') {
-      toast(favoriteMessage, 'success');
-    }
-  }, [favoriteMessage]);
+  }, [token, userDataSelector.username]);
 
   //observe the skeleton element for fetching additional comments
   useEffect(() => {
@@ -438,22 +424,25 @@ const BookDetails = () => {
         onConfirmBtnText="Confirm"
         onConfirm={async () => {
           try {
+            onClose();
+            if (isBookInCart) {
+              //remove book id from redux state and decrement the cart counter
+              dispatch(removeCartItem(`${bookId}`));
+              dispatch(decrementCartCounter());
+              await removeBookFromCart({
+                method: 'DELETE',
+                url: API_ROUTES.removeBookFromCart(`${bookId}`)
+              }).then(() => {
+                console.log(`${singleBook.title} removed from cart`);
+              });
+            }
+
             const response = await removeBook({
               method: 'DELETE',
-              url: API_ROUTES.deleteBook(`${bookId}`),
-              headers: { Authorization: `Bearer ${token}` }
+              url: API_ROUTES.deleteBook(`${bookId}`)
             });
-
-            if (response && response.status === 200) {
-              onClose();
-              if (isBookInCart) {
-                //remove book id from redux state and decrement the cart counter
-                dispatch(removeCartItem(`${bookId}`));
-                dispatch(decrementCartCounter());
-              }
-              toast(`${response.data.message}`, 'success');
-              navigation('/');
-            }
+            toast(`${response && response.data.message}`, 'success');
+            navigation('/');
           } catch (error) {
             console.error(error);
           }

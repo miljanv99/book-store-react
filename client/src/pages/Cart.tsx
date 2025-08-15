@@ -63,8 +63,7 @@ const CartScreen = () => {
   const fetchCartItems = async () => {
     const cartItems = await getCartItems({
       method: 'GET',
-      url: API_ROUTES.getCartItems,
-      headers: { Authorization: `Bearer ${token}` }
+      url: API_ROUTES.getCartItems
     });
     booksInCart = cartItems?.data.data.books;
 
@@ -130,8 +129,7 @@ const CartScreen = () => {
     (id: string) => {
       removeBook({
         method: 'DELETE',
-        url: API_ROUTES.removeBookFromCart(id),
-        headers: { Authorization: `Bearer ${token}` }
+        url: API_ROUTES.removeBookFromCart(id)
       })
         .then((res) => {
           setCartBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
@@ -153,8 +151,7 @@ const CartScreen = () => {
   const handleRemoveAll = () => {
     removeAllItems({
       method: 'DELETE',
-      url: API_ROUTES.deleteAllFromCart,
-      headers: { Authorization: `Bearer ${token}` }
+      url: API_ROUTES.deleteAllFromCart
     })
       .then(() => {
         setCartBooks([]);
@@ -179,7 +176,7 @@ const CartScreen = () => {
     const response = await checkout({
       method: 'POST',
       url: API_ROUTES.checkout,
-      headers: { Authorization: `Bearer ${token}` },
+
       data: getBookAndQuantity
     });
     console.log('AAA', response?.status);

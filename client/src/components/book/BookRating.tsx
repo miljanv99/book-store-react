@@ -47,7 +47,6 @@ const BookRating: React.FC<BookRatingProps> = ({
       const response = await rateBookApi({
         method: 'POST',
         url: bookId && API_ROUTES.rateBook(bookId),
-        headers: { Authorization: `Bearer ${token}` },
         data: {
           rating: ratingInModal
         }

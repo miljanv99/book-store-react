@@ -14,8 +14,7 @@ export function useAddToCart() {
   const addToCart = async (bookID: string) => {
     const response = await addToCartApi({
       method: 'POST',
-      url: API_ROUTES.addBookToCart(bookID),
-      headers: { Authorization: `Bearer ${token}` }
+      url: API_ROUTES.addBookToCart(bookID)
     });
 
     //set books id in redux cart item state
