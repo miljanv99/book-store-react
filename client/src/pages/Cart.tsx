@@ -53,10 +53,8 @@ const CartScreen = () => {
   const [cartBooks, setCartBooks] = useState<Book[]>([]);
   const isCheckoutDisabled = cartBooks.some((book) => book.quantity === 0);
   const getCartItems = useApi<ApiResponse<Cart>>();
-  const removeBook = useApi<ApiResponse<string>>();
+  const handleRemove = useApi<ApiResponse<string>>();
   const checkout = useApi<ApiResponse<Receipt>>();
-
-  const removeAllItems = useApi();
 
   let booksInCart: Book[];
 
@@ -127,7 +125,7 @@ const CartScreen = () => {
 
   const handleRemoveItem = useCallback(
     (id: string) => {
-      removeBook({
+      handleRemove({
         method: 'DELETE',
         url: API_ROUTES.removeBookFromCart(id)
       })
@@ -149,7 +147,7 @@ const CartScreen = () => {
   );
 
   const handleRemoveAll = () => {
-    removeAllItems({
+    handleRemove({
       method: 'DELETE',
       url: API_ROUTES.deleteAllFromCart
     })

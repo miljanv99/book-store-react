@@ -10,9 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectTheNewestBooksList, setTheNewest } from '../reducers/bookSlice';
 
 const Home = () => {
-  const fetchTheNewestBooks = useApi<ApiResponse<Book[]>>();
-  const fetchTheBestRatedBooks = useApi<ApiResponse<Book[]>>();
-  const fetchTheMostPurchasedBooksBooks = useApi<ApiResponse<Book[]>>();
+  const handleBooks = useApi<ApiResponse<Book[]>>();
 
   const [bestRatedBooks, setBestRatedBooks] = useState<Book[]>([]);
   const [mostPurchasedBooks, setMostPurchasedBooks] = useState<Book[]>([]);
@@ -23,15 +21,15 @@ const Home = () => {
 
   const fetchBooks = async () => {
     setIsLoading(true);
-    const newest = await fetchTheNewestBooks({
+    const newest = await handleBooks({
       method: 'GET',
       url: `${API_ROUTES.getAllBooks}?sort={"creationDate":-1}&limit=5`
     });
-    const bestRated = await fetchTheBestRatedBooks({
+    const bestRated = await handleBooks({
       method: 'GET',
       url: `${API_ROUTES.getAllBooks}?sort={"currentRating":-1}&limit=5`
     });
-    const mostPurchase = await fetchTheMostPurchasedBooksBooks({
+    const mostPurchase = await handleBooks({
       method: 'GET',
       url: `${API_ROUTES.getAllBooks}?sort={"purchasesCount":-1}&limit=5`
     });

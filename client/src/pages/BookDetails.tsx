@@ -61,10 +61,9 @@ const BookDetails = () => {
 
   const getProfileData = useApi<ApiResponse<User>>();
   const toggleFavorite = useApi<ApiResponse<void>>();
-  const getSingleBook = useApi<ApiResponse<Book>>();
+  const handleBook = useApi<ApiResponse<Book>>();
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
-  const removeBook = useApi<ApiResponse<Book>>();
   const removeBookFromCart = useApi<ApiResponse<string>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
@@ -82,7 +81,7 @@ const BookDetails = () => {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const getBookDetails = async () => {
-    const response = await getSingleBook({
+    const response = await handleBook({
       method: 'GET',
       url: API_ROUTES.getSingleBook(`${bookId}`)
     });
@@ -437,7 +436,7 @@ const BookDetails = () => {
               });
             }
 
-            const response = await removeBook({
+            const response = await handleBook({
               method: 'DELETE',
               url: API_ROUTES.deleteBook(`${bookId}`)
             });

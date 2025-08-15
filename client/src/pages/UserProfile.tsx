@@ -15,7 +15,7 @@ import { useApi } from '../hooks/useApi';
 import { User } from '../model/User.model';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAuthToken, selectUserData, setUserData } from '../reducers/authSlice';
+import { selectUserData, setUserData } from '../reducers/authSlice';
 import { Receipt } from '../model/Receipts.model';
 import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
@@ -35,7 +35,6 @@ const UserProfile = () => {
   const [profile, setProfile] = useState<User>();
 
   const userData = useSelector(selectUserData);
-  const token = useSelector(selectAuthToken);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const dispatch = useDispatch();
   const toast = useToastHandler();
