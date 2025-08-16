@@ -256,8 +256,24 @@ module.exports = {
   },
   
 
+  userBlockStatus: (req, res) => {
+    let usernameReq = req.body.username
+
+    USER.findOne({username: usernameReq}).then((user)=>{
+      if (!user) {
+        return res.status(404).json({
+            message: 'User not found'
+        })
+      }
+      return res.status(200).json({
+        data: user.isCommentsBlocked
+      })
+    })
+  },
+
   blockComments: (req, res) => {
     let adminId = req.params.userId; // Assuming you have a way to identify the admin
+    let userToBlock = req.body.username
 
     USER.findById(adminId)
       .then((admin) => {
@@ -266,38 +282,22 @@ module.exports = {
             message: "You are not authorized to perform this action",
           });
         }
-
-        USER.find({ isAdmin: false }, "_id", (err, users) => {
-          if (err) {
-            return res.status(400).json({
-              message: "Error fetching user IDs from database",
-            });
+         USER.findOneAndUpdate(
+          {username: userToBlock, isAdmin: false}, 
+          [{$set: {isCommentsBlocked: {$not: '$isCommentsBlocked'}}}],
+          {new: true},
+        ).then((updatedUser)=>{
+          if (!updatedUser) {
+            return res.status(404).json({
+              message: 'User not found'
+            })
           }
 
-          const userIDs = users.map((user) => user._id);
+          return res.status(200).json({
+            message: `Comments are ${updatedUser.isCommentsBlocked ? 'blocked' : 'unblocked'} for this user: ${updatedUser.username}`
+          });
 
-          USER.updateMany(
-            { _id: { $in: userIDs }, isAdmin: false }, // Only non-admin users
-            { $set: { isCommentsBlocked: true } }, // Set isCommentsBlocked to true
-          )
-            .then((result) => {
-              if (result.nModified === 0) {
-                return res.status(400).json({
-                  message: "You have already block the comments for all users",
-                });
-              }
-
-              res.status(200).json({
-                message: "Comments are blocked for all users",
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-              return res.status(400).json({
-                message: "Something went wrong, please try again.",
-              });
-            });
-        });
+        })  
       })
       .catch((err) => {
         console.log(err);

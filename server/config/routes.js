@@ -20,10 +20,11 @@ module.exports = (APP) => {
     AUTH.isInRole("Admin"),
     USER_CONTROLLER.blockComments,
   );
-  APP.post(
-    "/user/unlockComments/:userId",
+
+   APP.get(
+    "/user/commentsStatus",
     AUTH.isInRole("Admin"),
-    USER_CONTROLLER.unblockComments,
+    USER_CONTROLLER.userBlockStatus,
   );
 
   APP.get("/cart/getSize", AUTH.isAuth, CART_CONTROLLER.getCartSize);
