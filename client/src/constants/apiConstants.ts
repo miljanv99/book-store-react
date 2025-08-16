@@ -20,6 +20,8 @@ export const API_ROUTES = {
   getProfile: (username: string) => `/user/profile/${username}`,
   editProfile: '/user/editProfile',
   getPurchaseHistory: '/user/purchaseHistory',
+  commentsStatus: '/user/commentsStatus',
+  commentsPermission: '/user/commentsPermission',
   //Comment
   getComments: (bookId: string, skipCount: number) => `/comment/${bookId}/${skipCount}`,
   addComment: (bookId: string) => `/comment/add/${bookId}`

@@ -8,13 +8,27 @@ import {
   IconButton,
   Avatar,
   Spinner,
-  Circle
+  Circle,
+  Tooltip,
+  Input,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  HStack,
+  VStack,
+  Text,
+  Icon,
+  Button
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
-import { HamburgerIcon } from '@chakra-ui/icons';
-import { FiShoppingCart } from 'react-icons/fi';
+import { HamburgerIcon, CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
+import { FiShoppingCart, FiUserX, FiSearch } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import SignInModal from './modals/SignInModal';
@@ -22,6 +36,11 @@ import RegisterModal from './modals/RegisterModal';
 import DrawerComponent from './drawer';
 import { useEffect, useState } from 'react';
 import { selectCartCounter } from '../reducers/cartSlice';
+import { buttonStyles } from '../globalStyles';
+import { useApi } from '../hooks/useApi';
+import { ApiResponse } from '../model/ApiResponse.model';
+import { API_ROUTES } from '../constants/apiConstants';
+import { useToastHandler } from '../hooks/useToastHandler';
 
 const Navigation = () => {
   const token = useSelector(selectAuthToken);
@@ -30,6 +49,12 @@ const Navigation = () => {
   const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
   const userProfileData = useSelector(selectUserData);
   const cartCounter = useSelector(selectCartCounter);
+  const blockStatusApi = useApi<ApiResponse<boolean>>();
+  const commentsPermission = useApi<ApiResponse<string>>();
+  const [usernameValue, setUsernameValue] = useState<string>('');
+  const [blockStatus, setBlockStatus] = useState<boolean | undefined>(undefined);
+  const [displayBlockStatus, setDisplayBlockStatus] = useState<boolean>(false);
+  const toast = useToastHandler();
 
   // Modal state sign
   const {
@@ -44,6 +69,8 @@ const Navigation = () => {
     onOpen: onModalRegisterOpen,
     onClose: onModalRegisterClose
   } = useDisclosure();
+
+  const popoverDisclosure = useDisclosure();
 
   const [showSpinner, setShowSpinner] = useState(true);
 
@@ -99,33 +126,155 @@ const Navigation = () => {
                   Store
                 </Link>
               </WrapItem>
-              {token ? (
+              {token && (
                 <>
                   <WrapItem>
-                    <Link href="/cart" color={'white'}>
-                      <Box position={'relative'}>
-                        {cartCounter > 0 ? (
-                          <Circle
-                            zIndex={2}
-                            position={'absolute'}
-                            bottom={5}
-                            left={25}
-                            size="1.5rem"
-                            backgroundColor={'red'}>
-                            {`${cartCounter}`}
-                          </Circle>
-                        ) : null}
+                    <Tooltip label="Cart" placement="bottom">
+                      <Link href="/cart" color={'white'}>
+                        <Box position={'relative'}>
+                          {cartCounter > 0 && (
+                            <Circle
+                              zIndex={2}
+                              position={'absolute'}
+                              bottom={5}
+                              left={25}
+                              size="1.5rem"
+                              backgroundColor={'red'}>
+                              {`${cartCounter}`}
+                            </Circle>
+                          )}
 
-                        <IconButton
-                          _hover={{ bg: COLORS.darkPrimaryColor }}
-                          _active={{ bg: COLORS.darkPrimaryColor }}
-                          backgroundColor={'transparent'}
-                          aria-label="cart"
-                          icon={<FiShoppingCart color="white" size={25} />}
-                        />
-                      </Box>
-                    </Link>
+                          <IconButton
+                            _hover={{ bg: COLORS.darkPrimaryColor }}
+                            _active={{ bg: COLORS.darkPrimaryColor }}
+                            backgroundColor={'transparent'}
+                            aria-label="cart"
+                            icon={<FiShoppingCart color="white" size={25} />}
+                          />
+                        </Box>
+                      </Link>
+                    </Tooltip>
                   </WrapItem>
+                  {token && userProfileData.isAdmin && (
+                    <Popover isOpen={popoverDisclosure.isOpen}>
+                      <PopoverTrigger>
+                        <WrapItem onClick={popoverDisclosure.onOpen}>
+                          <Tooltip label="Block comment" placement="bottom">
+                            <IconButton
+                              _hover={{ bg: COLORS.darkPrimaryColor }}
+                              _active={{ bg: COLORS.darkPrimaryColor }}
+                              backgroundColor={'transparent'}
+                              aria-label="cart"
+                              icon={<FiUserX color="white" size={25} />}
+                            />
+                          </Tooltip>
+                        </WrapItem>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <PopoverArrow />
+                        <PopoverCloseButton
+                          onClick={() => {
+                            popoverDisclosure.onClose();
+                            setUsernameValue('');
+                            setBlockStatus(undefined);
+                            setDisplayBlockStatus(false);
+                          }}
+                        />
+                        <PopoverHeader textAlign={'center'} borderBottom="none">
+                          Comments permission
+                        </PopoverHeader>
+                        <PopoverBody>
+                          <VStack>
+                            <HStack>
+                              <Input
+                                placeholder="Enter username"
+                                value={usernameValue}
+                                onChange={(e) => {
+                                  setDisplayBlockStatus(false);
+                                  setUsernameValue(e.target.value);
+                                  if (e.target.value === '') {
+                                    setDisplayBlockStatus(false);
+                                  }
+                                }}></Input>
+                              <IconButton
+                                {...buttonStyles}
+                                aria-label="search"
+                                icon={<FiSearch />}
+                                isDisabled={!usernameValue}
+                                onClick={async () => {
+                                  const status = await blockStatusApi({
+                                    method: 'POST',
+                                    url: API_ROUTES.commentsStatus,
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    data: {
+                                      username: usernameValue
+                                    }
+                                  });
+                                  if (status && status.status === 401) {
+                                    toast('Something went wrong', 'error', 'bottom');
+                                    return;
+                                  }
+                                  setBlockStatus(status && status.data.data);
+                                  setDisplayBlockStatus(true);
+                                }}></IconButton>
+                            </HStack>
+                            {displayBlockStatus &&
+                              (blockStatus !== undefined ? (
+                                <HStack>
+                                  <Text>
+                                    {blockStatus ? 'Permission blocked' : 'Permission allowed'}
+                                  </Text>
+                                  <Icon
+                                    as={blockStatus ? NotAllowedIcon : CheckIcon}
+                                    color={blockStatus ? COLORS.lightRed : COLORS.greenColor}
+                                    boxSize={7}></Icon>
+                                </HStack>
+                              ) : (
+                                <HStack>
+                                  <Text>User Not Found</Text>
+                                  <FiUserX size={20}></FiUserX>
+                                </HStack>
+                              ))}
+                            {displayBlockStatus && blockStatus !== undefined && (
+                              <Button
+                                {...buttonStyles}
+                                _hover={{ bg: blockStatus ? COLORS.greenColor : COLORS.darkRed }}
+                                _active={{ bg: blockStatus ? COLORS.greenColor : COLORS.darkRed }}
+                                backgroundColor={
+                                  blockStatus ? COLORS.lightGreenColor : COLORS.lightRed
+                                }
+                                onClick={() => {
+                                  commentsPermission({
+                                    method: 'POST',
+                                    url: API_ROUTES.commentsPermission,
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    data: {
+                                      username: usernameValue
+                                    }
+                                  })
+                                    .then((res) => {
+                                      if (res && res.status === 401) {
+                                        toast('Unauthorized', 'error', 'bottom');
+                                        return;
+                                      }
+                                      toast(res && res.data.message, 'success');
+                                      setBlockStatus((prev) => !prev);
+                                      popoverDisclosure.onClose();
+                                      setUsernameValue('');
+                                      setDisplayBlockStatus(false);
+                                    })
+                                    .catch((error) => {
+                                      console.log(error);
+                                    });
+                                }}>
+                                {blockStatus ? 'Unblock' : 'Block'}
+                              </Button>
+                            )}
+                          </VStack>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                   <WrapItem>
                     {showSpinner ? (
                       <Spinner></Spinner>
@@ -136,7 +285,7 @@ const Navigation = () => {
                     )}
                   </WrapItem>
                 </>
-              ) : null}
+              )}
             </Wrap>
           </Flex>
         </Flex>

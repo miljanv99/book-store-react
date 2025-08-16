@@ -170,6 +170,7 @@ module.exports = {
           avatar: user.avatar,
           commentsCount: user.commentsCount,
           favoriteBooks: user.favoriteBooks,
+          isCommentsBlocked: user.isCommentsBlocked
         };
 
         return res.status(200).json({
@@ -271,17 +272,9 @@ module.exports = {
     })
   },
 
-  blockComments: (req, res) => {
-    let adminId = req.params.userId; // Assuming you have a way to identify the admin
+  commentsPermission: (req, res) => {
     let userToBlock = req.body.username
 
-    USER.findById(adminId)
-      .then((admin) => {
-        if (!admin || !admin.isAdmin) {
-          return res.status(403).json({
-            message: "You are not authorized to perform this action",
-          });
-        }
          USER.findOneAndUpdate(
           {username: userToBlock, isAdmin: false}, 
           [{$set: {isCommentsBlocked: {$not: '$isCommentsBlocked'}}}],
@@ -298,7 +291,6 @@ module.exports = {
           });
 
         })  
-      })
       .catch((err) => {
         console.log(err);
         return res.status(400).json({

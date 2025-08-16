@@ -16,12 +16,12 @@ module.exports = (APP) => {
   );
   APP.patch('/user/editProfile', AUTH.isAuth, USER_CONTROLLER.editProfile);
   APP.post(
-    "/user/blockComments/:userId",
+    "/user/commentsPermission",
     AUTH.isInRole("Admin"),
-    USER_CONTROLLER.blockComments,
+    USER_CONTROLLER.commentsPermission,
   );
 
-   APP.get(
+   APP.post(
     "/user/commentsStatus",
     AUTH.isInRole("Admin"),
     USER_CONTROLLER.userBlockStatus,

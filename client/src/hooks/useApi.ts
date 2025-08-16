@@ -1,22 +1,21 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { store } from '../store';
 import { selectAuthToken } from '../reducers/authSlice';
 
 const domain = 'http://localhost:8000';
 
 export const useApi = <T = any>() => {
-  const token = useSelector(selectAuthToken);
-
-  const apiConfig = axios.create({
-    baseURL: domain,
-    headers: {
-      Authorization: `Bearer ${token && token}`,
-      'Content-Type': 'application/json'
-    }
-  });
-
   const sendRequest = useCallback(async (config: AxiosRequestConfig) => {
+    const token = selectAuthToken(store.getState());
+
+    const apiConfig = axios.create({
+      baseURL: domain,
+      headers: {
+        Authorization: `Bearer ${token && token}`,
+        'Content-Type': 'application/json'
+      }
+    });
     try {
       const response = await apiConfig<T>(config);
       return {

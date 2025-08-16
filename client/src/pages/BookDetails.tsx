@@ -9,6 +9,7 @@ import {
   Input,
   Skeleton,
   Text,
+  Tooltip,
   useDisclosure,
   VStack
 } from '@chakra-ui/react';
@@ -156,6 +157,10 @@ const BookDetails = () => {
       }
     })
       .then((res) => {
+        if (res && res.status === 401) {
+          toast(res && res.data.message, 'error', 'bottom');
+          return;
+        }
         const newComment: Comment = {
           _id: res?.data.data._id,
           book: res?.data.data.book,
@@ -370,7 +375,7 @@ const BookDetails = () => {
             </HStack>
           ) : null}
 
-          {inputCommentInFocus ? (
+          {inputCommentInFocus && profileData ? (
             <>
               <HStack w={'100%'} justifyContent={'end'}>
                 <Button
@@ -381,9 +386,21 @@ const BookDetails = () => {
                   }}>
                   Cancel
                 </Button>
-                <Button {...buttonStyles} isDisabled={!inputCommentValue} onClick={addNewComment}>
-                  Comment
-                </Button>
+                {
+                  <Tooltip
+                    textAlign={'center'}
+                    label={
+                      profileData.isCommentsBlocked &&
+                      `You do not have permission to add comments. Please contact admin support.`
+                    }>
+                    <Button
+                      {...buttonStyles}
+                      isDisabled={!inputCommentValue || profileData.isCommentsBlocked}
+                      onClick={addNewComment}>
+                      Comment
+                    </Button>
+                  </Tooltip>
+                }
               </HStack>
             </>
           ) : null}
