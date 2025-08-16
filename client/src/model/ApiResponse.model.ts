@@ -1,4 +1,5 @@
-export type ApiResponse<T> = {
+export type ApiResponse<DataType, ErrorType = undefined> = {
   message: string;
-  data?: T;
+  errors?: ErrorType;
+  data?: DataType;
 };

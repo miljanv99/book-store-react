@@ -101,23 +101,30 @@ const RegisterModal: FC<RegisterProps> = ({
   };
 
   const handleRegister = async () => {
-    const response = await userRegister({
-      method: 'POST',
-      url: API_ROUTES.register,
-      data: {
-        email: requiredInputs.email,
-        username: requiredInputs.username,
-        password: requiredInputs.password,
-        confirmPassword: requiredInputs.confirm,
-        avatar: avatarUrl
+    try {
+      const response = await userRegister({
+        method: 'POST',
+        url: API_ROUTES.register,
+        data: {
+          email: requiredInputs.email,
+          username: requiredInputs.username,
+          password: requiredInputs.password,
+          confirmPassword: requiredInputs.confirm,
+          avatar: avatarUrl
+        }
+      });
+      if (response) {
+        console.log(response.data.message);
+        showToast(
+          response.data.errors ? response.data.errors.taken : response.data.message,
+          response.status === 200 ? 'success' : 'error'
+        );
+        if (response.status === 200) {
+          handleCloseRegisterModal();
+          onDrawerClose();
+        }
       }
-    });
-    if (response!.status === 200) {
-      console.log(response!.data.message);
-      handleCloseRegisterModal();
-      onDrawerClose();
-    }
-    showToast(response?.data.message, response?.status === 200 ? 'success' : 'error');
+    } catch (error) {}
   };
 
   const handleAvatarPreview = () => {

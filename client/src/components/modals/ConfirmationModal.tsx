@@ -4,7 +4,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  Text,
   ModalFooter,
   HStack,
   Button
@@ -15,7 +14,7 @@ import { COLORS } from '../../globalColors';
 
 interface BaseModalProps {
   headerText: string;
-  bodyText: ReactNode;
+  bodyContent: ReactNode;
   isModalOpen: boolean;
   onCloseBtnText: string;
   onClose: () => void;
@@ -26,7 +25,7 @@ type ModalProps =
   | (BaseModalProps & { onConfirmBtnText?: undefined; onConfirm?: undefined });
 
 const ConfirmationModal: FC<ModalProps> = ({
-  bodyText,
+  bodyContent,
   headerText,
   isModalOpen,
   onClose,
@@ -40,9 +39,7 @@ const ConfirmationModal: FC<ModalProps> = ({
         <ModalOverlay></ModalOverlay>
         <ModalContent>
           <ModalHeader textAlign={'center'}>{headerText}</ModalHeader>
-          <ModalBody textAlign={'center'}>
-            <Text>{bodyText}</Text>
-          </ModalBody>
+          <ModalBody textAlign={'center'}>{bodyContent}</ModalBody>
           <ModalFooter>
             <HStack justifyContent={'center'}>
               {onConfirm !== undefined ? (

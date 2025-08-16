@@ -283,7 +283,7 @@ const CartScreen = () => {
         isModalOpen={isRemoveAllModalOpen}
         onClose={onRemoveAllModalClose}
         headerText="Remove All Items"
-        bodyText="Are you sure that you want to remove all items from cart?"
+        bodyContent={<Text>Are you sure that you want to remove all items from cart?</Text>}
         onCloseBtnText="Cancel"
         onConfirm={handleRemoveAll}
         onConfirmBtnText="Yes, I am sure"></ConfirmationModal>
@@ -293,7 +293,7 @@ const CartScreen = () => {
         onClose={onCheckoutModalClose}
         headerText={`You're about to purchase ${cartCounter} items for a total of $
             ${calculateTotalPrice.toFixed(2)}`}
-        bodyText="Would you like to proceed with the checkout?"
+        bodyContent={<Text>Would you like to proceed with the checkout?</Text>}
         onCloseBtnText="Cancel"
         onConfirm={handleCheckout}
         onConfirmBtnText="Confirm Purchase"></ConfirmationModal>

@@ -141,7 +141,9 @@ const BookRating: React.FC<BookRatingProps> = ({
         isModalOpen={isModalOpen}
         onClose={onModalClose}
         headerText="Rate this Book?"
-        bodyText={`Are you sure you want to give this book a ${ratingInModal}-star rating? You won't be able to change your rating later.`}
+        bodyContent={
+          <Text>{`Are you sure you want to give this book a ${ratingInModal}-star rating? You won't be able to change your rating later.`}</Text>
+        }
         onCloseBtnText="Cancel"
         onConfirmBtnText="Confirm"
         onConfirm={rateBook}></ConfirmationModal>

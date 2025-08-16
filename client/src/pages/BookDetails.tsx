@@ -406,18 +406,20 @@ const BookDetails = () => {
         isModalOpen={isOpen}
         onClose={onClose}
         headerText={isBookInCart ? 'The book is in your cart!' : 'Are you sure?'}
-        bodyText={
-          <>
-            <strong>{singleBook.title}</strong> will be removed permanently from{' '}
-            <strong>store</strong>
-            {isBookInCart && (
-              <>
-                {' and'}
-                <strong> your cart</strong>
-              </>
-            )}
-            !
-          </>
+        bodyContent={
+          <Text>
+            <>
+              <strong>{singleBook.title}</strong> will be removed permanently from{' '}
+              <strong>store</strong>
+              {isBookInCart && (
+                <>
+                  {' and'}
+                  <strong> your cart</strong>
+                </>
+              )}
+              !
+            </>
+          </Text>
         }
         onCloseBtnText="Cancel"
         onConfirmBtnText="Confirm"
