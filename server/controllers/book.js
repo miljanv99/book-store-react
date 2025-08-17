@@ -1,6 +1,8 @@
 const VALIDATOR = require("validator");
+const CART = require("mongoose").model("Cart");
 const BOOK = require("mongoose").model("Book");
 const USER = require("mongoose").model("User");
+const mongoose = require('mongoose');
 
 //const PAGE_LIMIT = 16;
 
@@ -205,6 +207,7 @@ module.exports = {
     delete: (req, res) => {
         let bookId = req.params.bookId;
 
+        //remove book from the list
         BOOK.findByIdAndDelete(bookId)
             .then((deletedBook) => {
                 if (!deletedBook) {
@@ -213,10 +216,38 @@ module.exports = {
                     });
                 }
 
-                return res.status(200).json({
-                    message: "Book deleted successfully.",
-                    data: deletedBook,
-                });
+                const objectBookId = new mongoose.Types.ObjectId(bookId);
+
+                //remove if the book is in the cart
+                CART.updateMany(
+                    { books: objectBookId },
+                    [
+                        { 
+                            $set: {
+                                books: { $filter: { input: "$books", cond: { $ne: ["$$this", objectBookId] } } },
+                                totalPrice: { $max: [ { $subtract: ["$totalPrice", deletedBook.price] }, 0 ] }
+                            }
+                        }
+                    ]
+                ).then(() => {
+                        //remove if the book is in the favorite books
+                        USER.updateMany(
+                            {favoriteBooks: objectBookId},
+                            [{
+                                $set: {
+                                    favoriteBooks: {$filter: { input: "$favoriteBooks", cond: {$ne: ["$$this", objectBookId]}}}
+                                }
+                            }]
+                        ).then(()=>{
+                            return res.status(200).json({
+                                message: "Book deleted successfully.",
+                                data: deletedBook
+                        });
+                    })}).catch((err) => {
+                        console.error(err);
+                        return res.status(500).json({ message: "Something went wrong" });
+                    });
+
             })
             .catch((err) => {
                 console.log(err);

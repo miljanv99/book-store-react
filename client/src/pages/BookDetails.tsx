@@ -65,7 +65,6 @@ const BookDetails = () => {
   const handleBook = useApi<ApiResponse<Book>>();
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
-  const removeBookFromCart = useApi<ApiResponse<string>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
@@ -427,7 +426,7 @@ const BookDetails = () => {
           <Text>
             <>
               <strong>{singleBook.title}</strong> will be removed permanently from{' '}
-              <strong>store</strong>
+              <strong>store, other user's cart</strong>
               {isBookInCart && (
                 <>
                   {' and'}
@@ -447,12 +446,6 @@ const BookDetails = () => {
               //remove book id from redux state and decrement the cart counter
               dispatch(removeCartItem(`${bookId}`));
               dispatch(decrementCartCounter());
-              await removeBookFromCart({
-                method: 'DELETE',
-                url: API_ROUTES.removeBookFromCart(`${bookId}`)
-              }).then(() => {
-                console.log(`${singleBook.title} removed from cart`);
-              });
             }
 
             const response = await handleBook({
