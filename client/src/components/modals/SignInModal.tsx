@@ -101,8 +101,9 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
 
         dispatch(setCartCounter(cartSizeResponse && cartSizeResponse.data.data));
 
-        const { id, isAdmin, username, avatar, email } = profileResponse?.data.data!;
-        dispatch(setUserData({ id, isAdmin, username, avatar, email }));
+        const { _id, isAdmin, username, avatar, email } =
+          profileResponse && profileResponse.data.data;
+        dispatch(setUserData({ _id, isAdmin, username, avatar, email }));
         handleCloseSignInModal();
         onDrawerClose();
         console.log('Toast message', response.data.message);

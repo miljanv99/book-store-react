@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Book } from '../model/Book.model';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { COLORS } from '../globalColors';
 import BookRating from '../components/book/BookRating';
 import { ArrowBackIcon, EditIcon } from '@chakra-ui/icons';
@@ -65,6 +65,7 @@ const BookDetails = () => {
   const handleBook = useApi<ApiResponse<Book>>();
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
   const addBookComment = useApi<ApiResponse<Comment>>();
+  const handleComment = useApi<ApiResponse<string>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
@@ -98,8 +99,8 @@ const BookDetails = () => {
 
       setSkipCount((prev) => prev + COMMENTS_LIMIT);
 
-      const fetchedComments = response?.data.data;
-      const totalCount = response?.data.totalCount;
+      const fetchedComments = response && response.data.data;
+      const totalCount = response && response.data.totalCount;
 
       console.log('BOOKS: ', fetchedComments);
       setComments((prev) => [...prev, ...fetchedComments]);
@@ -160,25 +161,46 @@ const BookDetails = () => {
           toast(res && res.data.message, 'error', 'bottom');
           return;
         }
-        const newComment: Comment = {
-          _id: res?.data.data._id,
-          book: res?.data.data.book,
-          content: inputCommentValue,
-          creationDate: new Date(),
-          user: profileData!
-        };
-
-        setComments((prev) => [newComment, ...prev]);
-        setInputCommentValue('');
-        setInputCommentInFocus(false);
-        setNumberOfComment((prev) => prev + 1);
-        toast('Comment posted successfully!', 'success');
+        if (res && profileData) {
+          const newComment: Comment = {
+            _id: res.data.data._id,
+            book: res.data.data.book,
+            content: inputCommentValue,
+            creationDate: new Date(),
+            user: profileData
+          };
+          console.log('AAAAAA: ', profileData);
+          setComments((prev) => [newComment, ...prev]);
+          setInputCommentValue('');
+          setInputCommentInFocus(false);
+          setNumberOfComment((prev) => prev + 1);
+          toast('Comment posted successfully!', 'success');
+        }
       })
       .catch((error) => {
         toast(error, 'error');
         console.error(error);
       });
   };
+
+  const removeComment = useCallback(
+    (commentId: string) => {
+      handleComment({
+        method: 'DELETE',
+        url: API_ROUTES.deleteComment(commentId),
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((res) => {
+        if (res && res.status === 200) {
+          setComments((prevComments) =>
+            prevComments.filter((comment) => comment._id !== commentId)
+          );
+          setNumberOfComment((prev) => prev - 1);
+          toast(res.data.message, 'success', 'bottom');
+        }
+      });
+    },
+    [token, handleComment]
+  );
 
   useEffect(() => {
     getBookDetails();
@@ -407,7 +429,10 @@ const BookDetails = () => {
 
         <VStack width={'100%'} alignItems={'start'} spacing={'25px'}>
           {comments.map((comment) => (
-            <CommentItem key={comment._id} comment={comment}></CommentItem>
+            <CommentItem
+              key={comment._id}
+              comment={comment}
+              removeComment={removeComment}></CommentItem>
           ))}
         </VStack>
         {hasMore ? (

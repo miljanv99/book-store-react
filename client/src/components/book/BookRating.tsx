@@ -29,7 +29,7 @@ const BookRating: React.FC<BookRatingProps> = ({
 }) => {
   const rateBookApi = useApi<ApiResponse<Book>>();
 
-  const userDataId = useSelector(selectUserData).id;
+  const userDataId = useSelector(selectUserData)._id;
   const token = useSelector(selectAuthToken);
   const [numberOfStars, setNumberOfStars] = useState<number>(currentRating - 1);
   const [hoveredRatingIndex, setHoveredRatingIndex] = useState<number>(currentRating - 1);

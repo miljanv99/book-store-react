@@ -211,8 +211,8 @@ module.exports = {
           });
         }
 
-        COMMENT.findByIdAndRemove(comment._id).then(() => {
-          BOOK.update(
+        COMMENT.findByIdAndDelete(comment._id).then(() => {
+          BOOK.updateOne(
             { _id: comment.book },
             { $pull: { comments: comment._id } },
           ).then(() => {

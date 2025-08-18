@@ -163,7 +163,7 @@ module.exports = {
         }
 
         let userToSend = {
-          id: user.id,
+          _id: user.id,
           isAdmin: user.isAdmin,
           username: user.username,
           email: user.email,

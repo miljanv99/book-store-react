@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 export interface UserData {
-  id: string;
+  _id: string;
   isAdmin: boolean;
   username: string;
   avatar: string;
@@ -18,7 +18,7 @@ interface AuthState {
 const initialState: AuthState = {
   token: null,
   userData: {
-    id: '',
+    _id: '',
     isAdmin: false,
     username: '',
     avatar: '',
@@ -37,7 +37,7 @@ export const authSlice = createSlice({
       state.token = null;
     },
     setUserData: (state, action: PayloadAction<UserData>) => {
-      state.userData.id = action.payload.id;
+      state.userData._id = action.payload._id;
       state.userData.isAdmin = action.payload.isAdmin;
       state.userData.username = action.payload.username;
       state.userData.avatar = action.payload.avatar;

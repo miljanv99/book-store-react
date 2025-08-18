@@ -218,7 +218,7 @@ const UserProfile = () => {
                           method: 'PATCH',
                           url: API_ROUTES.editProfile,
                           data: {
-                            id: userData.id,
+                            id: userData._id,
                             username: profileInputs.username,
                             email: profileInputs.email,
                             avatar: profileInputs.avatar

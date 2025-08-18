@@ -48,7 +48,7 @@ const DrawerComponent: FC<DrawerProps> = ({
 
     dispatch(
       setUserData({
-        id: '',
+        _id: '',
         isAdmin: false,
         username: '',
         avatar: '',
