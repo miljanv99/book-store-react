@@ -20,10 +20,19 @@ import React from 'react';
 
 type CommentItemProps = {
   comment: Comment;
+  setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditCommentRef: React.Dispatch<React.SetStateAction<Record<string, string> | undefined>>;
+  isCommentBlocked: boolean;
   removeComment: (commentId: string) => void;
 };
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, removeComment }) => {
+const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  setIsEdit,
+  setEditCommentRef,
+  removeComment,
+  isCommentBlocked
+}) => {
   console.log('Rendering CommentItem:', comment._id);
   const userId = useSelector(selectUserData)._id;
   const hoverBg = useColorModeValue('gray.200', 'gray.700');
@@ -42,15 +51,24 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, removeComment }) => 
             <Text>{comment.user.username}</Text>
             <Text textColor={'lightslategray'}>{formattedDate(comment.creationDate)}</Text>
           </HStack>
-          <Text>{comment.content}</Text>
+          <HStack>
+            <Text>{comment.content}</Text>
+          </HStack>
         </VStack>
       </HStack>
-      {comment.user._id === userId && (
+      {comment.user._id === userId && !isCommentBlocked && (
         <Menu>
           <MenuButton as={IconButton} icon={<FiMoreVertical />} variant="ghost" />
           {
             <MenuList>
-              <MenuItem>Edit</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setIsEdit(true);
+                  const editCommentContent = comment.content.split('(edited)')[0];
+                  setEditCommentRef({ [comment._id]: editCommentContent });
+                }}>
+                Edit
+              </MenuItem>
               <MenuItem
                 textColor={COLORS.lightRed}
                 onClick={() => {

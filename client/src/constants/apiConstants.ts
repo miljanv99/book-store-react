@@ -25,5 +25,6 @@ export const API_ROUTES = {
   //Comment
   getComments: (bookId: string, skipCount: number) => `/comment/${bookId}/${skipCount}`,
   addComment: (bookId: string) => `/comment/add/${bookId}`,
-  deleteComment: (commentId: string) => `/comment/delete/${commentId}`
+  deleteComment: (commentId: string) => `/comment/delete/${commentId}`,
+  editComment: (commentId: string) => `/comment/edit/${commentId}`
 };

@@ -28,7 +28,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
 import { HamburgerIcon, CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
-import { FiShoppingCart, FiUserX, FiSearch } from 'react-icons/fi';
+import { FiShoppingCart, FiUserX, FiSearch, FiUsers, FiHome } from 'react-icons/fi';
+import { MdStorefront } from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from '../reducers/authSlice';
 import SignInModal from './modals/SignInModal';
@@ -108,23 +109,37 @@ const Navigation = () => {
           <Flex>
             <Wrap direction={'row'} spacing={7} align={'center'}>
               <WrapItem>
-                <Link
-                  _hover={{ textDecoration: 'none' }}
-                  textDecorationLine={'none'}
-                  fontSize={18}
-                  href="/"
-                  color={'white'}>
-                  Home
-                </Link>
+                <Tooltip label="Home">
+                  <Link
+                    _hover={{ textDecoration: 'none' }}
+                    textDecorationLine={'none'}
+                    fontSize={18}
+                    href="/"
+                    color={'white'}>
+                    <IconButton
+                      _hover={{ bg: COLORS.darkPrimaryColor }}
+                      _active={{ bg: COLORS.darkPrimaryColor }}
+                      backgroundColor={'transparent'}
+                      aria-label="store"
+                      icon={<FiHome color="white" size={25} />}></IconButton>
+                  </Link>
+                </Tooltip>
               </WrapItem>
               <WrapItem>
-                <Link
-                  _hover={{ textDecoration: 'none' }}
-                  fontSize={18}
-                  href="/store"
-                  color={'white'}>
-                  Store
-                </Link>
+                <Tooltip label="Store">
+                  <Link
+                    _hover={{ textDecoration: 'none' }}
+                    fontSize={18}
+                    href="/store"
+                    color={'white'}>
+                    <IconButton
+                      _hover={{ bg: COLORS.darkPrimaryColor }}
+                      _active={{ bg: COLORS.darkPrimaryColor }}
+                      backgroundColor={'transparent'}
+                      aria-label="store"
+                      icon={<MdStorefront color="white" size={25} />}></IconButton>
+                  </Link>
+                </Tooltip>
               </WrapItem>
               {token && (
                 <>
@@ -165,7 +180,7 @@ const Navigation = () => {
                               _active={{ bg: COLORS.darkPrimaryColor }}
                               backgroundColor={'transparent'}
                               aria-label="cart"
-                              icon={<FiUserX color="white" size={25} />}
+                              icon={<FiUsers color="white" size={25} />}
                             />
                           </Tooltip>
                         </WrapItem>

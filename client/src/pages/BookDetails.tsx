@@ -64,8 +64,8 @@ const BookDetails = () => {
   const toggleFavorite = useApi<ApiResponse<void>>();
   const handleBook = useApi<ApiResponse<Book>>();
   const getBookComments = useApi<ApiResponseComment<Comment[]>>();
-  const addBookComment = useApi<ApiResponse<Comment>>();
-  const handleComment = useApi<ApiResponse<string>>();
+  const handleBookCommnt = useApi<ApiResponse<Comment>>();
+  const removeCommentItem = useApi<ApiResponse<string>>();
 
   const [singleBook, setSingleBook] = useState<Book>();
   const [profileData, setProfileData] = useState<User>();
@@ -79,6 +79,9 @@ const BookDetails = () => {
   const [skipCount, setSkipCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [editCommentRef, setEditCommentRef] = useState<Record<string, string>>();
+  const inputRef = useRef<HTMLInputElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const getBookDetails = async () => {
@@ -149,7 +152,7 @@ const BookDetails = () => {
   };
 
   const addNewComment = () => {
-    addBookComment({
+    handleBookCommnt({
       method: 'POST',
       url: API_ROUTES.addComment(bookId!),
       data: {
@@ -185,7 +188,7 @@ const BookDetails = () => {
 
   const removeComment = useCallback(
     (commentId: string) => {
-      handleComment({
+      removeCommentItem({
         method: 'DELETE',
         url: API_ROUTES.deleteComment(commentId),
         headers: { Authorization: `Bearer ${token}` }
@@ -199,14 +202,54 @@ const BookDetails = () => {
         }
       });
     },
-    [token, handleComment]
+    [token, removeCommentItem]
   );
+
+  const editComment = (commentId: string) => {
+    handleBookCommnt({
+      method: 'PUT',
+      url: API_ROUTES.editComment(commentId),
+      data: {
+        content: inputCommentValue
+      }
+    }).then((res) => {
+      if (res && res.status !== 200) {
+        toast(res.data.errors.content, 'error', 'bottom');
+        return;
+      }
+
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === commentId
+            ? { ...comment, content: `${inputCommentValue} (edited)` }
+            : comment
+        )
+      );
+      toast(res && res.data.message, 'success', 'bottom');
+      setInputCommentInFocus(false);
+      setInputCommentValue('');
+      setIsEdit(false);
+    });
+  };
 
   useEffect(() => {
     getBookDetails();
     getComments();
     scrollTo({ top: 0 });
   }, [token]);
+
+  useEffect(() => {
+    if (isEdit && editCommentRef) {
+      // Defer focus until after Chakra's menu closes
+      const [, content] = Object.entries(editCommentRef)[0];
+      setTimeout(() => {
+        inputRef.current && (inputRef.current.focus(), inputRef.current.scrollTo());
+
+        setInputCommentInFocus(true);
+        setInputCommentValue(content);
+      }, 50);
+    }
+  }, [isEdit]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -381,6 +424,7 @@ const BookDetails = () => {
             <HStack w={'100%'} mb={'25px'}>
               <Avatar boxSize={'50px'} src={userDataSelector.avatar}></Avatar>
               <Input
+                ref={inputRef}
                 value={inputCommentValue}
                 name="comment_input"
                 placeholder="Add a comment"
@@ -404,6 +448,7 @@ const BookDetails = () => {
                   onClick={() => {
                     setInputCommentInFocus(false);
                     setInputCommentValue('');
+                    setIsEdit(false);
                   }}>
                   Cancel
                 </Button>
@@ -417,8 +462,15 @@ const BookDetails = () => {
                     <Button
                       {...buttonStyles}
                       isDisabled={!inputCommentValue || profileData.isCommentsBlocked}
-                      onClick={addNewComment}>
-                      Comment
+                      onClick={
+                        !isEdit
+                          ? addNewComment
+                          : () => {
+                              const [commentID] = Object.keys(editCommentRef!);
+                              editComment(commentID);
+                            }
+                      }>
+                      {isEdit ? 'Save' : 'Comment'}
                     </Button>
                   </Tooltip>
                 }
@@ -432,7 +484,10 @@ const BookDetails = () => {
             <CommentItem
               key={comment._id}
               comment={comment}
-              removeComment={removeComment}></CommentItem>
+              setIsEdit={setIsEdit}
+              setEditCommentRef={setEditCommentRef}
+              removeComment={removeComment}
+              isCommentBlocked={profileData?.isCommentsBlocked ?? false}></CommentItem>
           ))}
         </VStack>
         {hasMore ? (
