@@ -9,26 +9,13 @@ import {
   Avatar,
   Spinner,
   Circle,
-  Tooltip,
-  Input,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger,
-  HStack,
-  VStack,
-  Text,
-  Icon,
-  Button
+  Tooltip
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
-import { HamburgerIcon, CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
-import { FiShoppingCart, FiUserX, FiSearch, FiUsers, FiHome } from 'react-icons/fi';
+import { HamburgerIcon } from '@chakra-ui/icons';
+import { FiShoppingCart, FiUsers, FiHome } from 'react-icons/fi';
 import { MdStorefront } from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from '../reducers/authSlice';
@@ -37,11 +24,7 @@ import RegisterModal from './modals/RegisterModal';
 import DrawerComponent from './drawer';
 import { useEffect, useState } from 'react';
 import { selectCartCounter } from '../reducers/cartSlice';
-import { buttonStyles } from '../globalStyles';
-import { useApi } from '../hooks/useApi';
-import { ApiResponse } from '../model/ApiResponse.model';
-import { API_ROUTES } from '../constants/apiConstants';
-import { useToastHandler } from '../hooks/useToastHandler';
+import AdminModal from './modals/AdminModal';
 
 const Navigation = () => {
   const token = useSelector(selectAuthToken);
@@ -50,12 +33,6 @@ const Navigation = () => {
   const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
   const userProfileData = useSelector(selectUserData);
   const cartCounter = useSelector(selectCartCounter);
-  const blockStatusApi = useApi<ApiResponse<boolean>>();
-  const commentsPermission = useApi<ApiResponse<string>>();
-  const [usernameValue, setUsernameValue] = useState<string>('');
-  const [blockStatus, setBlockStatus] = useState<boolean | undefined>(undefined);
-  const [displayBlockStatus, setDisplayBlockStatus] = useState<boolean>(false);
-  const toast = useToastHandler();
 
   // Modal state sign
   const {
@@ -71,7 +48,7 @@ const Navigation = () => {
     onClose: onModalRegisterClose
   } = useDisclosure();
 
-  const popoverDisclosure = useDisclosure();
+  const adminModalDisclosure = useDisclosure();
 
   const [showSpinner, setShowSpinner] = useState(true);
 
@@ -171,124 +148,17 @@ const Navigation = () => {
                     </Tooltip>
                   </WrapItem>
                   {token && userProfileData.isAdmin && (
-                    <Popover isOpen={popoverDisclosure.isOpen}>
-                      <PopoverTrigger>
-                        <WrapItem onClick={popoverDisclosure.onOpen}>
-                          <Tooltip label="Block comment" placement="bottom">
-                            <IconButton
-                              _hover={{ bg: COLORS.darkPrimaryColor }}
-                              _active={{ bg: COLORS.darkPrimaryColor }}
-                              backgroundColor={'transparent'}
-                              aria-label="cart"
-                              icon={<FiUsers color="white" size={25} />}
-                            />
-                          </Tooltip>
-                        </WrapItem>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <PopoverArrow />
-                        <PopoverCloseButton
-                          onClick={() => {
-                            popoverDisclosure.onClose();
-                            setUsernameValue('');
-                            setBlockStatus(undefined);
-                            setDisplayBlockStatus(false);
-                          }}
+                    <WrapItem onClick={adminModalDisclosure.onOpen}>
+                      <Tooltip label="Admin" placement="bottom">
+                        <IconButton
+                          _hover={{ bg: COLORS.darkPrimaryColor }}
+                          _active={{ bg: COLORS.darkPrimaryColor }}
+                          backgroundColor={'transparent'}
+                          aria-label="cart"
+                          icon={<FiUsers color="white" size={25} />}
                         />
-                        <PopoverHeader textAlign={'center'} borderBottom="none">
-                          Comments permission
-                        </PopoverHeader>
-                        <PopoverBody>
-                          <VStack>
-                            <HStack>
-                              <Input
-                                placeholder="Enter username"
-                                value={usernameValue}
-                                onChange={(e) => {
-                                  setDisplayBlockStatus(false);
-                                  setUsernameValue(e.target.value);
-                                  if (e.target.value === '') {
-                                    setDisplayBlockStatus(false);
-                                  }
-                                }}></Input>
-                              <IconButton
-                                {...buttonStyles}
-                                aria-label="search"
-                                icon={<FiSearch />}
-                                isDisabled={!usernameValue}
-                                onClick={async () => {
-                                  const status = await blockStatusApi({
-                                    method: 'POST',
-                                    url: API_ROUTES.commentsStatus,
-                                    headers: { Authorization: `Bearer ${token}` },
-                                    data: {
-                                      username: usernameValue
-                                    }
-                                  });
-                                  if (status && status.status === 401) {
-                                    toast('Something went wrong', 'error', 'bottom');
-                                    return;
-                                  }
-                                  setBlockStatus(status && status.data.data);
-                                  setDisplayBlockStatus(true);
-                                }}></IconButton>
-                            </HStack>
-                            {displayBlockStatus &&
-                              (blockStatus !== undefined ? (
-                                <HStack>
-                                  <Text>
-                                    {blockStatus ? 'Permission blocked' : 'Permission allowed'}
-                                  </Text>
-                                  <Icon
-                                    as={blockStatus ? NotAllowedIcon : CheckIcon}
-                                    color={blockStatus ? COLORS.lightRed : COLORS.greenColor}
-                                    boxSize={7}></Icon>
-                                </HStack>
-                              ) : (
-                                <HStack>
-                                  <Text>User Not Found</Text>
-                                  <FiUserX size={20}></FiUserX>
-                                </HStack>
-                              ))}
-                            {displayBlockStatus && blockStatus !== undefined && (
-                              <Button
-                                {...buttonStyles}
-                                _hover={{ bg: blockStatus ? COLORS.greenColor : COLORS.darkRed }}
-                                _active={{ bg: blockStatus ? COLORS.greenColor : COLORS.darkRed }}
-                                backgroundColor={
-                                  blockStatus ? COLORS.lightGreenColor : COLORS.lightRed
-                                }
-                                onClick={() => {
-                                  commentsPermission({
-                                    method: 'POST',
-                                    url: API_ROUTES.commentsPermission,
-                                    headers: { Authorization: `Bearer ${token}` },
-                                    data: {
-                                      username: usernameValue
-                                    }
-                                  })
-                                    .then((res) => {
-                                      if (res && res.status === 401) {
-                                        toast('Unauthorized', 'error', 'bottom');
-                                        return;
-                                      }
-                                      toast(res && res.data.message, 'success');
-                                      setBlockStatus((prev) => !prev);
-                                      popoverDisclosure.onClose();
-                                      setUsernameValue('');
-                                      setDisplayBlockStatus(false);
-                                    })
-                                    .catch((error) => {
-                                      console.log(error);
-                                    });
-                                }}>
-                                {blockStatus ? 'Unblock' : 'Block'}
-                              </Button>
-                            )}
-                          </VStack>
-                        </PopoverBody>
-                      </PopoverContent>
-                    </Popover>
+                      </Tooltip>
+                    </WrapItem>
                   )}
                   <WrapItem>
                     {showSpinner ? (
@@ -320,6 +190,12 @@ const Navigation = () => {
         onModalRegisterClose={onModalRegisterClose}
         onDrawerClose={onDrawerClose}
       />
+
+      {token && userProfileData.isAdmin && (
+        <AdminModal
+          isModalOpen={adminModalDisclosure.isOpen}
+          onClose={adminModalDisclosure.onClose}></AdminModal>
+      )}
     </>
   );
 };

@@ -2,6 +2,7 @@ const VALIDATOR = require("validator");
 const PASSPORT = require("passport");
 const USER = require("mongoose").model("User");
 const RECEIPT = require("mongoose").model("Receipt");
+const ROLE = require("mongoose").model("Role");
 
 function validateRegisterForm(payload) {
   let errors = {};
@@ -260,7 +261,7 @@ module.exports = {
   userBlockStatus: (req, res) => {
     let usernameReq = req.body.username
 
-    USER.findOne({username: usernameReq}).then((user)=>{
+    USER.findOne({username: usernameReq, isAdmin: false}).then((user)=>{
       if (!user) {
         return res.status(404).json({
             message: 'User not found'
@@ -349,4 +350,81 @@ module.exports = {
         });
       });
   },
+
+  getAllUsers: (_, res) => {
+    USER.find({}, 'username isAdmin').then((users)=>{
+      if (users) {
+        return res.status(200).json({
+          message: "All users received",
+          data: users
+      })
+      }
+    }).catch((error)=>{
+        console.log(error);
+          return res.status(400).json({
+            message: "Something went wrong, please try again.",
+        });
+    })
+  },
+
+  giveAdminPermission: async (req, res) => {
+    const users = req.body;
+
+    // Validate all values are boolean
+    for (const username in users) {
+      if (typeof users[username] !== "boolean") {
+        return res.status(400).json({
+          message: `Value of ${username} must be boolean`
+        });
+      }
+    }
+
+ 
+
+    try {
+      // Bulk update isAdmin field for all users
+      // const updateOperations = Object.entries(users).map(([username, isAdmin]) => ({
+      //   updateOne: {
+      //     filter: { username },
+      //     update: { $set: { isAdmin } }
+      //   }
+      // }));
+
+      // await USER.bulkWrite(updateOperations);
+      for (const username in users) {
+        await USER.updateMany(
+          { username: username},
+          { $set: { isAdmin: users[username] } }
+        );
+
+      }
+
+      const adminID = await ROLE.findOne({name: "Admin"}, '_id');
+
+      // For each user, push/pull _id into ROLE.users
+      for (const [username, isAdmin] of Object.entries(users)) {
+        const user = await USER.findOne({ username }, "_id");
+        if (!user) break;
+
+        const adminUpdate = isAdmin ? { $push: { users: user._id } } : { $pull: { users: user._id } };
+        const userUpdate  = isAdmin ? { $pull: { users: user._id } } : { $push: { users: user._id } };
+
+        await ROLE.updateOne({name: "Admin"}, adminUpdate)
+        await ROLE.updateOne({name: "User"}, userUpdate)
+
+        //Update Users.roles
+        await USER.updateOne({username: username}, isAdmin ? {$addToSet: {roles: adminID._id}} : {$pull: {roles: adminID._id }})
+        
+      }
+
+      return res.status(200).json({
+        message: "Successfully updated admin permissions"
+      });
+    } catch (error) {
+      return res.status(400).json({
+        message: error.message || error
+      });
+    }
+  }
+
 };

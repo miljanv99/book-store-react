@@ -14,6 +14,8 @@ module.exports = (APP) => {
     AUTH.isAuth,
     USER_CONTROLLER.getPurchaseHistory,
   );
+  APP.get('/user/allUsers', AUTH.isAuth, USER_CONTROLLER.getAllUsers);
+  APP.post('/user/giveAdminPermission', AUTH.isAuth, USER_CONTROLLER.giveAdminPermission);
   APP.patch('/user/editProfile', AUTH.isAuth, USER_CONTROLLER.editProfile);
   APP.post(
     "/user/commentsPermission",
