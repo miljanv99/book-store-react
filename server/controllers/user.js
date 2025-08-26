@@ -137,7 +137,7 @@ module.exports = {
       });
     }
 
-    PASSPORT.authenticate("local-login", (err, token) => {
+    const middleware = PASSPORT.authenticate("local-login", (err, token) => {
       if (err || !token) {
         return res.status(400).json({
           message: "Invalid Credentials!",
@@ -148,7 +148,9 @@ module.exports = {
         message: "Login successful!",
         data: token,
       });
-    })(req, res);
+    });
+
+    middleware(req, res);
   },
 
   getProfile: (req, res) => {
