@@ -1,5 +1,5 @@
 // PasswordResetPage.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -36,18 +36,22 @@ export const NewPassword = () => {
     setIsLoading(true);
     if (!password || !confirmPassword) {
       toast('Please fill all fields', 'error');
+      setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       toast('Passwords do not match', 'error');
+      setIsLoading(false);
       return;
     }
 
     if (!token || !id) {
       toast('Invalid link', 'error');
+      setIsLoading(false);
       return;
     }
+
     const response = await resetPassword({
       method: 'POST',
       url: API_ROUTES.restartPassword(token, id),
@@ -98,7 +102,11 @@ export const NewPassword = () => {
               />
             </FormControl>
 
-            <Button {...buttonStyles} onClick={handleReset} isLoading={loading}>
+            <Button
+              {...buttonStyles}
+              onClick={handleReset}
+              isDisabled={!password || !confirmPassword}
+              isLoading={loading}>
               Reset Password
             </Button>
           </VStack>
