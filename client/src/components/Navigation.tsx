@@ -164,9 +164,11 @@ const Navigation = () => {
                     {showSpinner ? (
                       <Spinner></Spinner>
                     ) : (
-                      <Link as={RouterLink} to={`/profile/${userProfileData.username}`}>
-                        <Avatar size="md" src={userProfileData.avatar!} />
-                      </Link>
+                      <Tooltip label="Profile">
+                        <Link as={RouterLink} to={`/profile/${userProfileData.username}`}>
+                          <Avatar size="md" src={userProfileData.avatar!} />
+                        </Link>
+                      </Tooltip>
                     )}
                   </WrapItem>
                 </>
