@@ -79,7 +79,6 @@ const RestartPasswordRequestModal: FC<RestartPasswordProps> = ({ closeModal, isM
               <Button
                 {...buttonStyles}
                 isDisabled={!email}
-                {...buttonStyles}
                 onClick={() => {
                   sendRequest(email);
                 }}>
