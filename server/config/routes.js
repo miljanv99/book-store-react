@@ -8,6 +8,8 @@ const AUTH = require("./auth");
 module.exports = (APP) => {
   APP.post("/user/register", USER_CONTROLLER.register);
   APP.post("/user/login", USER_CONTROLLER.login);
+  APP.post("/user/requestRestartPassword", USER_CONTROLLER.requestRestartPassword)
+  APP.post('/user/restartPassword', USER_CONTROLLER.restartPassword)
   APP.get("/user/profile/:username", AUTH.isAuth, USER_CONTROLLER.getProfile);
   APP.get(
     "/user/purchaseHistory",

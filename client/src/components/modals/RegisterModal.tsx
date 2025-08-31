@@ -22,6 +22,7 @@ import { useApi } from '../../hooks/useApi';
 import { ApiResponse } from '../../model/ApiResponse.model';
 import { API_ROUTES } from '../../constants/apiConstants';
 import { emailRegex, urlRegex } from '../../constants/regex';
+import { buttonStyles } from '../../globalStyles';
 
 interface RegisterProps {
   isModalRegisterOpen: boolean;
@@ -233,10 +234,15 @@ const RegisterModal: FC<RegisterProps> = ({
           </Stack>
         </ModalBody>
         <ModalFooter>
-          <Button isDisabled={isRegisterBtn} colorScheme="blue" mr={3} onClick={handleRegister}>
+          <Button
+            {...buttonStyles}
+            isDisabled={isRegisterBtn}
+            colorScheme="blue"
+            mr={3}
+            onClick={handleRegister}>
             Register
           </Button>
-          <Button variant="ghost" onClick={handleCloseRegisterModal}>
+          <Button {...buttonStyles} variant="ghost" onClick={handleCloseRegisterModal}>
             Cancel
           </Button>
         </ModalFooter>

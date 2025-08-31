@@ -1,28 +1,26 @@
 const JWT = require("jsonwebtoken");
 const LOCAL_STRATEGY = require("passport-local").Strategy;
-
 const ENCRYPTION = require("../utilities/encryption");
 const ROLE = require("mongoose").model("Role");
 const USER = require("mongoose").model("User");
 const CART = require("mongoose").model("Cart");
-
-const SECRET = "5b362e2a094b97392c3d7bba";
-
-function generateToken(userInfo) {
-  const USER = {
-    id: userInfo.id,
-    username: userInfo.username,
-    avatar: userInfo.avatar,
-    isCommentsBlocked: userInfo.isCommentsBlocked,
-    isAdmin: userInfo.isAdmin,
-    roles: userInfo.roles,
-  };
-  const PAYLOAD = { sub: USER };
-
-  return JWT.sign(PAYLOAD, SECRET, { expiresIn: 604800000 });
-}
+require("dotenv").config();
 
 module.exports = {
+  generateToken(userInfo) {
+    const USER = {
+      id: userInfo.id,
+      username: userInfo.username,
+      avatar: userInfo.avatar,
+      isCommentsBlocked: userInfo.isCommentsBlocked,
+      isAdmin: userInfo.isAdmin,
+      roles: userInfo.roles,
+    };
+    const PAYLOAD = { sub: USER };
+
+    return JWT.sign(PAYLOAD, process.env.BACKEND_SECRET, { expiresIn: 604800000 });
+  },
+
   localRegister: () => {
     return new LOCAL_STRATEGY(
       {
@@ -53,7 +51,7 @@ module.exports = {
               role.users.push(newUser._id);
               role.save();
 
-              let token = generateToken(newUser);
+              let token = module.exports.generateToken(newUser);
 
               CART.create({ user: newUser._id }).then((cart) => {
                 newUser.cart = cart._id;
@@ -86,7 +84,7 @@ module.exports = {
             return done(null, false);
           }
 
-          let token = generateToken(user);
+          let token = module.exports.generateToken(user);
 
           return done(null, token);
         });

@@ -1,13 +1,12 @@
 const JWT = require("jsonwebtoken");
-
 const ROLE = require("mongoose").model("Role");
-const SECRET = "5b362e2a094b97392c3d7bba";
+require("dotenv").config();
 
 function verifyToken(req) {
   const TOKEN = req.headers.authorization.split(" ")[1];
 
   return new Promise((resolve, reject) => {
-    JWT.verify(TOKEN, SECRET, (err, decoded) => {
+    JWT.verify(TOKEN, process.env.BACKEND_SECRET, (err, decoded) => {
       if (err) {
         reject();
       }

@@ -7,7 +7,10 @@ import {
   Stack,
   Input,
   ModalFooter,
-  Button
+  Button,
+  Text,
+  Center,
+  useDisclosure
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { selectUserData, setToken, setUserData } from '../../reducers/authSlice';
@@ -20,6 +23,9 @@ import { API_ROUTES } from '../../constants/apiConstants';
 import { User } from '../../model/User.model';
 import { Cart } from '../../model/Cart.model';
 import { Book } from '../../model/Book.model';
+import RestartPasswordRequestModal from './RestartPasswordRequestModal';
+import { buttonStyles } from '../../globalStyles';
+import { COLORS } from '../../globalColors';
 
 interface SignProps {
   isModalSignInOpen: boolean;
@@ -35,6 +41,7 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
   const userProfile = useApi<ApiResponse<User>>();
   const getCartSize = useApi<ApiResponse<number>>();
   const getCartItems = useApi<ApiResponse<Cart>>();
+  const disclosure = useDisclosure();
 
   const [credentials, setCredentials] = useState({
     username: '',
@@ -127,37 +134,55 @@ const SignInModal: FC<SignProps> = ({ isModalSignInOpen, onModalSignInClose, onD
   }, [profileData]);
 
   return (
-    <Modal isCentered={true} isOpen={isModalSignInOpen} onClose={handleCloseSignInModal}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader textAlign={'center'}>Sign In</ModalHeader>
-        <ModalBody>
-          <Stack spacing={8}>
-            <Input
-              name="username"
-              onChange={handleCredentials}
-              variant="flushed"
-              placeholder="Username"
-            />
-            <Input
-              name="password"
-              onChange={handleCredentials}
-              variant="flushed"
-              placeholder="Password"
-              type="password"
-            />
-          </Stack>
-        </ModalBody>
-        <ModalFooter>
-          <Button mr={3} colorScheme="blue" isDisabled={disableSignBtn} onClick={handleLogin}>
-            Sign In
-          </Button>
-          <Button variant="ghost" onClick={handleCloseSignInModal}>
-            Close
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <>
+      <Modal isCentered={true} isOpen={isModalSignInOpen} onClose={handleCloseSignInModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textAlign={'center'}>Sign In</ModalHeader>
+          <ModalBody>
+            <Stack spacing={8}>
+              <Input
+                name="username"
+                onChange={handleCredentials}
+                variant="flushed"
+                placeholder="Username"
+              />
+              <Input
+                name="password"
+                onChange={handleCredentials}
+                variant="flushed"
+                placeholder="Password"
+                type="password"
+              />
+              <Center>
+                <Text
+                  _hover={{ textDecorationLine: 'underline', cursor: 'pointer' }}
+                  onClick={disclosure.onOpen}>
+                  Forgot your password?
+                </Text>
+              </Center>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              {...buttonStyles}
+              mr={3}
+              colorScheme="blue"
+              isDisabled={disableSignBtn}
+              onClick={handleLogin}>
+              Sign In
+            </Button>
+            <Button {...buttonStyles} variant="ghost" onClick={handleCloseSignInModal}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <RestartPasswordRequestModal
+        isModalOpen={disclosure.isOpen}
+        closeModal={disclosure.onClose}></RestartPasswordRequestModal>
+    </>
   );
 };
 

@@ -13,6 +13,7 @@ import { IconButton, useDisclosure } from '@chakra-ui/react';
 import { buttonStyles } from './globalStyles';
 import { COLORS } from './globalColors';
 import BookModal from './components/modals/BookModal';
+import { NewPassword } from './pages/NewPassword';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -54,6 +55,7 @@ function App() {
           <Route
             path="profile/:username"
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
+          <Route path="restartPassword" element={<NewPassword></NewPassword>}></Route>
         </Route>
       </Routes>
     </>
