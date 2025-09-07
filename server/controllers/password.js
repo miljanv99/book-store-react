@@ -2,7 +2,7 @@ const { generateToken } = require('../config/passport');
 const ENCRYPTION = require('../utilities/encryption');
 const sendMail = require('../utilities/sendEmail/sendEmail');
 const jwt = require('jsonwebtoken');
-const oAuth2Client = require('../config/googleClient').default;
+const oAuth2Client = require('../config/googleClient');
 const USER = require('mongoose').model('User');
 require('dotenv').config();
 
