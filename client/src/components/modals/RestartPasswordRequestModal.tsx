@@ -8,11 +8,7 @@ import {
   Input,
   ModalFooter,
   Button,
-  HStack,
-  Icon,
-  VStack,
-  Text,
-  Center
+  HStack
 } from '@chakra-ui/react';
 import { FC, useState } from 'react';
 import { buttonStyles } from '../../globalStyles';
@@ -20,7 +16,6 @@ import { useApi } from '../../hooks/useApi';
 import { API_ROUTES } from '../../constants/apiConstants';
 import { emailRegex } from '../../constants/regex';
 import { useToastHandler } from '../../hooks/useToastHandler';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 
 type RestartPasswordProps = {
   isModalOpen: boolean;
@@ -29,7 +24,6 @@ type RestartPasswordProps = {
 
 const RestartPasswordRequestModal: FC<RestartPasswordProps> = ({ closeModal, isModalOpen }) => {
   const [email, setEmail] = useState<string>('');
-  const [status, setStatus] = useState<number>();
   const requestPasswordReset = useApi();
   const toast = useToastHandler();
 
@@ -39,14 +33,15 @@ const RestartPasswordRequestModal: FC<RestartPasswordProps> = ({ closeModal, isM
     if (isValid) {
       const response = await requestPasswordReset({
         method: 'POST',
-        url: API_ROUTES.requestRestartPassword,
+        url: API_ROUTES.authRequestRestartPassword,
         data: {
           email: email
         }
       });
 
       if (response && response.status === 200) {
-        setStatus(response.status);
+        window.open(response.data.data, '_blank');
+        closeModal();
       } else {
         console.log(response);
         toast(response && response.data.message, 'error', 'bottom');
@@ -59,55 +54,36 @@ const RestartPasswordRequestModal: FC<RestartPasswordProps> = ({ closeModal, isM
   return (
     <Modal isCentered={true} isOpen={isModalOpen} onClose={closeModal}>
       <ModalOverlay />
-      {!status ? (
-        <ModalContent>
-          <ModalHeader textAlign={'center'}>Please Enter Your Email Address</ModalHeader>
-          <ModalBody>
-            <Stack spacing={8}>
-              <Input
-                name="email"
-                variant="flushed"
-                placeholder="Enter email"
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-              />
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <HStack>
-              <Button
-                {...buttonStyles}
-                isDisabled={!email}
-                onClick={() => {
-                  sendRequest(email);
-                }}>
-                Send
-              </Button>
-              <Button {...buttonStyles} onClick={closeModal}>
-                Close
-              </Button>
-            </HStack>
-          </ModalFooter>
-        </ModalContent>
-      ) : (
-        <ModalContent>
-          <ModalHeader textAlign={'center'}>You Successfully Sent Request</ModalHeader>
-          <ModalBody>
-            <VStack>
-              <Icon as={CheckCircleIcon} color={'green'} boxSize={12}></Icon>
-              <Text>Please Check Your Email</Text>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Center w={'100vw'}>
-              <Button {...buttonStyles} onClick={closeModal}>
-                Close
-              </Button>
-            </Center>
-          </ModalFooter>
-        </ModalContent>
-      )}
+      <ModalContent>
+        <ModalHeader textAlign={'center'}>Please Enter Your Email Address</ModalHeader>
+        <ModalBody>
+          <Stack spacing={8}>
+            <Input
+              name="email"
+              variant="flushed"
+              placeholder="Enter email"
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            />
+          </Stack>
+        </ModalBody>
+        <ModalFooter>
+          <HStack>
+            <Button
+              {...buttonStyles}
+              isDisabled={!email}
+              onClick={() => {
+                sendRequest(email);
+              }}>
+              Send
+            </Button>
+            <Button {...buttonStyles} onClick={closeModal}>
+              Close
+            </Button>
+          </HStack>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   );
 };

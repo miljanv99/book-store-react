@@ -1,80 +1,89 @@
-const USER_CONTROLLER = require("../controllers/user");
-const BOOK_CONTROLLER = require("../controllers/book");
-const COMMENT_CONTROLLER = require("../controllers/comment");
-const CART_CONTROLLER = require("../controllers/cart");
-const ERROR_CONTROLLER = require("../controllers/error");
-const AUTH = require("./auth");
+const USER_CONTROLLER = require('../controllers/user');
+const PASSWORD_CONTROLLER = require('../controllers/password');
+const BOOK_CONTROLLER = require('../controllers/book');
+const COMMENT_CONTROLLER = require('../controllers/comment');
+const CART_CONTROLLER = require('../controllers/cart');
+const ERROR_CONTROLLER = require('../controllers/error');
+const AUTH = require('./auth');
 
 module.exports = (APP) => {
-  APP.post("/user/register", USER_CONTROLLER.register);
-  APP.post("/user/login", USER_CONTROLLER.login);
-  APP.post("/user/requestRestartPassword", USER_CONTROLLER.requestRestartPassword)
-  APP.post('/user/restartPassword', USER_CONTROLLER.restartPassword)
-  APP.get("/user/profile/:username", AUTH.isAuth, USER_CONTROLLER.getProfile);
+  APP.post('/user/register', USER_CONTROLLER.register);
+  APP.post('/user/login', USER_CONTROLLER.login);
+  APP.post(
+    '/user/authRequestRestartPassword',
+    PASSWORD_CONTROLLER.authRequestRestartPassword
+  );
+  APP.get('/oauth2callback', PASSWORD_CONTROLLER.getAccessToken);
+  APP.post('/user/restartPassword', PASSWORD_CONTROLLER.restartPassword);
+  APP.get('/user/profile/:username', AUTH.isAuth, USER_CONTROLLER.getProfile);
   APP.get(
-    "/user/purchaseHistory",
+    '/user/purchaseHistory',
     AUTH.isAuth,
-    USER_CONTROLLER.getPurchaseHistory,
+    USER_CONTROLLER.getPurchaseHistory
   );
   APP.get('/user/allUsers', AUTH.isAuth, USER_CONTROLLER.getAllUsers);
-  APP.post('/user/giveAdminPermission', AUTH.isAuth, USER_CONTROLLER.giveAdminPermission);
+  APP.post(
+    '/user/giveAdminPermission',
+    AUTH.isAuth,
+    USER_CONTROLLER.giveAdminPermission
+  );
   APP.patch('/user/editProfile', AUTH.isAuth, USER_CONTROLLER.editProfile);
   APP.post(
-    "/user/commentsPermission",
-    AUTH.isInRole("Admin"),
-    USER_CONTROLLER.commentsPermission,
+    '/user/commentsPermission',
+    AUTH.isInRole('Admin'),
+    USER_CONTROLLER.commentsPermission
   );
 
-   APP.post(
-    "/user/commentsStatus",
-    AUTH.isInRole("Admin"),
-    USER_CONTROLLER.userBlockStatus,
-  );
-
-  APP.get("/cart/getSize", AUTH.isAuth, CART_CONTROLLER.getCartSize);
-  APP.get("/user/cart", AUTH.isAuth, CART_CONTROLLER.getCart);
-  APP.post("/user/cart/add/:bookId", AUTH.isAuth, CART_CONTROLLER.addToCart);
-  APP.delete(
-    "/user/cart/delete/:bookId",
-    AUTH.isAuth,
-    CART_CONTROLLER.removeFromCart,
-  );
-  APP.delete(
-    "/user/cart/deleteAll",
-    AUTH.isAuth,
-    CART_CONTROLLER.removeAllFromCart,
-  );
-  APP.post("/user/cart/checkout", AUTH.isAuth, CART_CONTROLLER.checkout);
-
-  APP.get("/book/search", BOOK_CONTROLLER.search);
-  APP.get("/book/details/:bookId", BOOK_CONTROLLER.getSingle);
-  APP.post("/book/add", AUTH.isInRole("Admin"), BOOK_CONTROLLER.add);
-  APP.put("/book/edit/:bookId", AUTH.isInRole("Admin"), BOOK_CONTROLLER.edit);
-  APP.delete(
-    "/book/delete/:bookId",
-    AUTH.isInRole("Admin"),
-    BOOK_CONTROLLER.delete,
-  );
-  APP.post("/book/rate/:bookId", AUTH.isAuth, BOOK_CONTROLLER.rate);
   APP.post(
-    "/book/addToFavorites/:bookId",
+    '/user/commentsStatus',
+    AUTH.isInRole('Admin'),
+    USER_CONTROLLER.userBlockStatus
+  );
+
+  APP.get('/cart/getSize', AUTH.isAuth, CART_CONTROLLER.getCartSize);
+  APP.get('/user/cart', AUTH.isAuth, CART_CONTROLLER.getCart);
+  APP.post('/user/cart/add/:bookId', AUTH.isAuth, CART_CONTROLLER.addToCart);
+  APP.delete(
+    '/user/cart/delete/:bookId',
     AUTH.isAuth,
-    BOOK_CONTROLLER.addOrRemoveFavoriteBook,
+    CART_CONTROLLER.removeFromCart
+  );
+  APP.delete(
+    '/user/cart/deleteAll',
+    AUTH.isAuth,
+    CART_CONTROLLER.removeAllFromCart
+  );
+  APP.post('/user/cart/checkout', AUTH.isAuth, CART_CONTROLLER.checkout);
+
+  APP.get('/book/search', BOOK_CONTROLLER.search);
+  APP.get('/book/details/:bookId', BOOK_CONTROLLER.getSingle);
+  APP.post('/book/add', AUTH.isInRole('Admin'), BOOK_CONTROLLER.add);
+  APP.put('/book/edit/:bookId', AUTH.isInRole('Admin'), BOOK_CONTROLLER.edit);
+  APP.delete(
+    '/book/delete/:bookId',
+    AUTH.isInRole('Admin'),
+    BOOK_CONTROLLER.delete
+  );
+  APP.post('/book/rate/:bookId', AUTH.isAuth, BOOK_CONTROLLER.rate);
+  APP.post(
+    '/book/addToFavorites/:bookId',
+    AUTH.isAuth,
+    BOOK_CONTROLLER.addOrRemoveFavoriteBook
   );
 
   APP.get(
-    "/comment/getLatestFiveByUser/:userId",
+    '/comment/getLatestFiveByUser/:userId',
     AUTH.isAuth,
-    COMMENT_CONTROLLER.getLatestFiveByUser,
+    COMMENT_CONTROLLER.getLatestFiveByUser
   );
-  APP.get("/comment/:bookId/:skipCount", COMMENT_CONTROLLER.getComments);
-  APP.post("/comment/add/:bookId", AUTH.isAuth, COMMENT_CONTROLLER.add);
-  APP.put("/comment/edit/:commentId", AUTH.isAuth, COMMENT_CONTROLLER.edit);
+  APP.get('/comment/:bookId/:skipCount', COMMENT_CONTROLLER.getComments);
+  APP.post('/comment/add/:bookId', AUTH.isAuth, COMMENT_CONTROLLER.add);
+  APP.put('/comment/edit/:commentId', AUTH.isAuth, COMMENT_CONTROLLER.edit);
   APP.delete(
-    "/comment/delete/:commentId",
+    '/comment/delete/:commentId',
     AUTH.isAuth,
-    COMMENT_CONTROLLER.delete,
+    COMMENT_CONTROLLER.delete
   );
 
-  APP.all("*", ERROR_CONTROLLER.error);
+  APP.all('*', ERROR_CONTROLLER.error);
 };

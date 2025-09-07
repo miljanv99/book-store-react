@@ -1,13 +1,8 @@
-const VALIDATOR = require("validator");
-const PASSPORT = require("passport");
-const { generateToken } = require("../config/passport");
-const USER = require("mongoose").model("User");
-const RECEIPT = require("mongoose").model("Receipt");
-const ROLE = require("mongoose").model("Role");
-const ENCRYPTION = require("../utilities/encryption");
-const sendMail = require('../utilities/sendEmail/sendEmail')
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const VALIDATOR = require('validator');
+const PASSPORT = require('passport');
+const USER = require('mongoose').model('User');
+const RECEIPT = require('mongoose').model('Receipt');
+const ROLE = require('mongoose').model('Role');
 
 function validateRegisterForm(payload) {
   let errors = {};
@@ -15,45 +10,45 @@ function validateRegisterForm(payload) {
 
   if (
     !payload ||
-    typeof payload.email !== "string" ||
+    typeof payload.email !== 'string' ||
     !VALIDATOR.isEmail(payload.email)
   ) {
     isFormValid = false;
-    errors.email = "Please provide a correct email address.";
+    errors.email = 'Please provide a correct email address.';
   }
 
   if (
     !payload ||
-    typeof payload.password !== "string" ||
+    typeof payload.password !== 'string' ||
     payload.password.trim().length < 3
   ) {
     isFormValid = false;
-    errors.password = "Password must have at least 3 characters.";
+    errors.password = 'Password must have at least 3 characters.';
   }
 
   if (!payload || payload.password !== payload.confirmPassword) {
     isFormValid = false;
-    errors.passwordsDontMatch = "Passwords do not match!";
+    errors.passwordsDontMatch = 'Passwords do not match!';
   }
 
   if (
     !payload ||
-    typeof payload.username !== "string" ||
+    typeof payload.username !== 'string' ||
     payload.username.trim().length === 0
   ) {
     isFormValid = false;
-    errors.name = "Please provide your name.";
+    errors.name = 'Please provide your name.';
   }
 
   if (payload.avatar.trim().length !== 0) {
     if (!VALIDATOR.isURL(payload.avatar)) {
       isFormValid = false;
       errors.avatar =
-        "Please provide a valid link to your avatar image or leave the field empty.";
+        'Please provide a valid link to your avatar image or leave the field empty.';
     }
   } else {
-    if (payload.hasOwnProperty("avatar")) {
-      delete payload["avatar"];
+    if (payload.hasOwnProperty('avatar')) {
+      delete payload['avatar'];
     }
   }
 
@@ -69,20 +64,20 @@ function validateLoginForm(payload) {
 
   if (
     !payload ||
-    typeof payload.password !== "string" ||
+    typeof payload.password !== 'string' ||
     payload.password.trim().length === 0
   ) {
     isFormValid = false;
-    errors.password = "Please provide your password.";
+    errors.password = 'Please provide your password.';
   }
 
   if (
     !payload ||
-    typeof payload.username !== "string" ||
+    typeof payload.username !== 'string' ||
     payload.username.trim().length === 0
   ) {
     isFormValid = false;
-    errors.name = "Please provide your name.";
+    errors.name = 'Please provide your name.';
   }
 
   return {
@@ -97,21 +92,21 @@ module.exports = {
 
     if (!validationResult.success) {
       return res.status(400).json({
-        message: "Register form validation failed!",
+        message: 'Register form validation failed!',
         errors: validationResult.errors,
       });
     }
 
-    PASSPORT.authenticate("local-register", (err, token) => {
+    PASSPORT.authenticate('local-register', (err, token) => {
       if (err || !token) {
         return res.status(400).json({
-          message: "Registration failed!",
-          errors: { taken: "Username or email already taken" },
+          message: 'Registration failed!',
+          errors: { taken: 'Username or email already taken' },
         });
       }
 
       return res.status(200).json({
-        message: "Registration successful!",
+        message: 'Registration successful!',
         data: token,
       });
     })(req, res);
@@ -122,20 +117,20 @@ module.exports = {
 
     if (!validationResult.success) {
       return res.status(400).json({
-        message: "Login form validation failed!",
+        message: 'Login form validation failed!',
         errors: validationResult.errors,
       });
     }
 
-    const middleware = PASSPORT.authenticate("local-login", (err, token) => {
+    const middleware = PASSPORT.authenticate('local-login', (err, token) => {
       if (err || !token) {
         return res.status(400).json({
-          message: "Invalid Credentials!",
+          message: 'Invalid Credentials!',
         });
       }
 
       return res.status(200).json({
-        message: "Login successful!",
+        message: 'Login successful!',
         data: token,
       });
     });
@@ -147,7 +142,7 @@ module.exports = {
     let username = req.params.username;
 
     USER.findOne({ username: username })
-      .populate("favoriteBooks")
+      .populate('favoriteBooks')
       .then((user) => {
         if (!user) {
           return res.status(400).json({
@@ -163,18 +158,18 @@ module.exports = {
           avatar: user.avatar,
           commentsCount: user.commentsCount,
           favoriteBooks: user.favoriteBooks,
-          isCommentsBlocked: user.isCommentsBlocked
+          isCommentsBlocked: user.isCommentsBlocked,
         };
 
         return res.status(200).json({
-          message: "",
+          message: '',
           data: userToSend,
         });
       })
       .catch((err) => {
         console.log(err);
         return res.status(400).json({
-          message: "Something went wrong, please try again.",
+          message: 'Something went wrong, please try again.',
         });
       });
   },
@@ -185,7 +180,7 @@ module.exports = {
       .sort({ creationDate: -1 })
       .then((receipts) => {
         res.status(200).json({
-          message: "",
+          message: '',
           data: receipts,
         });
       });
@@ -202,13 +197,13 @@ module.exports = {
 
     if (requesterId !== userToChange) {
       return res.status(401).json({
-        message: "You're not allowed to change other user data!"
+        message: "You're not allowed to change other user data!",
       });
     }
 
     if (!username && !email) {
       return res.status(400).json({
-        message: 'You have not entered username and email!'
+        message: 'You have not entered username and email!',
       });
     }
 
@@ -224,13 +219,13 @@ module.exports = {
 
     if (Object.keys(update).length === 0) {
       return res.status(400).json({
-        message: 'No fields updated!'
+        message: 'No fields updated!',
       });
     }
 
     USER.findByIdAndUpdate(userToChange, update, {
       new: true,
-      runValidators: true
+      runValidators: true,
     })
       .then((updatedUser) => {
         if (!updatedUser) {
@@ -248,46 +243,45 @@ module.exports = {
         return res.status(400).json({ message: error });
       });
   },
-  
 
   userBlockStatus: (req, res) => {
-    let usernameReq = req.body.username
+    let usernameReq = req.body.username;
 
-    USER.findOne({username: usernameReq, isAdmin: false}).then((user)=>{
+    USER.findOne({ username: usernameReq, isAdmin: false }).then((user) => {
       if (!user) {
         return res.status(404).json({
-            message: 'User not found'
-        })
+          message: 'User not found',
+        });
       }
       return res.status(200).json({
-        data: user.isCommentsBlocked
-      })
-    })
+        data: user.isCommentsBlocked,
+      });
+    });
   },
 
   commentsPermission: (req, res) => {
-    let userToBlock = req.body.username
+    let userToBlock = req.body.username;
 
-         USER.findOneAndUpdate(
-          {username: userToBlock, isAdmin: false}, 
-          [{$set: {isCommentsBlocked: {$not: '$isCommentsBlocked'}}}],
-          {new: true},
-        ).then((updatedUser)=>{
-          if (!updatedUser) {
-            return res.status(404).json({
-              message: 'User not found'
-            })
-          }
-
-          return res.status(200).json({
-            message: `Comments are ${updatedUser.isCommentsBlocked ? 'blocked' : 'unblocked'} for this user: ${updatedUser.username}`
+    USER.findOneAndUpdate(
+      { username: userToBlock, isAdmin: false },
+      [{ $set: { isCommentsBlocked: { $not: '$isCommentsBlocked' } } }],
+      { new: true }
+    )
+      .then((updatedUser) => {
+        if (!updatedUser) {
+          return res.status(404).json({
+            message: 'User not found',
           });
+        }
 
-        })  
+        return res.status(200).json({
+          message: `Comments are ${updatedUser.isCommentsBlocked ? 'blocked' : 'unblocked'} for this user: ${updatedUser.username}`,
+        });
+      })
       .catch((err) => {
         console.log(err);
         return res.status(400).json({
-          message: "Something went wrong, please try again.",
+          message: 'Something went wrong, please try again.',
         });
       });
   },
@@ -299,14 +293,14 @@ module.exports = {
       .then((admin) => {
         if (!admin || !admin.isAdmin) {
           return res.status(403).json({
-            message: "You are not authorized to perform this action",
+            message: 'You are not authorized to perform this action',
           });
         }
 
-        USER.find({ isAdmin: false }, "_id", (err, users) => {
+        USER.find({ isAdmin: false }, '_id', (err, users) => {
           if (err) {
             return res.status(400).json({
-              message: "Error fetching user IDs from database",
+              message: 'Error fetching user IDs from database',
             });
           }
 
@@ -314,23 +308,23 @@ module.exports = {
 
           USER.updateMany(
             { _id: { $in: userIDs }, isAdmin: false }, // Only non-admin users
-            { $set: { isCommentsBlocked: false } }, // Set isCommentsBlocked to true
+            { $set: { isCommentsBlocked: false } } // Set isCommentsBlocked to true
           )
             .then((result) => {
               if (result.nModified === 0) {
                 return res.status(400).json({
-                  message: "You have already block the comments for all users",
+                  message: 'You have already block the comments for all users',
                 });
               }
 
               res.status(200).json({
-                message: "Comments are un-blocked for all users",
+                message: 'Comments are un-blocked for all users',
               });
             })
             .catch((err) => {
               console.log(err);
               return res.status(400).json({
-                message: "Something went wrong, please try again.",
+                message: 'Something went wrong, please try again.',
               });
             });
         });
@@ -338,25 +332,27 @@ module.exports = {
       .catch((err) => {
         console.log(err);
         return res.status(400).json({
-          message: "Something went wrong, please try again.",
+          message: 'Something went wrong, please try again.',
         });
       });
   },
 
   getAllUsers: (_, res) => {
-    USER.find({}, 'username isAdmin').then((users)=>{
-      if (users) {
-        return res.status(200).json({
-          message: "All users received",
-          data: users
+    USER.find({}, 'username isAdmin')
+      .then((users) => {
+        if (users) {
+          return res.status(200).json({
+            message: 'All users received',
+            data: users,
+          });
+        }
       })
-      }
-    }).catch((error)=>{
+      .catch((error) => {
         console.log(error);
-          return res.status(400).json({
-            message: "Something went wrong, please try again.",
+        return res.status(400).json({
+          message: 'Something went wrong, please try again.',
         });
-    })
+      });
   },
 
   giveAdminPermission: async (req, res) => {
@@ -364,14 +360,12 @@ module.exports = {
 
     // Validate all values are boolean
     for (const username in users) {
-      if (typeof users[username] !== "boolean") {
+      if (typeof users[username] !== 'boolean') {
         return res.status(400).json({
-          message: `Value of ${username} must be boolean`
+          message: `Value of ${username} must be boolean`,
         });
       }
     }
-
- 
 
     try {
       // Bulk update isAdmin field for all users
@@ -385,98 +379,44 @@ module.exports = {
       // await USER.bulkWrite(updateOperations);
       for (const username in users) {
         await USER.updateMany(
-          { username: username},
+          { username: username },
           { $set: { isAdmin: users[username] } }
         );
-
       }
 
-      const adminID = await ROLE.findOne({name: "Admin"}, '_id');
+      const adminID = await ROLE.findOne({ name: 'Admin' }, '_id');
 
       // For each user, push/pull _id into ROLE.users
       for (const [username, isAdmin] of Object.entries(users)) {
-        const user = await USER.findOne({ username }, "_id");
+        const user = await USER.findOne({ username }, '_id');
         if (!user) break;
 
-        const adminUpdate = isAdmin ? { $push: { users: user._id } } : { $pull: { users: user._id } };
-        const userUpdate  = isAdmin ? { $pull: { users: user._id } } : { $push: { users: user._id } };
+        const adminUpdate = isAdmin
+          ? { $push: { users: user._id } }
+          : { $pull: { users: user._id } };
+        const userUpdate = isAdmin
+          ? { $pull: { users: user._id } }
+          : { $push: { users: user._id } };
 
-        await ROLE.updateOne({name: "Admin"}, adminUpdate)
-        await ROLE.updateOne({name: "User"}, userUpdate)
+        await ROLE.updateOne({ name: 'Admin' }, adminUpdate);
+        await ROLE.updateOne({ name: 'User' }, userUpdate);
 
         //Update Users.roles
-        await USER.updateOne({username: username}, isAdmin ? {$addToSet: {roles: adminID._id}} : {$pull: {roles: adminID._id }})
-        
+        await USER.updateOne(
+          { username: username },
+          isAdmin
+            ? { $addToSet: { roles: adminID._id } }
+            : { $pull: { roles: adminID._id } }
+        );
       }
 
       return res.status(200).json({
-        message: "Successfully updated admin permissions"
+        message: 'Successfully updated admin permissions',
       });
     } catch (error) {
       return res.status(400).json({
-        message: error.message || error
+        message: error.message || error,
       });
     }
-  },
-  
-  requestRestartPassword: async (req, res) => {
-    const email = req.body.email;
-
-    const user = await USER.findOne({email: email})
-    if (!user) {
-      return res.status(400).json({
-        message: 'User does not exist'
-      })
-    }
-
-    const token = generateToken(user);
-
-    const resetLink = `http://localhost:5173/restartPassword?token=${token}&id=${user._id}`;
-
-    await sendMail(resetLink, email);
-
-    return res.status(200).json({
-        message: 'Requset sent successfully',
-        data: resetLink
-      })
-
-  },
-
-  restartPassword: async(req, res) => {
-    const {token, id} = req.query;
-    const newPassword = req.body.password;
-
-    
-    const decoded = jwt.verify(token, process.env.BACKEND_SECRET);
-
-    try {
-
-      if (!newPassword) {
-        return res.status(400).json({ message: "Please provide password field" });
-      }
-
-      if (decoded.sub.id !== id) {
-        return res.status(400).json({ message: "Invalid token or user ID" });
-      }
-      const user = await USER.findById(id);
-
-      if (!user) {
-        return res.status(400).json({ message: "User not found" });
-      }
-
-      let salt = ENCRYPTION.generateSalt();
-      let hashedPassword = ENCRYPTION.generateHashedPassword(salt, newPassword);
-
-      user.password = hashedPassword
-      user.salt = salt
-      console.log('Generated salt: ', salt);
-      console.log('Hashed password: ', hashedPassword)
-      await user.save();
-
-      return res.json({ message: "Password successfully reset!" });
-    } catch (error) {
-      return res.status(400).json({ message: error });
-    }
-    
   },
 };

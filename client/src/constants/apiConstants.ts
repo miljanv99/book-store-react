@@ -17,7 +17,7 @@ export const API_ROUTES = {
   //User
   login: '/user/login',
   register: '/user/register',
-  requestRestartPassword: '/user/requestRestartPassword',
+  authRequestRestartPassword: '/user/authRequestRestartPassword',
   restartPassword: (token: string, userId: string) =>
     `/user/restartPassword?token=${token}&id=${userId}`,
   getProfile: (username: string) => `/user/profile/${username}`,
