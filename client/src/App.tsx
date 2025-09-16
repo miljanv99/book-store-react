@@ -14,6 +14,7 @@ import { buttonStyles } from './globalStyles';
 import { COLORS } from './globalColors';
 import BookModal from './components/modals/BookModal';
 import { NewPassword } from './pages/NewPassword';
+import { StoreProvider } from './context/storeContext';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -49,7 +50,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigation />}>
           <Route index element={<Home />} />
-          <Route path="store" element={<Store />} />
+          <Route
+            path="store"
+            element={
+              <StoreProvider>
+                <Store />
+              </StoreProvider>
+            }
+          />
           <Route path="cart" element={token ? <Cart /> : <Navigate to="/" replace />} />
           <Route path="bookDetails/:bookId" element={<BookDetails />} />
           <Route

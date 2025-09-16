@@ -107,6 +107,12 @@ function validateRatingForm(payload) {
   };
 }
 
+function removeDoubleQuotes(paramName) {
+  const cleanTitle = paramName.replace(/^"|"$/g, '');
+  console.log('CLEAN TITLE: ', cleanTitle);
+  return { $regex: cleanTitle, $options: 'i' };
+}
+
 module.exports = {
   getSingle: (req, res) => {
     let bookId = req.params.bookId;
@@ -401,9 +407,12 @@ module.exports = {
 
       if (params.title) {
         console.log('TITLE: ', params.title);
-        const cleanTitle = params.title.replace(/^"|"$/g, '');
-        console.log('CLEAN TITLE: ', cleanTitle);
-        searchParams.query.title = { $regex: cleanTitle, $options: 'i' };
+        searchParams.query.title = removeDoubleQuotes(params.title);
+      }
+
+      if (params.genre) {
+        console.log('GENRE: ', params.genre);
+        searchParams.query.genre = removeDoubleQuotes(params.genre);
       }
 
       const numberOfBooks = await BOOK.find(
