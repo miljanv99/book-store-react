@@ -1,6 +1,6 @@
 const { google } = require('googleapis');
 require('dotenv').config();
-const oAuth2Client = require('../../config/googleClient').default;
+const oAuth2Client = require('../../config/googleClient');
 
 async function sendMail(resetLink, sendTo, refreshToken) {
   oAuth2Client.setCredentials({
