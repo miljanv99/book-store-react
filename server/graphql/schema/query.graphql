@@ -1,0 +1,14 @@
+type PopularAuthor {
+  author: String!
+  topBook: String!
+}
+
+type Query {
+  getAllBooks: [Book!]!
+  book(id: ID!): Book
+  users: [User!]!
+  getBooksByGenre(genre: String!): [Book!]!
+  getPopularAuthorsByGenre(genre: String!): [PopularAuthor]!
+  topMostPopularBooksWithLimit(limitNumber: Int!): [Book!]!
+  totalRevenue: Float!
+}

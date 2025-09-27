@@ -1,10 +1,10 @@
-const JWT = require("jsonwebtoken");
-const LOCAL_STRATEGY = require("passport-local").Strategy;
-const ENCRYPTION = require("../utilities/encryption");
-const ROLE = require("mongoose").model("Role");
-const USER = require("mongoose").model("User");
-const CART = require("mongoose").model("Cart");
-require("dotenv").config();
+const JWT = require('jsonwebtoken');
+const LOCAL_STRATEGY = require('passport-local').Strategy;
+const ENCRYPTION = require('../utilities/encryption');
+const ROLE = require('mongoose').model('Role');
+const USER = require('mongoose').model('User');
+const CART = require('mongoose').model('Cart');
+require('dotenv').config();
 
 module.exports = {
   generateToken(userInfo) {
@@ -18,14 +18,16 @@ module.exports = {
     };
     const PAYLOAD = { sub: USER };
 
-    return JWT.sign(PAYLOAD, process.env.BACKEND_SECRET, { expiresIn: 604800000 });
+    return JWT.sign(PAYLOAD, process.env.BACKEND_SECRET, {
+      expiresIn: 604800000,
+    });
   },
 
   localRegister: () => {
     return new LOCAL_STRATEGY(
       {
-        usernameField: "username",
-        passwordField: "password",
+        usernameField: 'username',
+        passwordField: 'password',
         session: false,
         passReqToCallback: true,
       },
@@ -43,7 +45,7 @@ module.exports = {
         user.salt = salt;
         user.password = hashedPassword;
 
-        ROLE.findOne({ name: "User" }).then((role) => {
+        ROLE.findOne({ name: 'User' }).then((role) => {
           user.roles = [role._id];
 
           USER.create(user)
@@ -63,15 +65,15 @@ module.exports = {
               return done(null, false);
             });
         });
-      },
+      }
     );
   },
 
   localLogin: () => {
     return new LOCAL_STRATEGY(
       {
-        usernameField: "username",
-        passwordField: "password",
+        usernameField: 'username',
+        passwordField: 'password',
         session: false,
       },
       (username, password, done) => {
@@ -88,7 +90,7 @@ module.exports = {
 
           return done(null, token);
         });
-      },
+      }
     );
   },
 };
