@@ -71,9 +71,20 @@ const DrawerComponent: FC<DrawerProps> = ({
                 Sign In
               </Button>
             ) : (
-              <Button width={'150px'} size={'lg'} onClick={handleSignOut}>
-                Sign Out
-              </Button>
+              <>
+                <Button
+                  width={'150px'}
+                  size={'lg'}
+                  onClick={() => {
+                    navigate('analytics');
+                    onDrawerClose();
+                  }}>
+                  Analytics
+                </Button>
+                <Button width={'150px'} size={'lg'} onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              </>
             )}
             {!token ? (
               <Button width={'150px'} size={'lg'} onClick={onModalRegisterOpen}>

@@ -15,6 +15,7 @@ import { COLORS } from './globalColors';
 import BookModal from './components/modals/BookModal';
 import { NewPassword } from './pages/NewPassword';
 import { StoreProvider } from './context/storeContext';
+import Analytics from './pages/Analytics';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -64,6 +65,7 @@ function App() {
             path="profile/:username"
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
           <Route path="restartPassword" element={<NewPassword></NewPassword>}></Route>
+          <Route path="analytics" element={token ? <Analytics /> : <Navigate to="/" />}></Route>
         </Route>
       </Routes>
     </>
