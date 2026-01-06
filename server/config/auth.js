@@ -1,9 +1,9 @@
-const JWT = require("jsonwebtoken");
-const ROLE = require("mongoose").model("Role");
-require("dotenv").config();
+const JWT = require('jsonwebtoken');
+const ROLE = require('mongoose').model('Role');
+require('dotenv').config();
 
 function verifyToken(req) {
-  const TOKEN = req.headers.authorization.split(" ")[1];
+  const TOKEN = req.headers.authorization.split(' ')[1];
 
   return new Promise((resolve, reject) => {
     JWT.verify(TOKEN, process.env.BACKEND_SECRET, (err, decoded) => {
@@ -22,7 +22,7 @@ module.exports = {
   isAuth: (req, res, next) => {
     if (!req.headers.authorization) {
       return res.status(401).json({
-        message: "You need to be logged in to access this!",
+        message: 'You need to be logged in to access this!',
       });
     }
 
@@ -32,7 +32,7 @@ module.exports = {
       })
       .catch(() => {
         return res.status(401).json({
-          message: "Token verification failed!",
+          message: 'Token verification failed!',
         });
       });
   },
@@ -49,19 +49,19 @@ module.exports = {
                 next();
               } else {
                 return res.status(401).json({
-                  message: "You need to be an admin to access this!",
+                  message: 'You need to be an admin to access this!',
                 });
               }
             })
             .catch(() => {
               return res.status(401).json({
-                message: "Token verification failed!",
+                message: 'Token verification failed!',
               });
             });
         });
       } else {
         return res.status(401).json({
-          message: "You need to be logged in to access this!",
+          message: 'You need to be logged in to access this!',
         });
       }
     };

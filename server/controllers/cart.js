@@ -1,14 +1,15 @@
-const CART = require("mongoose").model("Cart");
-const BOOK = require("mongoose").model("Book");
-const RECEIPT = require("mongoose").model("Receipt");
-const USER = require("mongoose").model("User");
+const CART = require('mongoose').model('Cart');
+const BOOK = require('mongoose').model('Book');
+const RECEIPT = require('mongoose').model('Receipt');
+const USER = require('mongoose').model('User');
 
 module.exports = {
   getCartSize: (req, res) => {
     let userId = req.user.id;
+    console.log('CHECK USER: ' + req.user.username);
     CART.findOne({ user: userId }).then((cart) => {
       res.status(200).json({
-        message: "",
+        message: '',
         data: cart.books.length,
       });
     });
@@ -18,10 +19,10 @@ module.exports = {
     let userId = req.user.id;
 
     CART.findOne({ user: userId })
-      .populate("books")
+      .populate('books')
       .then((cart) => {
         res.status(200).json({
-          message: "",
+          message: '',
           data: cart,
         });
       });
@@ -35,7 +36,7 @@ module.exports = {
       .then((book) => {
         if (!book) {
           return res.status(400).json({
-            message: "There is no book with the given id in our database.",
+            message: 'There is no book with the given id in our database.',
           });
         }
 
@@ -48,7 +49,7 @@ module.exports = {
 
           if (bookIds.indexOf(bookId) !== -1) {
             return res.status(400).json({
-              message: "Book is already in your cart",
+              message: 'Book is already in your cart',
             });
           }
 
@@ -57,7 +58,7 @@ module.exports = {
           cart.save();
 
           res.status(200).json({
-            message: "Book added to cart!",
+            message: 'Book added to cart!',
             data: cart,
           });
         });
@@ -65,7 +66,7 @@ module.exports = {
       .catch((err) => {
         console.log(err);
         return res.status(400).json({
-          message: "Something went wrong, please try again.",
+          message: 'Something went wrong, please try again.',
         });
       });
   },
@@ -78,7 +79,7 @@ module.exports = {
       .then((book) => {
         if (!book) {
           return res.status(400).json({
-            message: "There is no book with the given id in our database.",
+            message: 'There is no book with the given id in our database.',
           });
         }
 
@@ -90,7 +91,7 @@ module.exports = {
           cart.save();
 
           res.status(200).json({
-            message: "Book removed from cart!",
+            message: 'Book removed from cart!',
             data: cart,
           });
         });
@@ -98,7 +99,7 @@ module.exports = {
       .catch((err) => {
         console.log(err);
         return res.status(400).json({
-          message: "Something went wrong, please try again.",
+          message: 'Something went wrong, please try again.',
         });
       });
   },
@@ -110,7 +111,7 @@ module.exports = {
       .then((cart) => {
         if (!cart) {
           return res.status(400).json({
-            message: "Cart not found for the user.",
+            message: 'Cart not found for the user.',
           });
         }
 
@@ -121,21 +122,21 @@ module.exports = {
           .save()
           .then(() => {
             res.status(200).json({
-              message: "All items removed from the cart.",
+              message: 'All items removed from the cart.',
               data: cart,
             });
           })
           .catch((err) => {
             console.log(err);
             return res.status(500).json({
-              message: "Internal server error. Please try again.",
+              message: 'Internal server error. Please try again.',
             });
           });
       })
       .catch((err) => {
         console.log(err);
         return res.status(500).json({
-          message: "Internal server error. Please try again.",
+          message: 'Internal server error. Please try again.',
         });
       });
   },
@@ -146,10 +147,10 @@ module.exports = {
     let products = [];
 
     CART.findOne({ user: userId })
-      .populate("books")
+      .populate('books')
       .then((cart) => {
         for (let book of cart.books) {
-          let qty = req.body[book._id.toString()]
+          let qty = req.body[book._id.toString()];
           totalPrice += book.price * qty;
           products.push({
             id: book._id,
@@ -160,15 +161,16 @@ module.exports = {
             qty: qty,
           });
 
-         BOOK.updateOne(
-          {_id: book._id},
-          {$inc: {purchasesCount: qty}}
-         ).then((res)=>{
-          console.log(`Purchases count updated: ${book.title} - added qty: ${qty}`, res)
-         }).catch((err)=>{
-          console.log('Purchases count erro: ', err)
-         })
-
+          BOOK.updateOne({ _id: book._id }, { $inc: { purchasesCount: qty } })
+            .then((res) => {
+              console.log(
+                `Purchases count updated: ${book.title} - added qty: ${qty}`,
+                res
+              );
+            })
+            .catch((err) => {
+              console.log('Purchases count erro: ', err);
+            });
         }
 
         RECEIPT.create({
@@ -179,14 +181,14 @@ module.exports = {
           .then((receipt) => {
             USER.updateOne(
               { _id: userId },
-              { $push: { receipts: receipt._id } },
+              { $push: { receipts: receipt._id } }
             ).then(() => {
               cart.books = [];
               cart.totalPrice = 0;
               cart.save();
               return res.status(200).json({
                 message:
-                  "Thank you for your order! Books will be sent to you as soon as possible!",
+                  'Thank you for your order! Books will be sent to you as soon as possible!',
                 data: receipt,
               });
             });
@@ -194,7 +196,7 @@ module.exports = {
           .catch((err) => {
             console.log(err);
             return res.status(400).json({
-              message: "Something went wrong, please try again.",
+              message: 'Something went wrong, please try again.',
             });
           });
       });

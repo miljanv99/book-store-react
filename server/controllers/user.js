@@ -244,18 +244,18 @@ module.exports = {
       });
   },
 
-  userBlockStatus: (req, res) => {
+  userBlockStatus: async (req, res) => {
     let usernameReq = req.body.username;
 
-    USER.findOne({ username: usernameReq, isAdmin: false }).then((user) => {
-      if (!user) {
-        return res.status(404).json({
-          message: 'User not found',
-        });
-      }
-      return res.status(200).json({
-        data: user.isCommentsBlocked,
+    const user = await USER.findOne({ username: usernameReq, isAdmin: false });
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
       });
+    }
+
+    return res.status(200).json({
+      data: user.isCommentsBlocked,
     });
   },
 

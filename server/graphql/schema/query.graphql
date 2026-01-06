@@ -3,12 +3,58 @@ type PopularAuthor {
   topBook: String!
 }
 
+type SalesByAuthor {
+  author: String!
+  totalPurchases: Int!
+}
+
+type NumberOfBooksByGenre {
+  genre: String!
+  count: Int!
+}
+
+type BestRatedBooksByGenre {
+  genre: String!
+  books: [Book!]!
+}
+
+type mostPurchases {
+  username: String!
+  receiptsCount: Int!
+}
+
+type mostSpent {
+  username: String!
+  totalSpent: Float!
+}
+
+type revenuePerBook {
+  title: String!
+  revenue: Float!
+}
+type favoriteBookCount {
+  title: String!
+  favoriteCount: Int!
+}
+
+
 type Query {
   getAllBooks: [Book!]!
-  book(id: ID!): Book
-  users: [User!]!
-  getBooksByGenre(genre: String!): [Book!]!
+  oneBook(id: ID!): Book
+  oneUser(id: ID!): User
+  revenuePerBook:  [revenuePerBook!]
+  booksWithTheFewestPurchases: [Book!]
+  userWithMostPurchases: [mostPurchases!]
+  userMostSpend: [mostSpent!]
+  userWithMostComments: [User!]
+  users: Int!
+  getAllUsers: [User!]
+  bestRatedBooksByGenre: [BestRatedBooksByGenre!]!
   getPopularAuthorsByGenre(genre: String!): [PopularAuthor]!
   topMostPopularBooksWithLimit(limitNumber: Int!): [Book!]!
   totalRevenue: Float!
+  getSalesByAuthor: [SalesByAuthor!]
+  getNumberOfBooksByGenre: [NumberOfBooksByGenre!]!
+  recentPurchases: [Receipt!]
+  favoriteBooksCount: [favoriteBookCount!]
 }

@@ -1,0 +1,17 @@
+type ProductsInfo {
+    id: ID!
+    title: String!
+    author: String!
+    cover: String!
+    price: Float!
+    qty: Int!
+    
+}
+
+type Receipt {
+    id: ID!
+    productsInfo: [ProductsInfo!]
+    totalPrice: Float!
+    username: String
+    creationDate: String!
+}

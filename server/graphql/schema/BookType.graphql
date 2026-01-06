@@ -5,4 +5,8 @@ type Book {
   year: Int!
   author: String!
   description: String
+  purchasesCount: Int!
+  price: Float!
+  currentRating: Float!
+  ratedBy: [User!]
 }
