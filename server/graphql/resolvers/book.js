@@ -1,12 +1,16 @@
-const BOOK = require('mongoose').model('Book');
-const RECEIPT = require('mongoose').model('Receipt');
-const USER = require('mongoose').model('User');
+import mongoose from 'mongoose';
+import { BOOK } from '../../models/Book.js';
+import { RECEIPT } from '../../models/Receipt.js';
+import { USER } from '../../models/User.js';
 
-module.exports = {
+export default {
   Query: {
     getAllBooks: async () => BOOK.find(),
+
     oneBook: async (_, { id }) => BOOK.findById(id),
+
     oneUser: async (_, { id }) => USER.findById(id),
+
     bestRatedBooksByGenre: async () => {
       const result = [];
       const allBooks = await BOOK.find().sort({ currentRating: -1 });
@@ -27,18 +31,18 @@ module.exports = {
       }
       return result;
     },
+
     getPopularAuthorsByGenre: async (_, { genre }) => {
-      const booksByPopularity = await BOOK.find({ genre: genre }).sort({
+      const booksByPopularity = await BOOK.find({ genre }).sort({
         purchasesCount: -1,
       });
 
-      const author = new Set();
-
+      const authors = new Set();
       const result = [];
 
       for (const book of booksByPopularity) {
-        if (!author.has(book.author)) {
-          author.add(book.author);
+        if (!authors.has(book.author)) {
+          authors.add(book.author);
           result.push({ author: book.author, topBook: book.title });
         }
       }
@@ -48,8 +52,8 @@ module.exports = {
 
     getSalesByAuthor: async () => {
       const books = await BOOK.find();
+      const results = [];
 
-      let results = [];
       for (const book of books) {
         const existing = results.find((r) => r.author === book.author);
 
@@ -64,40 +68,26 @@ module.exports = {
       }
 
       results.sort((a, b) => b.totalPurchases - a.totalPurchases);
-      const top8 = results.slice(0, 8);
-
-      return top8;
+      return results.slice(0, 8);
     },
 
     topMostPopularBooksWithLimit: async (_, { limitNumber }) => {
-      const books = await BOOK.find()
-        .sort({
-          purchasesCount: -1,
-        })
-        .limit(limitNumber);
-
-      return books;
+      return await BOOK.find().sort({ purchasesCount: -1 }).limit(limitNumber);
     },
+
     totalRevenue: async () => {
-      const allReceipt = await RECEIPT.find();
-
-      const totalRevenue = allReceipt.reduce(
-        (sum, receipt) => sum + receipt.totalPrice,
-        0
-      );
-
-      return totalRevenue;
+      const allReceipts = await RECEIPT.find();
+      return allReceipts.reduce((sum, receipt) => sum + receipt.totalPrice, 0);
     },
 
     getNumberOfBooksByGenre: async () => {
       const books = await BOOK.find();
-      let results = [];
+      const results = [];
 
       for (const book of books) {
-        const isExisting = results.find((res) => res.genre === book.genre);
-
-        if (isExisting) {
-          isExisting.count += 1;
+        const existing = results.find((res) => res.genre === book.genre);
+        if (existing) {
+          existing.count += 1;
         } else {
           results.push({ genre: book.genre, count: 1 });
         }
@@ -108,25 +98,19 @@ module.exports = {
 
     revenuePerBook: async () => {
       const books = await BOOK.find();
-      let result = [];
-      for (const book of books) {
-        let revenue = 0;
-        revenue = book.purchasesCount * book.price;
-        result.push({ title: book.title, revenue: revenue });
-      }
+      const result = books.map((book) => ({
+        title: book.title,
+        revenue: book.purchasesCount * book.price,
+      }));
       return result.sort((a, b) => b.revenue - a.revenue);
     },
 
     booksWithTheFewestPurchases: async () => {
-      const books = await BOOK.find().sort({ purchasesCount: 1 }).limit(5);
-
-      return books;
+      return await BOOK.find().sort({ purchasesCount: 1 }).limit(5);
     },
   },
 
   Book: {
-    ratedBy: async (parent) => {
-      return await USER.find({ _id: { $in: parent.ratedBy } });
-    },
+    ratedBy: async (parent) => USER.find({ _id: { $in: parent.ratedBy } }),
   },
 };

@@ -1,12 +1,12 @@
-const USER_CONTROLLER = require('../controllers/user');
-const PASSWORD_CONTROLLER = require('../controllers/password');
-const BOOK_CONTROLLER = require('../controllers/book');
-const COMMENT_CONTROLLER = require('../controllers/comment');
-const CART_CONTROLLER = require('../controllers/cart');
-const ERROR_CONTROLLER = require('../controllers/error');
-const AUTH = require('./auth');
+import * as USER_CONTROLLER from '../controllers/user.js';
+import * as PASSWORD_CONTROLLER from '../controllers/password.js';
+import * as BOOK_CONTROLLER from '../controllers/book.js';
+import * as COMMENT_CONTROLLER from '../controllers/comment.js';
+import * as CART_CONTROLLER from '../controllers/cart.js';
+import * as ERROR_CONTROLLER from '../controllers/error.js';
+import * as AUTH from './auth.js';
 
-module.exports = (APP) => {
+const setupRoutes = (APP) => {
   APP.post('/user/register', USER_CONTROLLER.register);
   APP.post('/user/login', USER_CONTROLLER.login);
   APP.post(
@@ -33,7 +33,6 @@ module.exports = (APP) => {
     AUTH.isInRole('Admin'),
     USER_CONTROLLER.commentsPermission
   );
-
   APP.post(
     '/user/commentsStatus',
     AUTH.isInRole('Admin'),
@@ -62,7 +61,7 @@ module.exports = (APP) => {
   APP.delete(
     '/book/delete/:bookId',
     AUTH.isInRole('Admin'),
-    BOOK_CONTROLLER.delete
+    BOOK_CONTROLLER.deleteBook
   );
   APP.post('/book/rate/:bookId', AUTH.isAuth, BOOK_CONTROLLER.rate);
   APP.post(
@@ -82,8 +81,10 @@ module.exports = (APP) => {
   APP.delete(
     '/comment/delete/:commentId',
     AUTH.isAuth,
-    COMMENT_CONTROLLER.delete
+    COMMENT_CONTROLLER.deleteComment
   );
 
   APP.all('*', ERROR_CONTROLLER.error);
 };
+
+export default setupRoutes;

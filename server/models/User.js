@@ -1,12 +1,12 @@
-const MONGOOSE = require('mongoose');
+import mongoose from 'mongoose';
 
-const ENCRYPTION = require('../utilities/encryption');
-const STRING = MONGOOSE.Schema.Types.String;
-const NUMBER = MONGOOSE.Schema.Types.Number;
-const BOOLEAN = MONGOOSE.Schema.Types.Boolean;
-const OBJECT_ID = MONGOOSE.Schema.Types.ObjectId;
+import { generateHashedPassword } from '../utilities/encryption.js';
+const STRING = mongoose.Schema.Types.String;
+const NUMBER = mongoose.Schema.Types.Number;
+const BOOLEAN = mongoose.Schema.Types.Boolean;
+const OBJECT_ID = mongoose.Schema.Types.ObjectId;
 
-const USER_SCHEMA = MONGOOSE.Schema({
+const USER_SCHEMA = mongoose.Schema({
   username: { type: STRING, required: true, unique: true },
   email: { type: STRING, required: true, unique: true },
   avatar: { type: STRING, default: 'https://i.imgur.com/4s5qLzU.png' },
@@ -23,7 +23,7 @@ const USER_SCHEMA = MONGOOSE.Schema({
 
 USER_SCHEMA.method({
   authenticate: function (password) {
-    let hashedPassword = ENCRYPTION.generateHashedPassword(this.salt, password);
+    let hashedPassword = generateHashedPassword(this.salt, password);
 
     if (hashedPassword === this.password) {
       return true;
@@ -32,6 +32,4 @@ USER_SCHEMA.method({
   },
 });
 
-const USER = MONGOOSE.model('User', USER_SCHEMA);
-
-module.exports = USER;
+export const USER = mongoose.model('User', USER_SCHEMA);

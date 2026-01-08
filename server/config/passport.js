@@ -1,96 +1,98 @@
-const JWT = require('jsonwebtoken');
-const LOCAL_STRATEGY = require('passport-local').Strategy;
-const ENCRYPTION = require('../utilities/encryption');
-const ROLE = require('mongoose').model('Role');
-const USER = require('mongoose').model('User');
-const CART = require('mongoose').model('Cart');
-require('dotenv').config();
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import { Strategy as LocalStrategy } from 'passport-local';
+import * as ENCRYPTION from '../utilities/encryption.js';
+import dotenv from 'dotenv';
 
-module.exports = {
-  generateToken(userInfo) {
-    const USER = {
-      id: userInfo.id,
-      username: userInfo.username,
-      avatar: userInfo.avatar,
-      isCommentsBlocked: userInfo.isCommentsBlocked,
-      isAdmin: userInfo.isAdmin,
-      roles: userInfo.roles,
-    };
-    const PAYLOAD = { sub: USER };
+dotenv.config();
 
-    return JWT.sign(PAYLOAD, process.env.BACKEND_SECRET, {
-      expiresIn: 604800000,
-    });
-  },
+import { ROLE } from '../models/Role.js';
+import { USER } from '../models/User.js';
+import { CART } from '../models/Cart.js';
 
-  localRegister: () => {
-    return new LOCAL_STRATEGY(
-      {
-        usernameField: 'username',
-        passwordField: 'password',
-        session: false,
-        passReqToCallback: true,
-      },
-      (req, username, password, done) => {
-        let user = {
+export const generateToken = (userInfo) => {
+  const USER_PAYLOAD = {
+    id: userInfo.id,
+    username: userInfo.username,
+    avatar: userInfo.avatar,
+    isCommentsBlocked: userInfo.isCommentsBlocked,
+    isAdmin: userInfo.isAdmin,
+    roles: userInfo.roles,
+  };
+
+  return jwt.sign({ sub: USER_PAYLOAD }, process.env.BACKEND_SECRET, {
+    expiresIn: 604800000, // 1 week in ms
+  });
+};
+
+export const localRegister = () => {
+  return new LocalStrategy(
+    {
+      usernameField: 'username',
+      passwordField: 'password',
+      session: false,
+      passReqToCallback: true,
+    },
+    async (req, username, password, done) => {
+      try {
+        const user = {
           username: req.body.username,
           avatar: req.body.avatar,
           email: req.body.email,
-          password: req.body.password,
+          password,
         };
 
-        let salt = ENCRYPTION.generateSalt();
-        let hashedPassword = ENCRYPTION.generateHashedPassword(salt, password);
+        const salt = ENCRYPTION.generateSalt();
+        const hashedPassword = ENCRYPTION.generateHashedPassword(
+          salt,
+          password
+        );
 
         user.salt = salt;
         user.password = hashedPassword;
 
-        ROLE.findOne({ name: 'User' }).then((role) => {
-          user.roles = [role._id];
+        const role = await ROLE.findOne({ name: 'User' });
+        if (!role) return done(null, false);
 
-          USER.create(user)
-            .then((newUser) => {
-              role.users.push(newUser._id);
-              role.save();
+        user.roles = [role._id];
 
-              let token = module.exports.generateToken(newUser);
+        const newUser = await USER.create(user);
 
-              CART.create({ user: newUser._id }).then((cart) => {
-                newUser.cart = cart._id;
-                newUser.save();
-                return done(null, token);
-              });
-            })
-            .catch(() => {
-              return done(null, false);
-            });
-        });
+        role.users.push(newUser._id);
+        await role.save();
+
+        const cart = await CART.create({ user: newUser._id });
+        newUser.cart = cart._id;
+        await newUser.save();
+
+        const token = generateToken(newUser);
+        return done(null, token);
+      } catch (err) {
+        return done(null, false);
       }
-    );
-  },
+    }
+  );
+};
 
-  localLogin: () => {
-    return new LOCAL_STRATEGY(
-      {
-        usernameField: 'username',
-        passwordField: 'password',
-        session: false,
-      },
-      (username, password, done) => {
-        USER.findOne({ username: username }).then((user) => {
-          if (!user) {
-            return done(null, false);
-          }
+export const localLogin = () => {
+  return new LocalStrategy(
+    {
+      usernameField: 'username',
+      passwordField: 'password',
+      session: false,
+    },
+    async (username, password, done) => {
+      try {
+        const user = await USER.findOne({ username });
+        if (!user) return done(null, false);
 
-          if (!user.authenticate(password)) {
-            return done(null, false);
-          }
+        if (!user.authenticate(password)) return done(null, false);
 
-          let token = module.exports.generateToken(user);
-
-          return done(null, token);
-        });
+        const token = generateToken(user);
+        return done(null, token);
+      } catch (err) {
+        return done(null, false);
       }
-    );
-  },
+    }
+  );
 };

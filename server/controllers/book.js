@@ -1,8 +1,9 @@
-const VALIDATOR = require('validator');
-const CART = require('mongoose').model('Cart');
-const BOOK = require('mongoose').model('Book');
-const USER = require('mongoose').model('User');
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import VALIDATOR from 'validator';
+
+import { BOOK } from '../models/Book.js';
+import { USER } from '../models/User.js';
+import { CART } from '../models/Cart.js';
 
 //const PAGE_LIMIT = 16;
 
@@ -113,341 +114,337 @@ function removeDoubleQuotes(paramName) {
   return { $regex: cleanTitle, $options: 'i' };
 }
 
-module.exports = {
-  getSingle: (req, res) => {
-    let bookId = req.params.bookId;
+export const getSingle = async (req, res) => {
+  let bookId = req.params.bookId;
 
-    BOOK.findById(bookId)
-      .then((book) => {
-        if (!book) {
-          return res.status(400).json({
-            message: 'There is no book with the given id in our database.',
-          });
-        }
-
-        return res.status(200).json({
-          message: '',
-          data: book,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+  BOOK.findById(bookId)
+    .then((book) => {
+      if (!book) {
         return res.status(400).json({
-          message: 'Something went wrong, please try again.',
+          message: 'There is no book with the given id in our database.',
         });
+      }
+
+      return res.status(200).json({
+        message: '',
+        data: book,
       });
-  },
-
-  add: (req, res) => {
-    let book = req.body;
-
-    let validationResult = validateBookForm(book);
-
-    if (!validationResult.success) {
+    })
+    .catch((err) => {
+      console.log(err);
       return res.status(400).json({
-        message: 'Book form validation failed!',
-        errors: validationResult.errors,
+        message: 'Something went wrong, please try again.',
       });
-    }
+    });
+};
 
-    BOOK.create(book)
-      .then((newBook) => {
-        return res.status(200).json({
-          message: 'Book created successfully!',
-          data: newBook,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(400).json({
-          message: 'Something went wrong, please try again.',
-        });
+export const add = async (req, res) => {
+  let book = req.body;
+
+  let validationResult = validateBookForm(book);
+
+  if (!validationResult.success) {
+    return res.status(400).json({
+      message: 'Book form validation failed!',
+      errors: validationResult.errors,
+    });
+  }
+
+  BOOK.create(book)
+    .then((newBook) => {
+      return res.status(200).json({
+        message: 'Book created successfully!',
+        data: newBook,
       });
-  },
-
-  edit: (req, res) => {
-    let bookId = req.params.bookId;
-    let editedBook = req.body;
-
-    let validationResult = validateBookForm(editedBook);
-
-    if (!validationResult.success) {
+    })
+    .catch((err) => {
+      console.log(err);
       return res.status(400).json({
-        message: 'Book form validation failed!',
-        errors: validationResult.errors,
+        message: 'Something went wrong, please try again.',
       });
-    }
+    });
+};
 
-    BOOK.findById(bookId)
-      .then((book) => {
-        if (!book) {
-          return res.status(400).json({
-            message: 'There is no book with the given id in our database.',
-          });
-        }
+export const edit = async (req, res) => {
+  let bookId = req.params.bookId;
+  let editedBook = req.body;
 
-        book.title = editedBook.title;
-        book.author = editedBook.author;
-        book.genre = editedBook.genre;
-        book.year = editedBook.year;
-        book.description = editedBook.description;
-        book.cover = editedBook.cover;
-        book.isbn = editedBook.isbn;
-        book.pagesCount = editedBook.pagesCount;
-        book.price = editedBook.price;
-        book.save();
+  let validationResult = validateBookForm(editedBook);
 
-        return res.status(200).json({
-          message: 'Book edited successfully!',
-          data: book,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+  if (!validationResult.success) {
+    return res.status(400).json({
+      message: 'Book form validation failed!',
+      errors: validationResult.errors,
+    });
+  }
+
+  BOOK.findById(bookId)
+    .then((book) => {
+      if (!book) {
         return res.status(400).json({
-          message: 'Something went wrong, please try again.',
+          message: 'There is no book with the given id in our database.',
         });
+      }
+
+      book.title = editedBook.title;
+      book.author = editedBook.author;
+      book.genre = editedBook.genre;
+      book.year = editedBook.year;
+      book.description = editedBook.description;
+      book.cover = editedBook.cover;
+      book.isbn = editedBook.isbn;
+      book.pagesCount = editedBook.pagesCount;
+      book.price = editedBook.price;
+      book.save();
+
+      return res.status(200).json({
+        message: 'Book edited successfully!',
+        data: book,
       });
-  },
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({
+        message: 'Something went wrong, please try again.',
+      });
+    });
+};
 
-  delete: (req, res) => {
-    let bookId = req.params.bookId;
+export const deleteBook = async (req, res) => {
+  let bookId = req.params.bookId;
 
-    //remove book from the list
-    BOOK.findByIdAndDelete(bookId)
-      .then((deletedBook) => {
-        if (!deletedBook) {
-          return res.status(400).json({
-            message: 'There is no book with the given id in our database.',
-          });
-        }
+  //remove book from the list
+  BOOK.findByIdAndDelete(bookId)
+    .then((deletedBook) => {
+      if (!deletedBook) {
+        return res.status(400).json({
+          message: 'There is no book with the given id in our database.',
+        });
+      }
 
-        const objectBookId = new mongoose.Types.ObjectId(bookId);
+      const objectBookId = new mongoose.Types.ObjectId(bookId);
 
-        //remove if the book is in the cart
-        CART.updateMany({ books: objectBookId }, [
-          {
-            $set: {
-              books: {
-                $filter: {
-                  input: '$books',
-                  cond: { $ne: ['$$this', objectBookId] },
-                },
-              },
-              totalPrice: {
-                $max: [{ $subtract: ['$totalPrice', deletedBook.price] }, 0],
+      //remove if the book is in the cart
+      CART.updateMany({ books: objectBookId }, [
+        {
+          $set: {
+            books: {
+              $filter: {
+                input: '$books',
+                cond: { $ne: ['$$this', objectBookId] },
               },
             },
+            totalPrice: {
+              $max: [{ $subtract: ['$totalPrice', deletedBook.price] }, 0],
+            },
           },
-        ])
-          .then(() => {
-            //remove if the book is in the favorite books
-            USER.updateMany({ favoriteBooks: objectBookId }, [
-              {
-                $set: {
-                  favoriteBooks: {
-                    $filter: {
-                      input: '$favoriteBooks',
-                      cond: { $ne: ['$$this', objectBookId] },
-                    },
+        },
+      ])
+        .then(() => {
+          //remove if the book is in the favorite books
+          USER.updateMany({ favoriteBooks: objectBookId }, [
+            {
+              $set: {
+                favoriteBooks: {
+                  $filter: {
+                    input: '$favoriteBooks',
+                    cond: { $ne: ['$$this', objectBookId] },
                   },
                 },
               },
-            ]).then(() => {
-              return res.status(200).json({
-                message: 'Book deleted successfully.',
-                data: deletedBook,
-              });
+            },
+          ]).then(() => {
+            return res.status(200).json({
+              message: 'Book deleted successfully.',
+              data: deletedBook,
             });
-          })
-          .catch((err) => {
-            console.error(err);
-            return res.status(500).json({ message: 'Something went wrong' });
           });
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(400).json({
-          message: 'Something went wrong, please try again.',
+        })
+        .catch((err) => {
+          console.error(err);
+          return res.status(500).json({ message: 'Something went wrong' });
         });
-      });
-  },
-
-  rate: (req, res) => {
-    let bookId = req.params.bookId;
-    let rating = req.body.rating;
-    let userId = req.user.id;
-
-    let validationResult = validateRatingForm(req.body);
-
-    if (!validationResult.success) {
+    })
+    .catch((err) => {
+      console.log(err);
       return res.status(400).json({
-        message: 'Rating form validation failed!',
-        errors: validationResult.errors,
+        message: 'Something went wrong, please try again.',
       });
+    });
+};
+
+export const rate = async (req, res) => {
+  let bookId = req.params.bookId;
+  let rating = req.body.rating;
+  let userId = req.user.id;
+
+  let validationResult = validateRatingForm(req.body);
+
+  if (!validationResult.success) {
+    return res.status(400).json({
+      message: 'Rating form validation failed!',
+      errors: validationResult.errors,
+    });
+  }
+
+  BOOK.findById(bookId)
+    .then((book) => {
+      if (!book) {
+        return res.status(400).json({
+          message: 'There is no book with the given id in our database.',
+        });
+      }
+
+      let ratedByIds = book.ratedBy.map((id) => id.toString());
+      if (ratedByIds.indexOf(userId) !== -1) {
+        return res.status(400).json({
+          message: 'You already rated this book',
+        });
+      }
+
+      book.ratedBy.push(userId);
+      book.ratingPoints += rating;
+      book.ratedCount += 1;
+      book.currentRating = book.ratingPoints / book.ratedCount;
+      book.save();
+
+      return res.status(200).json({
+        message: 'You rated the book successfully.',
+        data: book,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({
+        message: 'Something went wrong, please try again.',
+      });
+    });
+};
+
+export const addOrRemoveFavoriteBook = async (req, res) => {
+  let bookId = req.params.bookId;
+
+  BOOK.findById(bookId)
+    .then((book) => {
+      if (!book) {
+        return res.status(400).json({
+          message: 'There is no book with the given id in our database.',
+        });
+      }
+
+      USER.findById(req.user.id).then((user) => {
+        let booksIds = user.favoriteBooks.map((b) => b.toString());
+        if (booksIds.indexOf(bookId) !== -1) {
+          user.favoriteBooks.remove(book._id);
+          user.save();
+
+          return res.status(200).json({
+            message: 'Successfully removed the book to your favorites list.',
+          });
+        } else {
+          user.favoriteBooks.push(book._id);
+          user.save();
+
+          return res.status(200).json({
+            message: 'Successfully added the book to your favorites list.',
+          });
+        }
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({
+        message: 'Something went wrong, please try again.',
+      });
+    });
+};
+
+export const search = async (req, res) => {
+  let params = req.query;
+  let searchParams = {
+    query: {},
+    sort: { creationDate: -1 },
+    skip: null,
+  };
+
+  try {
+    // Query
+    if (params.query || typeof params.query === 'string') {
+      let query = JSON.parse(params.query);
+      console.log('JSON query: ', query);
+
+      if (!('searchTerm' in query)) {
+        return res.status(400).json({
+          message: 'searchTerm key is missing!',
+        });
+      }
+
+      if (
+        typeof query.searchTerm !== 'string' ||
+        query.searchTerm.trim() === ''
+      ) {
+        return res.status(400).json({
+          message: 'Enter string value for searchTerm key!',
+        });
+      }
+      searchParams.query = {
+        $text: { $search: query.searchTerm, $language: 'en' },
+      };
     }
 
-    BOOK.findById(bookId)
-      .then((book) => {
-        if (!book) {
+    // Sort
+    if (params.sort) {
+      searchParams.sort = JSON.parse(params.sort);
+    }
+
+    if (params.skip) {
+      searchParams.skip = JSON.parse(params.skip);
+    }
+
+    if (params.limit) {
+      searchParams.limit = JSON.parse(params.limit);
+    }
+
+    if (params.title) {
+      console.log('TITLE: ', params.title);
+      searchParams.query.title = removeDoubleQuotes(params.title);
+    }
+
+    if (params.genre) {
+      console.log('GENRE: ', params.genre);
+      searchParams.query.genre = removeDoubleQuotes(params.genre);
+    }
+
+    const numberOfBooks = await BOOK.find(searchParams.query).countDocuments();
+
+    if (numberOfBooks) {
+      BOOK.find(searchParams.query)
+        .sort(searchParams.sort)
+        .skip(searchParams.skip)
+        .limit(searchParams.limit)
+        .select('-comments')
+        .then((result) => {
+          return res.status(200).json({
+            message: '',
+            data: result,
+            query: searchParams,
+            itemsCount: numberOfBooks,
+          });
+        })
+        .catch(() => {
           return res.status(400).json({
-            message: 'There is no book with the given id in our database.',
+            message: 'Bad Request!',
           });
-        }
-
-        let ratedByIds = book.ratedBy.map((id) => id.toString());
-        if (ratedByIds.indexOf(userId) !== -1) {
-          return res.status(400).json({
-            message: 'You already rated this book',
-          });
-        }
-
-        book.ratedBy.push(userId);
-        book.ratingPoints += rating;
-        book.ratedCount += 1;
-        book.currentRating = book.ratingPoints / book.ratedCount;
-        book.save();
-
-        return res.status(200).json({
-          message: 'You rated the book successfully.',
-          data: book,
         });
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(400).json({
-          message: 'Something went wrong, please try again.',
-        });
-      });
-  },
-
-  addOrRemoveFavoriteBook: (req, res) => {
-    let bookId = req.params.bookId;
-
-    BOOK.findById(bookId)
-      .then((book) => {
-        if (!book) {
-          return res.status(400).json({
-            message: 'There is no book with the given id in our database.',
-          });
-        }
-
-        USER.findById(req.user.id).then((user) => {
-          let booksIds = user.favoriteBooks.map((b) => b.toString());
-          if (booksIds.indexOf(bookId) !== -1) {
-            user.favoriteBooks.remove(book._id);
-            user.save();
-
-            return res.status(200).json({
-              message: 'Successfully removed the book to your favorites list.',
-            });
-          } else {
-            user.favoriteBooks.push(book._id);
-            user.save();
-
-            return res.status(200).json({
-              message: 'Successfully added the book to your favorites list.',
-            });
-          }
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        return res.status(400).json({
-          message: 'Something went wrong, please try again.',
-        });
-      });
-  },
-
-  search: async (req, res) => {
-    let params = req.query;
-    let searchParams = {
-      query: {},
-      sort: { creationDate: -1 },
-      skip: null,
-    };
-
-    try {
-      // Query
-      if (params.query || typeof params.query === 'string') {
-        let query = JSON.parse(params.query);
-        console.log('JSON query: ', query);
-
-        if (!('searchTerm' in query)) {
-          return res.status(400).json({
-            message: 'searchTerm key is missing!',
-          });
-        }
-
-        if (
-          typeof query.searchTerm !== 'string' ||
-          query.searchTerm.trim() === ''
-        ) {
-          return res.status(400).json({
-            message: 'Enter string value for searchTerm key!',
-          });
-        }
-        searchParams.query = {
-          $text: { $search: query.searchTerm, $language: 'en' },
-        };
-      }
-
-      // Sort
-      if (params.sort) {
-        searchParams.sort = JSON.parse(params.sort);
-      }
-
-      if (params.skip) {
-        searchParams.skip = JSON.parse(params.skip);
-      }
-
-      if (params.limit) {
-        searchParams.limit = JSON.parse(params.limit);
-      }
-
-      if (params.title) {
-        console.log('TITLE: ', params.title);
-        searchParams.query.title = removeDoubleQuotes(params.title);
-      }
-
-      if (params.genre) {
-        console.log('GENRE: ', params.genre);
-        searchParams.query.genre = removeDoubleQuotes(params.genre);
-      }
-
-      const numberOfBooks = await BOOK.find(
-        searchParams.query
-      ).countDocuments();
-
-      if (numberOfBooks) {
-        BOOK.find(searchParams.query)
-          .sort(searchParams.sort)
-          .skip(searchParams.skip)
-          .limit(searchParams.limit)
-          .select('-comments')
-          .then((result) => {
-            return res.status(200).json({
-              message: '',
-              data: result,
-              query: searchParams,
-              itemsCount: numberOfBooks,
-            });
-          })
-          .catch(() => {
-            return res.status(400).json({
-              message: 'Bad Request!',
-            });
-          });
-      } else {
-        return res.status(200).json({
-          message: 'No books with this query',
-          itemsCount: numberOfBooks,
-        });
-      }
-    } catch (error) {
-      return res.status(400).json({
-        message: 'Invalid JSON format in query parameter',
+    } else {
+      return res.status(200).json({
+        message: 'No books with this query',
+        itemsCount: numberOfBooks,
       });
     }
-  },
+  } catch (error) {
+    return res.status(400).json({
+      message: 'Invalid JSON format in query parameter',
+    });
+  }
 };

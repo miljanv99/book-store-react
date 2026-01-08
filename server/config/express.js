@@ -1,15 +1,20 @@
-const BODY_PARSER = require('body-parser');
-const CORS = require('cors');
-const PASSPORT = require('passport');
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import passport from 'passport';
 
-const REGISTER_STRATEGY = require('./passport').localRegister();
-const LOGIN_STRATEGY = require('./passport').localLogin();
+import { localRegister, localLogin } from './passport.js';
 
-module.exports = (APP) => {
-  APP.use(BODY_PARSER.urlencoded({ extended: true }));
-  APP.use(BODY_PARSER.json());
-  APP.use(CORS());
-  APP.use(PASSPORT.initialize());
-  PASSPORT.use('local-register', REGISTER_STRATEGY);
-  PASSPORT.use('local-login', LOGIN_STRATEGY);
+const registerStrategy = localRegister();
+const loginStrategy = localLogin();
+
+const setupExpress = (APP) => {
+  APP.use(bodyParser.urlencoded({ extended: true }));
+  APP.use(bodyParser.json());
+  APP.use(cors());
+  APP.use(passport.initialize());
+
+  passport.use('local-register', registerStrategy);
+  passport.use('local-login', loginStrategy);
 };
+
+export default setupExpress;

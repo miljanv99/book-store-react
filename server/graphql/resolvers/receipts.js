@@ -1,7 +1,8 @@
-const RECEIPT = require('mongoose').model('Receipt');
-const USER = require('mongoose').model('User');
+import mongoose from 'mongoose';
+import { RECEIPT } from '../../models/Receipt.js';
+import { USER } from '../../models/User.js';
 
-module.exports = {
+export default {
   Query: {
     recentPurchases: async () => {
       const recentReceipts = await RECEIPT.find()

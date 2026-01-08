@@ -1,69 +1,70 @@
-const JWT = require('jsonwebtoken');
-const ROLE = require('mongoose').model('Role');
-require('dotenv').config();
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-function verifyToken(req) {
-  const TOKEN = req.headers.authorization.split(' ')[1];
+dotenv.config();
 
-  return new Promise((resolve, reject) => {
-    JWT.verify(TOKEN, process.env.BACKEND_SECRET, (err, decoded) => {
-      if (err) {
-        reject();
-      }
+import { ROLE } from '../models/Role.js';
 
-      req.user = decoded.sub;
-      console.log('TEST:', req.user);
-      resolve();
+const verifyToken = async (req) => {
+  if (!req.headers.authorization) {
+    throw new Error('No authorization header');
+  }
+
+  const token = req.headers.authorization.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.BACKEND_SECRET);
+    req.user = decoded.sub;
+    console.log('TEST:', req.user);
+  } catch (err) {
+    throw new Error('Token verification failed');
+  }
+};
+
+export const isAuth = async (req, res, next) => {
+  try {
+    await verifyToken(req);
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      message: err.message,
     });
-  });
-}
+  }
+};
 
-module.exports = {
-  isAuth: (req, res, next) => {
+export const isInRole = (roleName) => {
+  return async (req, res, next) => {
     if (!req.headers.authorization) {
       return res.status(401).json({
         message: 'You need to be logged in to access this!',
       });
     }
 
-    verifyToken(req)
-      .then(() => {
-        next();
-      })
-      .catch(() => {
-        return res.status(401).json({
-          message: 'Token verification failed!',
-        });
-      });
-  },
+    try {
+      const role = await ROLE.findOne({ name: roleName });
 
-  isInRole: (role) => {
-    return (req, res, next) => {
-      if (req.headers.authorization) {
-        ROLE.findOne({ name: role }).then((role) => {
-          verifyToken(req)
-            .then(() => {
-              let isInRole = req.user.roles.indexOf(role.id) !== -1;
-
-              if (isInRole) {
-                next();
-              } else {
-                return res.status(401).json({
-                  message: 'You need to be an admin to access this!',
-                });
-              }
-            })
-            .catch(() => {
-              return res.status(401).json({
-                message: 'Token verification failed!',
-              });
-            });
-        });
-      } else {
+      if (!role) {
         return res.status(401).json({
-          message: 'You need to be logged in to access this!',
+          message: 'Role not found',
         });
       }
-    };
-  },
+
+      await verifyToken(req);
+
+      const isInRole = req.user.roles.includes(role.id);
+
+      if (!isInRole) {
+        return res.status(401).json({
+          message: 'You need to be an admin to access this!',
+        });
+      }
+
+      next();
+    } catch (err) {
+      return res.status(401).json({
+        message: err.message || 'Token verification failed!',
+      });
+    }
+  };
 };

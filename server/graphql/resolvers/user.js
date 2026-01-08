@@ -1,7 +1,9 @@
-const USER = require('mongoose').model('User');
-const RECEIPT = require('mongoose').model('Receipt');
-const BOOK = require('mongoose').model('Book');
-module.exports = {
+import mongoose from 'mongoose';
+import { USER } from '../../models/User.js';
+import { RECEIPT } from '../../models/Receipt.js';
+import { BOOK } from '../../models/Book.js';
+
+export default {
   Query: {
     users: async () => {
       const users = await USER.countDocuments();

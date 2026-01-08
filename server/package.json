@@ -1,6 +1,7 @@
 {
   "name": "book-store-server",
   "version": "0.1.0",
+  "type": "module",
   "description": "Express server for Book Store Web App",
   "main": "app.js",
   "keywords": [],

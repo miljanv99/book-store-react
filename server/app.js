@@ -1,23 +1,30 @@
-const EXPRESS = require('express');
-const CORS = require('cors');
-const CONFIG = require('./config/config');
+import express from 'express';
+import cors from 'cors';
+import { CONFIG } from './config/config.js';
+import connectDatabase from './config/database.config.js';
+import setupExpress from './config/express.js';
+import setupRoutes from './config/routes.js';
+import setupGraphql from './graphql/GraphqlApollo.js';
 
 const PORT = 8000;
-let env = 'development';
+const env = 'development';
 
-const APP = EXPRESS();
+const APP = express();
 
 APP.use(
-  CORS({
+  cors({
     origin: '*',
   })
 );
 
 const startServer = async () => {
-  require('./config/database.config')(CONFIG[env]);
-  require('./config/express')(APP);
-  await require('./graphql/GraphqlApollo')(APP);
-  require('./config/routes')(APP);
+  connectDatabase(CONFIG[env]);
+
+  setupExpress(APP);
+
+  await setupGraphql(APP);
+
+  setupRoutes(APP);
 
   APP.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 };

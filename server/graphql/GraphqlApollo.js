@@ -1,8 +1,8 @@
-const { ApolloServer } = require('@apollo/server');
-const { expressMiddleware } = require('@as-integrations/express4');
-const { typeDefs, resolvers } = require('./mergeSchema');
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express4';
+import { typeDefs, resolvers } from './mergeSchema.js';
 
-module.exports = async (APP) => {
+export default async (APP) => {
   const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,

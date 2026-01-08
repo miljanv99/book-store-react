@@ -1,8 +1,8 @@
-const { google } = require('googleapis');
-require('dotenv').config();
-const oAuth2Client = require('../../config/googleClient');
+import { google } from 'googleapis';
+import 'dotenv/config';
+import oAuth2Client from '../../config/googleClient.js';
 
-async function sendMail(resetLink, sendTo, refreshToken) {
+export async function sendMail(resetLink, sendTo, refreshToken) {
   oAuth2Client.setCredentials({
     refresh_token: refreshToken,
   });
@@ -35,5 +35,3 @@ async function sendMail(resetLink, sendTo, refreshToken) {
 
   console.log('Message sent:', res.data.id);
 }
-
-module.exports = sendMail;

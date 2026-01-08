@@ -1,24 +1,25 @@
-const MONGOOSE = require("mongoose");
+import mongoose from 'mongoose';
 
-MONGOOSE.Promise = global.Promise;
+mongoose.Promise = global.Promise;
 
-module.exports = (config) => {
-  MONGOOSE.connect(config.connectionString);
+const connectDatabase = async (config) => {
+  mongoose.connect(config.connectionString);
 
-  let db = MONGOOSE.connection;
+  const db = mongoose.connection;
 
-  db.once("open", (err) => {
-    if (err) {
-      throw err;
-    }
+  db.once('open', (err) => {
+    if (err) throw err;
 
-    console.log("MongoDB is ready!");
+    console.log('MongoDB is ready!');
   });
 
-  require("../models/Cart");
-  require("../models/User");
-  require("../models/Role").init();
-  require("../models/Receipt");
-  require("../models/Book");
-  require("../models/Comment");
+  // Import models
+  await import('../models/Cart.js');
+  await import('../models/User.js');
+  await import('../models/Role.js');
+  await import('../models/Receipt.js');
+  await import('../models/Book.js');
+  await import('../models/Comment.js');
 };
+
+export default connectDatabase;

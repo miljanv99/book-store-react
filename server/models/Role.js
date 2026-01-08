@@ -1,70 +1,71 @@
-const MONGOOSE = require("mongoose");
+import mongoose from 'mongoose';
 
-const USER = MONGOOSE.model("User");
-const CART = MONGOOSE.model("Cart");
-const ENCRYPTION = require("../utilities/encryption");
-const STRING = MONGOOSE.Schema.Types.String;
-const OBJECT_ID = MONGOOSE.Schema.Types.ObjectId;
+import { USER } from '../models/User.js';
+import { CART } from '../models/Cart.js';
+import {
+  generateHashedPassword,
+  generateSalt,
+} from '../utilities/encryption.js';
 
-const ROLE_SCHEMA = MONGOOSE.Schema({
+const STRING = mongoose.Schema.Types.String;
+const OBJECT_ID = mongoose.Schema.Types.ObjectId;
+
+const ROLE_SCHEMA = mongoose.Schema({
   name: { type: STRING, required: true, unique: true },
-  users: [{ type: OBJECT_ID, ref: "User" }],
+  users: [{ type: OBJECT_ID, ref: 'User' }],
 });
 
-const ROLE = MONGOOSE.model("Role", ROLE_SCHEMA);
+export const ROLE = mongoose.model('Role', ROLE_SCHEMA);
 
-module.exports = ROLE;
+export const init = async () => {
+  try {
+    let adminRole = await ROLE.findOne({ name: 'Admin' });
+    if (!adminRole) {
+      adminRole = await ROLE.create({ name: 'Admin' });
 
-module.exports.init = () => {
-  ROLE.findOne({ name: "Admin" }).then((role) => {
-    if (!role) {
-      ROLE.create({ name: "Admin" }).then((newRole) => {
-        let salt = ENCRYPTION.generateSalt();
-        let passwordHash = ENCRYPTION.generateHashedPassword(salt, "admin");
-        let adminUser = {
-          username: "admin",
-          email: "admin@admin.com",
-          salt: salt,
-          password: passwordHash,
-          isAdmin: true,
-          roles: [newRole._id],
-        };
+      const salt = generateSalt();
+      const passwordHash = generateHashedPassword(salt, 'admin');
 
-        USER.create(adminUser).then((user) => {
-          newRole.users.push(user._id);
-          newRole.save();
-
-          CART.create({ user: user._id }).then((cart) => {
-            user.cart = cart._id;
-            user.save();
-          });
-        });
+      const adminUser = await USER.create({
+        username: 'admin',
+        email: 'admin@admin.com',
+        salt,
+        password: passwordHash,
+        isAdmin: true,
+        roles: [adminRole._id],
       });
+
+      adminRole.users.push(adminUser._id);
+      await adminRole.save();
+
+      const adminCart = await CART.create({ user: adminUser._id });
+      adminUser.cart = adminCart._id;
+      await adminUser.save();
     }
-  });
 
-  ROLE.findOne({ name: "User" }).then((role) => {
-    if (!role) {
-      ROLE.create({ name: "User" }).then((newRole) => {
-        let salt = ENCRYPTION.generateSalt();
-        let passwordHash = ENCRYPTION.generateHashedPassword(salt, "123");
-        let newUser = {
-          username: "jeliozver",
-          email: "jeliozver@gmail.com",
-          salt: salt,
-          password: passwordHash,
-          roles: [newRole._id],
-        };
+    let userRole = await ROLE.findOne({ name: 'User' });
+    if (!userRole) {
+      userRole = await ROLE.create({ name: 'User' });
 
-        USER.create(newUser).then((nu) => {
-          newRole.users.push(nu._id);
-          newRole.save();
-          CART.create({ user: nu._id }).then((cart) => {
-            nu.cart = cart._id;
-            nu.save();
-          });
-        });
+      const salt = generateSalt();
+      const passwordHash = generateHashedPassword(salt, '123');
+
+      const normalUser = await USER.create({
+        username: 'jeliozver',
+        email: 'jeliozver@gmail.com',
+        salt,
+        password: passwordHash,
+        roles: [userRole._id],
       });
+
+      userRole.users.push(normalUser._id);
+      await userRole.save();
+
+      const userCart = await CART.create({ user: normalUser._id });
+      normalUser.cart = userCart._id;
+      await normalUser.save();
     }
-  });
+  } catch (err) {
+    console.error('Error initializing roles and users:', err);
+  }
 };
