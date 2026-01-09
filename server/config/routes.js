@@ -22,6 +22,7 @@ const setupRoutes = (APP) => {
     USER_CONTROLLER.getPurchaseHistory
   );
   APP.get('/user/allUsers', AUTH.isAuth, USER_CONTROLLER.getAllUsers);
+  APP.get('/user/:userId', AUTH.isAuth, USER_CONTROLLER.getUser);
   APP.post(
     '/user/giveAdminPermission',
     AUTH.isAuth,

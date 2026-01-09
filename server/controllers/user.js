@@ -1,9 +1,10 @@
 import VALIDATOR from 'validator';
 import PASSPORT from 'passport';
+import mongoose from 'mongoose';
 
 import { ROLE } from '../models/Role.js';
-import { USER } from '../models/User.js';
 import { RECEIPT } from '../models/Receipt.js';
+import { USER } from '../models/User.js';
 
 function validateRegisterForm(payload) {
   let errors = {};
@@ -338,7 +339,8 @@ export const unblockComments = async (req, res) => {
 };
 
 export const getAllUsers = async (_, res) => {
-  USER.find({}, 'username isAdmin')
+  USER.find()
+    .populate('favoriteBooks')
     .then((users) => {
       if (users) {
         return res.status(200).json({
@@ -353,6 +355,27 @@ export const getAllUsers = async (_, res) => {
         message: 'Something went wrong, please try again.',
       });
     });
+};
+
+export const getUser = async (req, res) => {
+  let userId = req.params.userId;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid user ID' });
+  }
+
+  const user = await USER.findById(userId)
+    .populate('favoriteBooks')
+    .populate('receipts');
+
+  if (!user) {
+    return res.status(400).json({
+      message: 'No user with provider id',
+    });
+  }
+
+  return res.status(200).json({
+    data: user,
+  });
 };
 
 export const giveAdminPermission = async (req, res) => {

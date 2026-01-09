@@ -22,7 +22,8 @@ import {
   Wrap,
   Checkbox,
   useDisclosure,
-  Box
+  Box,
+  ModalCloseButton
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { FiShield, FiSearch, FiUserX, FiMessageCircle } from 'react-icons/fi';
@@ -122,7 +123,13 @@ const AdminModal: FC<adminModalProps> = ({ isModalOpen, onClose }) => {
       <Modal isOpen={isModalOpen} onClose={onClose} isCentered={true}>
         <ModalOverlay>
           <ModalContent maxW={'800px'}>
-            <ModalHeader textAlign={'center'}>Admin Settings</ModalHeader>
+            <ModalHeader textAlign={'center'}>
+              <ModalCloseButton
+                onClick={() => {
+                  onClose();
+                  setAdminPermissionTabInFocus(false);
+                }}></ModalCloseButton>
+            </ModalHeader>
             <ModalBody>
               <Tabs flex={1}>
                 <TabList justifyContent={'center'}>
@@ -284,30 +291,45 @@ const AdminModal: FC<adminModalProps> = ({ isModalOpen, onClose }) => {
               </Tabs>
             </ModalBody>
             <ModalFooter>
-              <HStack>
-                {Object.keys(adminPermissionInDraft).length !== 0 &&
-                  isAdminPermissionTabInFocus && (
-                    <Button
-                      alignSelf={'center'}
-                      {...buttonStyles}
-                      onClick={() => {
-                        const index = users.findIndex((u) => u.username === localUserName);
-                        const newValue = users[index].isAdmin;
-                        const originalValue = originalUsers[index].isAdmin;
-                        const isLocalUser = newValue !== originalValue;
-
-                        if (isLocalUser) {
-                          confirmationModalDisclosure.onOpen();
-                          return;
-                        }
-                        handleAdminPermission(adminPermissionInDraft);
-                      }}>
-                      Apply Changes
-                    </Button>
-                  )}
-                <Button {...buttonStyles} onClick={onClose}>
-                  Close
+              <HStack w={'100%'} justifyContent={'space-between'}>
+                <Button
+                  {...buttonStyles}
+                  onClick={() => {
+                    onClose();
+                    navigate('users');
+                  }}>
+                  View User List
                 </Button>
+                <HStack>
+                  {Object.keys(adminPermissionInDraft).length !== 0 &&
+                    isAdminPermissionTabInFocus && (
+                      <Button
+                        alignSelf={'center'}
+                        {...buttonStyles}
+                        onClick={() => {
+                          const index = users.findIndex((u) => u.username === localUserName);
+                          const newValue = users[index].isAdmin;
+                          const originalValue = originalUsers[index].isAdmin;
+                          const isLocalUser = newValue !== originalValue;
+
+                          if (isLocalUser) {
+                            confirmationModalDisclosure.onOpen();
+                            return;
+                          }
+                          handleAdminPermission(adminPermissionInDraft);
+                        }}>
+                        Apply Changes
+                      </Button>
+                    )}
+                  <Button
+                    {...buttonStyles}
+                    onClick={() => {
+                      onClose();
+                      setAdminPermissionTabInFocus(false);
+                    }}>
+                    Close
+                  </Button>
+                </HStack>
               </HStack>
             </ModalFooter>
           </ModalContent>

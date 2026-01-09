@@ -8,9 +8,15 @@ type ReceiptItemProps = {
   onOpen: () => void;
   receipts: Receipt[];
   setSelectedReceipt: React.Dispatch<React.SetStateAction<Receipt | undefined>>;
+  cardWidth?: number | string;
 };
 
-const ReceiptItem: React.FC<ReceiptItemProps> = ({ onOpen, receipts, setSelectedReceipt }) => {
+const ReceiptItem: React.FC<ReceiptItemProps> = ({
+  onOpen,
+  receipts,
+  setSelectedReceipt,
+  cardWidth
+}) => {
   const [isExpand, setIsExpand] = useState<Record<string, boolean>>({});
 
   const showDetails = (receiptId: string) => {
@@ -20,7 +26,7 @@ const ReceiptItem: React.FC<ReceiptItemProps> = ({ onOpen, receipts, setSelected
   };
 
   return (
-    <Card w={'900px'} display={'flex'}>
+    <Card w={cardWidth ?? '900px'} display={'flex'}>
       <CardHeader display={'flex'} justifyContent={'center'}>
         <Text {...cardTextStyle} fontWeight={'600'}>
           Purchase History

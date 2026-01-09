@@ -7,7 +7,6 @@ import BookDetails from './pages/BookDetails';
 import Cart from './pages/Cart';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from './reducers/authSlice';
-import UserProfile from './pages/UserProfile';
 import { AddIcon } from '@chakra-ui/icons';
 import { IconButton, useDisclosure } from '@chakra-ui/react';
 import { buttonStyles } from './globalStyles';
@@ -16,6 +15,9 @@ import BookModal from './components/modals/BookModal';
 import { NewPassword } from './pages/NewPassword';
 import { StoreProvider } from './context/storeContext';
 import Analytics from './pages/Analytics';
+import UserProfile from './pages/UserProfile';
+import UserDetails from './pages/userList/UserDetails';
+import UserList from './pages/userList/UserList';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -66,6 +68,9 @@ function App() {
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
           <Route path="restartPassword" element={<NewPassword></NewPassword>}></Route>
           <Route path="analytics" element={token ? <Analytics /> : <Navigate to="/" />}></Route>
+          <Route path="/users" element={<UserList />}>
+            <Route path=":userId" element={<UserDetails />} />
+          </Route>
         </Route>
       </Routes>
     </>

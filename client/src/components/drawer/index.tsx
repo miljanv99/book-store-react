@@ -37,6 +37,11 @@ const DrawerComponent: FC<DrawerProps> = ({
 
   const { colorMode, toggleColorMode } = useColorMode();
 
+  const BUTTON_STYLE = {
+    width: '150px',
+    size: 'lg'
+  };
+
   const handleSignOut = async () => {
     dispatch(clearToken());
     onDrawerClose();
@@ -73,21 +78,29 @@ const DrawerComponent: FC<DrawerProps> = ({
             ) : (
               <>
                 <Button
-                  width={'150px'}
-                  size={'lg'}
+                  {...BUTTON_STYLE}
+                  onClick={() => {
+                    // navigate('userList');
+                    navigate('users');
+                    onDrawerClose();
+                  }}>
+                  Users List
+                </Button>
+                <Button
+                  {...BUTTON_STYLE}
                   onClick={() => {
                     navigate('analytics');
                     onDrawerClose();
                   }}>
                   Analytics
                 </Button>
-                <Button width={'150px'} size={'lg'} onClick={handleSignOut}>
+                <Button {...BUTTON_STYLE} onClick={handleSignOut}>
                   Sign Out
                 </Button>
               </>
             )}
             {!token ? (
-              <Button width={'150px'} size={'lg'} onClick={onModalRegisterOpen}>
+              <Button {...BUTTON_STYLE} onClick={onModalRegisterOpen}>
                 Register
               </Button>
             ) : null}

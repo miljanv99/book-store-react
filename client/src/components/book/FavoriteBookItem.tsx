@@ -6,13 +6,21 @@ import { InfoIcon } from '@chakra-ui/icons';
 
 type FavorteBookItemProps = {
   profile: User | undefined;
+  cardWidth?: number | string;
+  bookImageWidth?: number;
+  bookImageHeight?: number;
 };
 
-const FavoriteBookItem: React.FC<FavorteBookItemProps> = ({ profile }) => {
+const FavoriteBookItem: React.FC<FavorteBookItemProps> = ({
+  profile,
+  cardWidth,
+  bookImageWidth,
+  bookImageHeight
+}) => {
   const navigate = useNavigate();
 
   return (
-    <Card w={'900px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
+    <Card w={cardWidth ?? '900px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
       <CardHeader display={'flex'} justifyContent={'center'}>
         <Text {...cardTextStyle} fontWeight={'600'}>
           Favorite Books
@@ -31,8 +39,8 @@ const FavoriteBookItem: React.FC<FavorteBookItemProps> = ({ profile }) => {
             profile?.favoriteBooks.map((book) => (
               <Image
                 key={book._id}
-                w={200}
-                h={300}
+                w={bookImageWidth ?? 200}
+                h={bookImageHeight ?? 300}
                 src={book.cover}
                 cursor={'pointer'}
                 onClick={async () => {
