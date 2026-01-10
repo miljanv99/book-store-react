@@ -26,7 +26,7 @@ export const API_ROUTES = {
   commentsStatus: '/user/commentsStatus',
   commentsPermission: '/user/commentsPermission',
   getAllUsers: '/user/allUsers',
-  getUser: (userId: string) => `/user/${userId}`,
+  getUser: (userId: string) => `/user/id/${userId}`,
   adminPermission: '/user/giveAdminPermission',
   //Comment
   getComments: (bookId: string, skipCount: number) => `/comment/${bookId}/${skipCount}`,
