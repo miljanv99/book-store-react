@@ -32,4 +32,8 @@ USER_SCHEMA.method({
   },
 });
 
+/**
+ * @type {import('mongoose').Model<any>}
+ */
+
 export const USER = mongoose.model('User', USER_SCHEMA);

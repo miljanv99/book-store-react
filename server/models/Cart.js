@@ -9,4 +9,8 @@ const CART_SCHEMA = mongoose.Schema({
   totalPrice: { type: NUMBER, default: 0 },
 });
 
+/**
+ * @type {import('mongoose').Model<any>}
+ */
+
 export const CART = mongoose.model('Cart', CART_SCHEMA);

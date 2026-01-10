@@ -41,6 +41,7 @@ import {
 import { useEffect, useMemo } from 'react';
 import { COLORS } from '../globalColors';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 type AnalyticsData = {
   topMostPopularBooksWithLimit: {
@@ -200,7 +201,7 @@ const Analytics = () => {
                         textDecoration: 'underline',
                         color: COLORS.darkPrimaryColor
                       }}
-                      onClick={() => navigate(`/bookDetails/${book.id}`)}>
+                      onClick={() => navigate(ROUTES.BOOK_DETAILS_DYNAMIC_PATH(book.id))}>
                       {book.title}
                     </Td>
                     <Td>{book.purchasesCount}</Td>
@@ -267,7 +268,9 @@ const Analytics = () => {
                                     textDecoration: 'underline',
                                     color: COLORS.darkPrimaryColor
                                   }}
-                                  onClick={() => navigate(`/bookDetails/${book.id}`)}>
+                                  onClick={() =>
+                                    navigate(ROUTES.BOOK_DETAILS_DYNAMIC_PATH(book.id))
+                                  }>
                                   {book.title}
                                 </Td>
                                 <Td>{book.currentRating.toFixed(2)}</Td>
@@ -375,7 +378,7 @@ const Analytics = () => {
                         textDecoration: 'underline',
                         color: COLORS.darkPrimaryColor
                       }}
-                      onClick={() => navigate(`/bookDetails/${book.id}`)}>
+                      onClick={() => navigate(ROUTES.BOOK_DETAILS_DYNAMIC_PATH(book.id))}>
                       {book.title}
                     </Td>
                     <Td>{book.purchasesCount}</Td>

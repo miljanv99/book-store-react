@@ -18,6 +18,7 @@ import { useApi } from '../hooks/useApi';
 import { API_ROUTES } from '../constants/apiConstants';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { buttonStyles } from '../globalStyles';
+import { ROUTES } from '../constants/routes';
 
 export const NewPassword = () => {
   const [password, setPassword] = useState('');
@@ -119,7 +120,7 @@ export const NewPassword = () => {
             <Button
               {...buttonStyles}
               onClick={() => {
-                navigate('/');
+                navigate(ROUTES.HOME);
               }}>
               Go Back
             </Button>

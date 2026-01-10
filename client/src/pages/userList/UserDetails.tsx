@@ -61,14 +61,34 @@ const UserDetails = () => {
               <HStack w={'80%'} justifyContent={'space-around'}>
                 <Card w={'50vw'} h={90} minW={'190px'}>
                   <VStack h={'inherit'} justifyContent={'center'}>
-                    <Text>User Type: {user.isAdmin ? 'Admin' : 'User'}</Text>
-                    <Text>Email: {user.email}</Text>
+                    <Text>
+                      User Type:{' '}
+                      <>
+                        <strong>{user.isAdmin ? 'Admin' : 'User'}</strong>
+                      </>
+                    </Text>
+                    <Text>
+                      Email:{' '}
+                      <>
+                        <strong>{user.email}</strong>
+                      </>
+                    </Text>
                   </VStack>
                 </Card>
                 <Card w={'50vw'} h={90} minW={'190px'}>
                   <VStack h={'inherit'} justifyContent={'center'}>
-                    <Text>Comment Status: {user.isCommentsBlocked ? 'Blocked' : 'Allowed'}</Text>
-                    <Text>Number Of Comments: {user.commentsCount}</Text>
+                    <Text>
+                      Comment Status:{' '}
+                      <>
+                        <strong>{user.isCommentsBlocked ? 'Blocked' : 'Allowed'}</strong>
+                      </>
+                    </Text>
+                    <Text>
+                      Number Of Comments:{' '}
+                      <>
+                        <strong>{user.commentsCount}</strong>
+                      </>
+                    </Text>
                   </VStack>
                 </Card>
               </HStack>

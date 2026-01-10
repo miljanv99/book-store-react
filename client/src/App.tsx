@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics';
 import UserProfile from './pages/UserProfile';
 import UserDetails from './pages/userList/UserDetails';
 import UserList from './pages/userList/UserList';
+import { ROUTES } from './constants/routes';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -51,25 +52,32 @@ function App() {
       <BookModal isOpen={isOpen} onClose={onClose}></BookModal>
 
       <Routes>
-        <Route path="/" element={<Navigation />}>
+        <Route path={ROUTES.HOME} element={<Navigation />}>
           <Route index element={<Home />} />
           <Route
-            path="store"
+            path={ROUTES.STORE}
             element={
               <StoreProvider>
                 <Store />
               </StoreProvider>
             }
           />
-          <Route path="cart" element={token ? <Cart /> : <Navigate to="/" replace />} />
-          <Route path="bookDetails/:bookId" element={<BookDetails />} />
+          <Route path={ROUTES.CART} element={token ? <Cart /> : <Navigate to="/" replace />} />
+          <Route path={ROUTES.BOOK_DETAILS} element={<BookDetails />} />
           <Route
-            path="profile/:username"
+            path={ROUTES.PROFILE}
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
-          <Route path="restartPassword" element={<NewPassword></NewPassword>}></Route>
-          <Route path="analytics" element={token ? <Analytics /> : <Navigate to="/" />}></Route>
-          <Route path="/users" element={<UserList />}>
-            <Route path=":userId" element={<UserDetails />} />
+          <Route path={ROUTES.RESTART_PASSWORD} element={<NewPassword></NewPassword>}></Route>
+          <Route
+            path={ROUTES.ANALYTICS}
+            element={token ? <Analytics /> : <Navigate to="/" />}></Route>
+          <Route
+            path={ROUTES.USERS_LIST.USERS}
+            element={token ? <UserList /> : <Navigate to="/" />}>
+            <Route
+              path={ROUTES.USERS_LIST.USER_DETAILS}
+              element={token ? <UserDetails /> : <Navigate to="/" />}
+            />
           </Route>
         </Route>
       </Routes>

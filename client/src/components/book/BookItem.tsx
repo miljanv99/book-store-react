@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { AddIcon } from '@chakra-ui/icons';
 import BookRating from './BookRating';
 import { useAddToCart } from '../../hooks/useAddToCart';
+import { ROUTES } from '../../constants/routes';
 
 function BookItem(props: Book) {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function BookItem(props: Book) {
   };
 
   function showBookDetails() {
-    navigate(`/bookDetails/${props._id}`);
+    navigate(ROUTES.BOOK_DETAILS_DYNAMIC_PATH(props._id));
   }
 
   return (

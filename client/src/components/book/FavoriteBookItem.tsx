@@ -3,6 +3,7 @@ import { User } from '../../model/User.model';
 import { useNavigate } from 'react-router-dom';
 import { cardTextStyle } from '../../globalStyles';
 import { InfoIcon } from '@chakra-ui/icons';
+import { ROUTES } from '../../constants/routes';
 
 type FavorteBookItemProps = {
   profile: User | undefined;
@@ -44,7 +45,7 @@ const FavoriteBookItem: React.FC<FavorteBookItemProps> = ({
                 src={book.cover}
                 cursor={'pointer'}
                 onClick={async () => {
-                  navigate(`/bookDetails/${book._id}`);
+                  navigate(ROUTES.BOOK_DETAILS_DYNAMIC_PATH(book._id));
                   scrollTo({ top: 0, behavior: 'instant' });
                 }}></Image>
             ))

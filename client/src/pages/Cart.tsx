@@ -32,6 +32,7 @@ import { API_ROUTES } from '../constants/apiConstants';
 import { ApiResponse } from '../model/ApiResponse.model';
 import { Receipt } from '../model/Receipts.model';
 import { COLORS } from '../globalColors';
+import { ROUTES } from '../constants/routes';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -180,7 +181,7 @@ const CartScreen = () => {
     console.log('AAA', response?.status);
     if (response?.status === 200) {
       dispatch(setCartCounter(0));
-      navigate('/');
+      navigate(ROUTES.HOME);
     }
     toast(response?.data.message, `${response?.status === 200 ? 'success' : 'error'}`);
   };

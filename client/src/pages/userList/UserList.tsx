@@ -19,6 +19,7 @@ import { useApi } from '../../hooks/useApi';
 import { ApiResponse } from '../../model/ApiResponse.model';
 import { User } from '../../model/User.model';
 import { selectAuthToken } from '../../reducers/authSlice';
+import { ROUTES } from '../../constants/routes';
 
 const UserList = () => {
   const token = useSelector(selectAuthToken);
@@ -46,7 +47,7 @@ const UserList = () => {
     if (users.length === 0) return;
 
     if (!userId) {
-      navigate(`/users/${users[0]._id}`, { replace: true });
+      navigate(ROUTES.USERS_LIST.USER_DETAILS_DYNAMIC_PATH(users[0]._id), { replace: true });
       setSelectedUserId(users[0]._id);
       return;
     }
@@ -102,7 +103,7 @@ const UserList = () => {
                     justifyContent={'space-between'}
                     onClick={() => {
                       setSelectedUserId(user._id);
-                      navigate(`/users/${user._id}`);
+                      navigate(ROUTES.USERS_LIST.USER_DETAILS_DYNAMIC_PATH(user._id));
                     }}>
                     <HStack>
                       <Avatar size={'lg'} src={user.avatar}></Avatar>

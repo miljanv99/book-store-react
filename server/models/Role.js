@@ -15,6 +15,10 @@ const ROLE_SCHEMA = mongoose.Schema({
   users: [{ type: OBJECT_ID, ref: 'User' }],
 });
 
+/**
+ * @type {import('mongoose').Model<any>}
+ */
+
 export const ROLE = mongoose.model('Role', ROLE_SCHEMA);
 
 export const init = async () => {

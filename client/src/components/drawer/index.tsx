@@ -13,9 +13,10 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { clearToken, selectAuthToken, setUserData } from '../../reducers/authSlice';
 import { FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { matchPath, useNavigate } from 'react-router-dom';
 import { useToastHandler } from '../../hooks/useToastHandler';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { ROUTES } from '../../constants/routes';
 
 interface DrawerProps {
   onModalSignInOpen: () => void;
@@ -45,11 +46,15 @@ const DrawerComponent: FC<DrawerProps> = ({
   const handleSignOut = async () => {
     dispatch(clearToken());
     onDrawerClose();
-    location.pathname === '/cart'
-      ? navigate('/')
-      : location.pathname === '/profile'
-        ? navigate('/')
-        : () => {};
+
+    if (
+      location.pathname === ROUTES.CART ||
+      location.pathname === ROUTES.PROFILE ||
+      location.pathname === ROUTES.USERS_LIST.USERS ||
+      matchPath(ROUTES.USERS_LIST.USERS_LIST_FULL_PATH, location.pathname)
+    ) {
+      navigate(ROUTES.HOME, { replace: true });
+    }
 
     dispatch(
       setUserData({
@@ -80,8 +85,7 @@ const DrawerComponent: FC<DrawerProps> = ({
                 <Button
                   {...BUTTON_STYLE}
                   onClick={() => {
-                    // navigate('userList');
-                    navigate('users');
+                    navigate(ROUTES.USERS_LIST.USERS);
                     onDrawerClose();
                   }}>
                   Users List
@@ -89,7 +93,7 @@ const DrawerComponent: FC<DrawerProps> = ({
                 <Button
                   {...BUTTON_STYLE}
                   onClick={() => {
-                    navigate('analytics');
+                    navigate(ROUTES.ANALYTICS);
                     onDrawerClose();
                   }}>
                   Analytics

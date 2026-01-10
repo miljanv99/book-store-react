@@ -31,4 +31,8 @@ BOOK_SCHEMA.index({
   isbn: 'text',
 });
 
+/**
+ * @type {import('mongoose').Model<any>}
+ */
+
 export const BOOK = mongoose.model('Book', BOOK_SCHEMA);

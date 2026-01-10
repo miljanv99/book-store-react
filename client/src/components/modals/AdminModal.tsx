@@ -37,6 +37,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { clearToken, selectAuthToken, selectUserData, setUserData } from '../../reducers/authSlice';
 import ConfirmationModal from './ConfirmationModal';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 interface adminModalProps {
   onClose: () => void;
@@ -296,7 +297,7 @@ const AdminModal: FC<adminModalProps> = ({ isModalOpen, onClose }) => {
                   {...buttonStyles}
                   onClick={() => {
                     onClose();
-                    navigate('users');
+                    navigate(ROUTES.USERS_LIST.USERS);
                   }}>
                   View User List
                 </Button>
@@ -344,7 +345,7 @@ const AdminModal: FC<adminModalProps> = ({ isModalOpen, onClose }) => {
         onCloseBtnText="Close"
         onConfirm={async () => {
           handleAdminPermission(adminPermissionInDraft);
-          navigate('/');
+          navigate(ROUTES.HOME);
           onClose();
           confirmationModalDisclosure.onClose();
           dispatch(clearToken());

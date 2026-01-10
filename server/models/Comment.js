@@ -11,4 +11,8 @@ const COMMENT_SCHEMA = mongoose.Schema({
   creationDate: { type: DATE, default: Date.now },
 });
 
+/**
+ * @type {import('mongoose').Model<any>}
+ */
+
 export const COMMENT = mongoose.model('Comment', COMMENT_SCHEMA);
