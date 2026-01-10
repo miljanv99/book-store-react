@@ -11,7 +11,7 @@ import {
   useColorMode
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearToken, selectAuthToken, setUserData } from '../../reducers/authSlice';
+import { clearToken, selectAuthToken, selectUserData, setUserData } from '../../reducers/authSlice';
 import { FC } from 'react';
 import { matchPath, useNavigate } from 'react-router-dom';
 import { useToastHandler } from '../../hooks/useToastHandler';
@@ -35,6 +35,7 @@ const DrawerComponent: FC<DrawerProps> = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const showToast = useToastHandler();
+  const isAdmin = useSelector(selectUserData).isAdmin;
 
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -82,22 +83,26 @@ const DrawerComponent: FC<DrawerProps> = ({
               </Button>
             ) : (
               <>
-                <Button
-                  {...BUTTON_STYLE}
-                  onClick={() => {
-                    navigate(ROUTES.USERS_LIST.USERS);
-                    onDrawerClose();
-                  }}>
-                  Users List
-                </Button>
-                <Button
-                  {...BUTTON_STYLE}
-                  onClick={() => {
-                    navigate(ROUTES.ANALYTICS);
-                    onDrawerClose();
-                  }}>
-                  Analytics
-                </Button>
+                {isAdmin && (
+                  <>
+                    <Button
+                      {...BUTTON_STYLE}
+                      onClick={() => {
+                        navigate(ROUTES.USERS_LIST.USERS);
+                        onDrawerClose();
+                      }}>
+                      Users List
+                    </Button>
+                    <Button
+                      {...BUTTON_STYLE}
+                      onClick={() => {
+                        navigate(ROUTES.ANALYTICS);
+                        onDrawerClose();
+                      }}>
+                      Analytics
+                    </Button>
+                  </>
+                )}
                 <Button {...BUTTON_STYLE} onClick={handleSignOut}>
                   Sign Out
                 </Button>

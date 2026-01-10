@@ -73,10 +73,10 @@ function App() {
             element={token ? <Analytics /> : <Navigate to="/" />}></Route>
           <Route
             path={ROUTES.USERS_LIST.USERS}
-            element={token ? <UserList /> : <Navigate to="/" />}>
+            element={token && isAdmin ? <UserList /> : <Navigate to="/" />}>
             <Route
               path={ROUTES.USERS_LIST.USER_DETAILS}
-              element={token ? <UserDetails /> : <Navigate to="/" />}
+              element={token && isAdmin ? <UserDetails /> : <Navigate to="/" />}
             />
           </Route>
         </Route>
