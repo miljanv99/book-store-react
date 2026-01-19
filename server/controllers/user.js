@@ -5,6 +5,14 @@ import mongoose from 'mongoose';
 import { ROLE } from '../models/Role.js';
 import { RECEIPT } from '../models/Receipt.js';
 import { USER } from '../models/User.js';
+import { CART } from '../models/Cart.js';
+import oAuth2Client from '../config/googleClient.js';
+import { newUserEmail } from '../utilities/sendEmail/sendEmail.js';
+import {
+  generateHashedPassword,
+  generateSalt,
+} from '../utilities/encryption.js';
+import crypto from 'crypto';
 
 function validateRegisterForm(payload) {
   let errors = {};
@@ -439,6 +447,84 @@ export const giveAdminPermission = async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message: error.message || error,
+    });
+  }
+};
+
+export const createNewUser = async (req, res) => {
+  try {
+    const username = req.body.username;
+    const email = req.body.email;
+    const role = req.body.role;
+    const avatar = req.body?.avatar;
+
+    if (!email || !username) {
+      return res.status(400).json({
+        message: 'You have to enter email, username',
+      });
+    }
+
+    if (role !== 'user' && role !== 'admin') {
+      return res.status(400).json({
+        message: 'isAdmin must have "user" or "admin" string value',
+      });
+    }
+
+    const isEmailUsed = await USER.findOne({ email: email });
+    const isUsernameUsed = await USER.findOne({ username: username });
+
+    if (isUsernameUsed) {
+      return res.status(400).json({
+        message: 'Someone already registered with provided username.',
+      });
+    }
+    if (isEmailUsed) {
+      return res.status(400).json({
+        message: 'Someone already registered with provided email.',
+      });
+    }
+
+    const isAdmin = role === 'admin' ? true : false;
+
+    const userRole = !isAdmin
+      ? await ROLE.findOne({ name: 'User' })
+      : await ROLE.findOne({ name: 'Admin' });
+    const generatedPassword = crypto.randomBytes(6).toString('hex');
+    const salt = generateSalt();
+    const passwordHash = generateHashedPassword(salt, generatedPassword);
+
+    const createdUser = await USER.create({
+      username: username,
+      email: email,
+      salt,
+      password: passwordHash,
+      isAdmin: isAdmin,
+      roles: [userRole._id],
+      ...(avatar && { avatar }),
+    });
+
+    userRole.users.push(createdUser._id);
+    await userRole.save();
+
+    const userCart = await CART.create({ user: createdUser._id });
+    createdUser.cart = userCart._id;
+    await createdUser.save();
+
+    const authUrl = oAuth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: ['https://mail.google.com/'],
+      prompt: 'consent',
+      state: encodeURIComponent(email),
+    });
+
+    await newUserEmail(email, username, generatedPassword, authUrl);
+    return res.status(200).json({
+      message: 'User is successfully created',
+      data: createdUser,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: `Something went wrong! ${error}`,
     });
   }
 };

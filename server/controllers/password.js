@@ -4,7 +4,7 @@ import {
   generateHashedPassword,
   generateSalt,
 } from '../utilities/encryption.js';
-import { sendMail } from '../utilities/sendEmail/sendEmail.js';
+import { restartPasswordMail } from '../utilities/sendEmail/sendEmail.js';
 import jwt from 'jsonwebtoken';
 import oAuth2Client from '../config/googleClient.js';
 import 'dotenv/config';
@@ -49,7 +49,7 @@ export const getAccessToken = async (req, res) => {
 
     const resetLink = `http://localhost:5173/restartPassword?token=${token}&id=${user._id}`;
 
-    await sendMail(resetLink, email, refreshToken);
+    await restartPasswordMail(resetLink, email, refreshToken);
     res.send(
       'Authorization successful! We sent you link to restart you password on email.'
     );

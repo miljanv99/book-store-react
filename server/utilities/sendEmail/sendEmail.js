@@ -1,8 +1,9 @@
 import { google } from 'googleapis';
 import 'dotenv/config';
 import oAuth2Client from '../../config/googleClient.js';
+import nodemailer from 'nodemailer';
 
-export async function sendMail(resetLink, sendTo, refreshToken) {
+export async function restartPasswordMail(resetLink, sendTo, refreshToken) {
   oAuth2Client.setCredentials({
     refresh_token: refreshToken,
   });
@@ -34,4 +35,44 @@ export async function sendMail(resetLink, sendTo, refreshToken) {
   });
 
   console.log('Message sent:', res.data.id);
+}
+
+export async function newUserEmail(
+  email,
+  username,
+  generatedPassword,
+  restartPasswordURL
+) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'miljanv999@gmail.com',
+      pass: process.env.EMAIL_APP_PASS,
+    },
+  });
+
+  console.log('Reset link:', restartPasswordURL);
+
+  const response = await transporter.sendMail({
+    from: 'miljanv999@gmail.com',
+    to: email,
+    subject: 'Account Activation',
+    html: `<p>Our Admin created you an account for our book store.</p>
+
+      <p>
+        <strong>Username:</strong> ${username}<br/>
+        <strong>Password:</strong> ${generatedPassword}
+      </p>
+
+      <p>
+        You can also re-create your password:
+        <br/>
+        <p>
+          ${restartPasswordURL}
+        </p>
+      </p>`,
+  });
+
+  console.log('Email message ID: ', response.messageId);
+  console.log('Email envelope: ', response.envelope);
 }

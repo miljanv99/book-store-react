@@ -431,6 +431,7 @@ const BookDetails = () => {
                 border={'none'}
                 borderBottom={'1px solid'}
                 borderRadius={'none'}
+                onBlur={() => setInputCommentInFocus(false)}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const inputValue = e.target.value;
                   setInputCommentValue(inputValue);

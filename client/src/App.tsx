@@ -67,7 +67,6 @@ function App() {
           <Route
             path={ROUTES.PROFILE}
             element={token ? <UserProfile /> : <Navigate to="/" replace />}></Route>
-          <Route path={ROUTES.RESTART_PASSWORD} element={<NewPassword></NewPassword>}></Route>
           <Route
             path={ROUTES.ANALYTICS}
             element={token ? <Analytics /> : <Navigate to="/" />}></Route>
@@ -80,6 +79,7 @@ function App() {
             />
           </Route>
         </Route>
+        <Route path={ROUTES.RESTART_PASSWORD} element={<NewPassword></NewPassword>}></Route>
       </Routes>
     </>
   );

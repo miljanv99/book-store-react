@@ -5,6 +5,7 @@ import * as COMMENT_CONTROLLER from '../controllers/comment.js';
 import * as CART_CONTROLLER from '../controllers/cart.js';
 import * as ERROR_CONTROLLER from '../controllers/error.js';
 import * as AUTH from './auth.js';
+import { newUserEmail } from '../utilities/sendEmail/sendEmail.js';
 
 const setupRoutes = (APP) => {
   APP.post('/user/register', USER_CONTROLLER.register);
@@ -15,6 +16,11 @@ const setupRoutes = (APP) => {
   );
   APP.get('/oauth2callback', PASSWORD_CONTROLLER.getAccessToken);
   APP.post('/user/restartPassword', PASSWORD_CONTROLLER.restartPassword);
+  APP.post(
+    '/user/accountActivation',
+    AUTH.isInRole('Admin'),
+    USER_CONTROLLER.createNewUser
+  );
   APP.get('/user/profile/:username', AUTH.isAuth, USER_CONTROLLER.getProfile);
   APP.get(
     '/user/purchaseHistory',

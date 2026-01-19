@@ -12,5 +12,6 @@ export const ROUTES = {
     USER_DETAILS: ':userId',
     USERS_LIST_FULL_PATH: '/users/:userId',
     USER_DETAILS_DYNAMIC_PATH: (userId: string) => `/users/${userId}`
-  }
+  },
+  ADD_NEW_USER: '/user/accountActivation'
 };
