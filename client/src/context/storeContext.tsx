@@ -13,10 +13,10 @@ const defaultValue: StoreContextType = {
 export const StoreContext = createContext<StoreContextType>(defaultValue);
 
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
-  const [inputValue, setInputValue] = useState(() => sessionStorage.getItem('storeInput') || '');
+  const [inputValue, setInputValue] = useState(() => localStorage.getItem('storeInput') || '');
 
   useEffect(() => {
-    sessionStorage.setItem('storeInput', inputValue);
+    localStorage.setItem('storeInput', inputValue);
   }, [inputValue]);
   return (
     <StoreContext.Provider value={{ inputValue, setInputValue }}>{children}</StoreContext.Provider>

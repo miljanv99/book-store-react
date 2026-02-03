@@ -1,20 +1,25 @@
 import { VStack, HStack, Button, Text } from '@chakra-ui/react';
 import { buttonStyles } from '../../globalStyles';
-import { SetURLSearchParams } from 'react-router-dom';
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import AdvancedFilterMenu from './AdvancedFilterMenu';
+import React from 'react';
+import { StoreContext } from '../../context/storeContext';
 
 interface AdvancedFilterPanelProps {
   searchParams: URLSearchParams;
-  setSearchParams: SetURLSearchParams;
+  updateSearchParams: (callback: (prev: URLSearchParams) => URLSearchParams) => void;
+  setInputValueTemperary: React.Dispatch<React.SetStateAction<string>>;
   allGenres: string[];
 }
 
 const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
   searchParams,
-  setSearchParams,
+  updateSearchParams,
+  setInputValueTemperary,
   allGenres
 }) => {
+  const inputValue = useContext(StoreContext);
+
   return (
     <VStack p={4} borderWidth={1} borderRadius="md" mb={'16px'}>
       <Text mb={2} fontWeight="bold">
@@ -30,7 +35,7 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
             { label: 'Higher ↑ To Lower ↓', value: { price: -1 } }
           ]}
           searchParams={searchParams}
-          setSearchParams={setSearchParams}></AdvancedFilterMenu>
+          updateSearchParams={updateSearchParams}></AdvancedFilterMenu>
 
         {/* Sort by Rating */}
         <AdvancedFilterMenu
@@ -41,7 +46,7 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
             { label: 'Higher ↑ To Lower ↓', value: { currentRating: -1 } }
           ]}
           searchParams={searchParams}
-          setSearchParams={setSearchParams}></AdvancedFilterMenu>
+          updateSearchParams={updateSearchParams}></AdvancedFilterMenu>
 
         {/* Popularity */}
         <AdvancedFilterMenu
@@ -52,7 +57,7 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
             { label: 'Higher ↑ To Lower ↓', value: { purchasesCount: -1 } }
           ]}
           searchParams={searchParams}
-          setSearchParams={setSearchParams}></AdvancedFilterMenu>
+          updateSearchParams={updateSearchParams}></AdvancedFilterMenu>
 
         {/* Title */}
         <AdvancedFilterMenu
@@ -63,7 +68,7 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
             { label: 'Z to A', value: { title: -1 } }
           ]}
           searchParams={searchParams}
-          setSearchParams={setSearchParams}></AdvancedFilterMenu>
+          updateSearchParams={updateSearchParams}></AdvancedFilterMenu>
 
         {/* Genre */}
         <AdvancedFilterMenu
@@ -71,13 +76,31 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
           paramKey="genre"
           allGenres={allGenres}
           searchParams={searchParams}
-          setSearchParams={setSearchParams}></AdvancedFilterMenu>
+          updateSearchParams={updateSearchParams}></AdvancedFilterMenu>
 
-        {searchParams.size > 0 && (
+        {/* the size is 2, because url will always have 2 params: skip and limit */}
+        {searchParams.size > 2 && (
           <Button
             {...buttonStyles}
             onClick={() => {
-              setSearchParams({});
+              updateSearchParams((prev) => {
+                // Create a new URLSearchParams object
+                const newParams = new URLSearchParams();
+
+                // Keep only 'skip' and 'limit' if they exist
+                ['skip', 'limit'].forEach((key) => {
+                  const value = prev.get(key);
+                  if (value !== null) {
+                    newParams.set(key, value);
+                  }
+                });
+
+                return newParams;
+              });
+
+              inputValue.setInputValue('');
+              setInputValueTemperary('');
+              localStorage.removeItem('storeInput');
             }}>
             Clear filter
           </Button>
@@ -86,4 +109,4 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
     </VStack>
   );
 };
-export default AdvancedFilterPanel;
+export default React.memo(AdvancedFilterPanel);

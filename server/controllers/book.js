@@ -415,7 +415,10 @@ export const search = async (req, res) => {
       searchParams.query.genre = removeDoubleQuotes(params.genre);
     }
 
-    const numberOfBooks = await BOOK.find(searchParams.query).countDocuments();
+    const numberOfBooks = await BOOK.find(searchParams.query)
+      .skip(searchParams.skip)
+      .limit(searchParams.limit)
+      .countDocuments();
 
     if (numberOfBooks) {
       BOOK.find(searchParams.query)
@@ -424,12 +427,17 @@ export const search = async (req, res) => {
         .limit(searchParams.limit)
         .select('-comments')
         .then((result) => {
-          return res.status(200).json({
-            message: '',
-            data: result,
-            query: searchParams,
-            itemsCount: numberOfBooks,
-          });
+          BOOK.find(searchParams.query)
+            .countDocuments()
+            .then((allBooksCount) => {
+              return res.status(200).json({
+                message: '',
+                data: result,
+                query: searchParams,
+                itemsCountPerPage: numberOfBooks,
+                itemsCountNoSkip: allBooksCount,
+              });
+            });
         })
         .catch(() => {
           return res.status(400).json({

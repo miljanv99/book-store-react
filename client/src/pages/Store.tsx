@@ -1,15 +1,5 @@
-import {
-  Flex,
-  Input,
-  Spinner,
-  VStack,
-  Wrap,
-  Text,
-  InputGroup,
-  InputRightElement,
-  IconButton
-} from '@chakra-ui/react';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { Flex, Spinner, VStack, Wrap, Text, HStack, Button } from '@chakra-ui/react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import BookItem from '../components/book/BookItem';
 import { Book } from '../model/Book.model';
 import { COLORS } from '../globalColors';
@@ -17,10 +7,11 @@ import { useApi } from '../hooks/useApi';
 import { API_ROUTES } from '../constants/apiConstants';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectFullBooksList, setAllBooks } from '../reducers/bookSlice';
-import { FiFilter } from 'react-icons/fi';
+
 import { useSearchParams } from 'react-router-dom';
 import AdvancedFilterPanel from '../components/advancedFilter/AdvancedFilterPanel';
 import { StoreContext } from '../context/storeContext';
+import SearchInput from '../components/advancedFilter/SearchInput';
 
 type ApiBookResponse<T> = {
   data: T;
@@ -28,34 +19,68 @@ type ApiBookResponse<T> = {
 };
 
 const Store = () => {
+  const bookSkip = 0;
+  const bookLimit = 30;
   const fetchAllBooks = useApi<ApiBookResponse<Book[]>>();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const allBooks = useSelector(selectFullBooksList);
+  const [numberOfAllBooks, setNumberOfAllBooks] = useState<number>(0);
+  const totalPages = Math.ceil(numberOfAllBooks / bookLimit);
 
   const { inputValue, setInputValue } = useContext(StoreContext);
+  const [inputValueTemperary, setInputValueTemperary] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [allGenres, setAllGenres] = useState<string[]>([]);
+  const apiURL = new URL(API_ROUTES.getAllBooks, window.location.origin);
 
   const fetchBooks = async () => {
+    let urlSearchTerm = '';
     setIsLoading(true);
 
-    const url = new URL(API_ROUTES.getAllBooks, window.location.origin);
+    if (inputValue === '') {
+      setSearchParams((prev) => {
+        prev.delete('query');
+        return prev;
+      });
+    }
+    if (searchParams) {
+      if (searchParams.has('genre') || searchParams.has('query')) {
+        setSearchParams((prev) => {
+          prev.set('skip', bookSkip.toString());
+          return prev;
+        });
+      }
 
-    searchParams.forEach((value, key) => {
-      url.searchParams.append(key, value);
-    });
+      if (searchParams.has('query')) {
+        const raw = searchParams.get('query');
+        console.log('RAW: ', raw);
+        urlSearchTerm = raw && JSON.parse(raw).searchTerm;
+        setInputValueTemperary(urlSearchTerm);
+        setInputValue(urlSearchTerm);
+      }
+    }
 
-    console.log('URL: ', url);
+    if (!searchParams.has('skip') && !searchParams.has('limit')) {
+      console.log('NO PARAMS');
+      setSearchParams({ skip: bookSkip.toString(), limit: bookLimit.toString() });
+    }
+
+    console.log('SEARCH PARAMS: ', searchParams);
     const response = await fetchAllBooks({
       method: 'GET',
-      url: `${url.pathname}${url.search}`
+      url: `${apiURL.pathname}?${searchParams}`
     });
+    console.log('URLaaaaa: ', `${apiURL.pathname}${apiURL.search}`);
+    console.log('search params: ', searchParams);
 
-    dispatch(setAllBooks(response && response.data.data));
+    if (response && response.status === 200) {
+      dispatch(setAllBooks(response && response.data.data));
+      setNumberOfAllBooks(response.data['itemsCountNoSkip']);
 
-    setIsLoading(false);
+      setIsLoading(false);
+    }
   };
 
   const fetchGenres = async () => {
@@ -70,26 +95,31 @@ const Store = () => {
     setAllGenres(genres);
   };
 
-  const filteredBooks = useMemo(() => {
-    console.log('TEST: ', inputValue);
-    if (inputValue === '') {
-      return allBooks;
-    }
-
-    const query = inputValue.toLowerCase().split(' ');
-
-    return allBooks.filter((book) => {
-      const title = book.title.toLowerCase();
-      const author = book.author.toLowerCase();
-      return query.every((word) => title.includes(word) || author.includes(word));
-    });
-  }, [allBooks, inputValue]);
+  const updateSearchParams = useCallback(
+    (callback: (prev: URLSearchParams) => URLSearchParams) => {
+      setSearchParams((prevParams) => {
+        const next = callback(new URLSearchParams(prevParams));
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
 
   //Fetch books
   useEffect(() => {
     console.log('FETCHHHHH STORE SCREEN');
     fetchBooks();
   }, [searchParams]);
+
+  //Input search by query
+  useEffect(() => {
+    updateSearchParams((prev) => {
+      prev.set('query', JSON.stringify({ searchTerm: inputValue }));
+      return prev;
+    });
+
+    localStorage.setItem('search', `${`{"searchTerm": "${inputValue}"}`}`);
+  }, [inputValue]);
 
   //Fetch all genres from allBooks
   useEffect(() => {
@@ -99,37 +129,28 @@ const Store = () => {
   return (
     <>
       <VStack justify={'center'} mt={'80px'}>
-        <InputGroup width={'500px'}>
-          <Input
-            width={500}
-            value={inputValue}
-            mb={showAdvancedFilters || searchParams.size > 0 ? 0 : 8}
-            placeholder="Enter Title or Author"
-            onChange={(e) => setInputValue(e.target.value)}></Input>
-          <InputRightElement>
-            <IconButton
-              backgroundColor={'transparent'}
-              aria-label={'advanced_filter'}
-              icon={<FiFilter />}
-              isDisabled={searchParams.size > 0}
-              onClick={() => {
-                setShowAdvancedFilters((prev) => !prev);
-              }}
-              size="md"
-            />
-          </InputRightElement>
-        </InputGroup>
-        {(showAdvancedFilters || searchParams.size > 0) && (
+        <SearchInput
+          inputValue={inputValue}
+          inputValueTemperary={inputValueTemperary}
+          searchParams={searchParams}
+          setInputValue={setInputValue}
+          setInputValueTemperary={setInputValueTemperary}
+          setSearchParams={setSearchParams}
+          setShowAdvancedFilters={setShowAdvancedFilters}
+          showAdvancedFilters={showAdvancedFilters}></SearchInput>
+
+        {(showAdvancedFilters || searchParams.size > 2) && (
           <AdvancedFilterPanel
             searchParams={searchParams}
-            setSearchParams={setSearchParams}
+            updateSearchParams={updateSearchParams}
+            setInputValueTemperary={setInputValueTemperary}
             allGenres={allGenres}></AdvancedFilterPanel>
         )}
         {isLoading ? (
           <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
             <Spinner size={'xl'} color={COLORS.primaryColor}></Spinner>
           </Flex>
-        ) : filteredBooks.length === 0 ? (
+        ) : !allBooks ? (
           <>
             <Flex height="100vh" justifyContent={'center'} alignItems={'center'}>
               <Text>Book Not Found</Text>
@@ -138,11 +159,31 @@ const Store = () => {
         ) : (
           <VStack>
             <Wrap display={'flex'} justify={'center'}>
-              {filteredBooks.map((book) => (
+              {allBooks.map((book) => (
                 <BookItem key={book._id} {...book}></BookItem>
               ))}
             </Wrap>
           </VStack>
+        )}
+        {numberOfAllBooks > 30 && numberOfAllBooks !== allBooks.length && (
+          <HStack>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <Button
+                onClick={() => {
+                  const newSkip = bookLimit * index;
+                  setSearchParams((prev) => {
+                    const newParams = new URLSearchParams(prev);
+                    newParams.set('skip', newSkip.toString());
+                    newParams.set('limit', bookLimit.toString());
+                    return newParams;
+                  });
+
+                  window.scrollTo({ top: 0 });
+                }}>
+                {index + 1}
+              </Button>
+            ))}
+          </HStack>
         )}
       </VStack>
     </>

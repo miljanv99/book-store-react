@@ -1,7 +1,7 @@
 import { Menu, MenuButton, Button, Portal, MenuList, MenuItem } from '@chakra-ui/react';
 import { COLORS } from '../../globalColors';
 import { FC } from 'react';
-import { SetURLSearchParams } from 'react-router-dom';
+import React from 'react';
 
 type BaseSearchUrlParams = {
   key: string;
@@ -31,7 +31,7 @@ type FilterMenuProps = {
   options?: SortOption[];
   allGenres?: string[];
   searchParams: URLSearchParams;
-  setSearchParams: SetURLSearchParams;
+  updateSearchParams: (callback: (prev: URLSearchParams) => URLSearchParams) => void;
 };
 
 const AdvancedFilterMenu: FC<FilterMenuProps> = ({ ...props }) => {
@@ -45,15 +45,20 @@ const AdvancedFilterMenu: FC<FilterMenuProps> = ({ ...props }) => {
   const isActive = parsedValue && Object.keys(parsedValue)[0] in (props.options?.[0].value ?? {});
 
   const handleSearchUrlParams = (searchParams: SearchUrlParams) => {
+    const currentParams = window.location.search;
     console.log('STRINGIFY: ', searchParams.stringify);
     const finalValue = searchParams.stringify
       ? JSON.stringify(searchParams.value)
       : String(searchParams.value);
 
-    props.setSearchParams((prev) => {
-      const prevParams = new URLSearchParams(prev);
-      prevParams.set(searchParams.key, finalValue);
-      return prevParams;
+    console.log('FINAL VALUE', encodeURIComponent(finalValue));
+
+    props.updateSearchParams((prev) => {
+      currentParams.includes(`${searchParams.key}=${encodeURIComponent(finalValue)}`)
+        ? prev.delete(searchParams.key, finalValue)
+        : prev.set(searchParams.key, finalValue);
+
+      return prev;
     });
   };
 
@@ -133,4 +138,4 @@ const AdvancedFilterMenu: FC<FilterMenuProps> = ({ ...props }) => {
   );
 };
 
-export default AdvancedFilterMenu;
+export default React.memo(AdvancedFilterMenu);
