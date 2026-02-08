@@ -89,18 +89,5 @@
 <img width="1908" height="951" alt="add new book" src="https://github.com/user-attachments/assets/68afa687-08f6-4f22-9e04-9fb1ef556736" />
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 - @typescript-eslint/parser
 - @typescript-eslint/eslint-plugin
