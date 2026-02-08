@@ -71,6 +71,8 @@
 - eslint-plugin-react-hooks
 - eslint-plugin-react-refresh
 - eslint-config-prettier
+- @typescript-eslint/parser
+- @typescript-eslint/eslint-plugin
 
 <img width="1908" height="945" alt="home" src="https://github.com/user-attachments/assets/f02b3917-27b8-4407-b6a8-90c3c9678285" />
 <img width="1899" height="956" alt="store filter" src="https://github.com/user-attachments/assets/75628ea1-1466-45a5-b3d6-cee7094f0874" />
@@ -89,5 +91,4 @@
 <img width="1908" height="951" alt="add new book" src="https://github.com/user-attachments/assets/68afa687-08f6-4f22-9e04-9fb1ef556736" />
 
 
-- @typescript-eslint/parser
-- @typescript-eslint/eslint-plugin
+
