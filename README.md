@@ -71,5 +71,36 @@
 - eslint-plugin-react-hooks
 - eslint-plugin-react-refresh
 - eslint-config-prettier
+
+<img width="1908" height="945" alt="home" src="https://github.com/user-attachments/assets/f02b3917-27b8-4407-b6a8-90c3c9678285" />
+<img width="1899" height="956" alt="store filter" src="https://github.com/user-attachments/assets/75628ea1-1466-45a5-b3d6-cee7094f0874" />
+<img width="1904" height="948" alt="cart" src="https://github.com/user-attachments/assets/d66dac1e-d1e8-406c-9209-aa81d814029b" />
+<img width="1898" height="864" alt="admin modal 1" src="https://github.com/user-attachments/assets/1fefb96a-231a-42a0-9885-a767735f640e" />
+<img width="1900" height="948" alt="admin modal 2" src="https://github.com/user-attachments/assets/5ee352ca-f433-4034-82d8-bcbd5fe873f2" />
+<img width="1905" height="949" alt="profile" src="https://github.com/user-attachments/assets/951c1816-d6ab-4935-859d-548ee3c2cc0c" />
+<img width="1907" height="955" alt="user list" src="https://github.com/user-attachments/assets/1f2f6619-3cc3-46ea-8a2d-8ef36fdd4399" />
+<img width="1905" height="958" alt="analytics 1" src="https://github.com/user-attachments/assets/b7253a6c-4cb7-4fdb-b1da-d23750bc5240" />
+<img width="1905" height="957" alt="analytics 2" src="https://github.com/user-attachments/assets/87baaa75-d28c-448a-9ac0-0ef32d9f129c" />
+<img width="1906" height="949" alt="analytics 3" src="https://github.com/user-attachments/assets/43e12ee1-57f9-42bf-a462-dab03b84354f" />
+<img width="1909" height="956" alt="analytics 4" src="https://github.com/user-attachments/assets/bdc03306-27c0-4e04-a2f9-317823f791d9" />
+<img width="1905" height="954" alt="registration" src="https://github.com/user-attachments/assets/71819de4-cba3-4822-8e21-fbe5fb6711fc" />
+<img width="1905" height="951" alt="sign in" src="https://github.com/user-attachments/assets/0e93653d-5af0-4ce1-bc09-ecadb35170a6" />
+<img width="1904" height="949" alt="edit book" src="https://github.com/user-attachments/assets/3483bf48-2d53-4688-978f-727bf4bf205e" />
+<img width="1908" height="951" alt="add new book" src="https://github.com/user-attachments/assets/68afa687-08f6-4f22-9e04-9fb1ef556736" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 - @typescript-eslint/parser
 - @typescript-eslint/eslint-plugin
