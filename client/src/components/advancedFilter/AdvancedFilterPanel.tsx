@@ -8,14 +8,12 @@ import { StoreContext } from '../../context/storeContext';
 interface AdvancedFilterPanelProps {
   searchParams: URLSearchParams;
   updateSearchParams: (callback: (prev: URLSearchParams) => URLSearchParams) => void;
-  setInputValueTemperary: React.Dispatch<React.SetStateAction<string>>;
   allGenres: string[];
 }
 
 const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
   searchParams,
   updateSearchParams,
-  setInputValueTemperary,
   allGenres
 }) => {
   const inputValue = useContext(StoreContext);
@@ -85,22 +83,26 @@ const AdvancedFilterPanel: FC<AdvancedFilterPanelProps> = ({
             onClick={() => {
               updateSearchParams((prev) => {
                 // Create a new URLSearchParams object
-                const newParams = new URLSearchParams();
 
-                // Keep only 'skip' and 'limit' if they exist
-                ['skip', 'limit'].forEach((key) => {
-                  const value = prev.get(key);
-                  if (value !== null) {
-                    newParams.set(key, value);
+                const keysToDelete: string[] = [];
+
+                prev.forEach((_, key) => {
+                  if (key !== 'skip' && key !== 'limit') {
+                    keysToDelete.push(key);
                   }
                 });
 
-                return newParams;
-              });
+                console.log('KEYS TO DELETE: ', keysToDelete);
 
-              inputValue.setInputValue('');
-              setInputValueTemperary('');
-              localStorage.removeItem('storeInput');
+                keysToDelete.forEach((key) => {
+                  if (key === 'query') {
+                    inputValue.setInputValue('');
+                  }
+                  prev.delete(key);
+                });
+
+                return prev;
+              });
             }}>
             Clear filter
           </Button>

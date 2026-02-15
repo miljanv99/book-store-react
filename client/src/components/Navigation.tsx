@@ -25,6 +25,7 @@ import DrawerComponent from './drawer';
 import { useEffect, useState } from 'react';
 import { selectCartCounter } from '../reducers/cartSlice';
 import AdminModal from './modals/AdminModal';
+import { ROUTES } from '../constants/routes';
 
 const Navigation = () => {
   const token = useSelector(selectAuthToken);
@@ -33,6 +34,7 @@ const Navigation = () => {
   const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
   const userProfileData = useSelector(selectUserData);
   const cartCounter = useSelector(selectCartCounter);
+  const localStorageSearch = localStorage.getItem('search');
 
   // Modal state sign
   const {
@@ -105,9 +107,10 @@ const Navigation = () => {
               <WrapItem>
                 <Tooltip label="Store">
                   <Link
+                    as={RouterLink}
+                    to={{ pathname: ROUTES.STORE, search: localStorageSearch ?? '' }}
                     _hover={{ textDecoration: 'none' }}
                     fontSize={18}
-                    href="/store"
                     color={'white'}>
                     <IconButton
                       _hover={{ bg: COLORS.darkPrimaryColor }}

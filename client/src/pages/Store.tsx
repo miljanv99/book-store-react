@@ -8,10 +8,11 @@ import { API_ROUTES } from '../constants/apiConstants';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectFullBooksList, setAllBooks } from '../reducers/bookSlice';
 
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import AdvancedFilterPanel from '../components/advancedFilter/AdvancedFilterPanel';
 import { StoreContext } from '../context/storeContext';
 import SearchInput from '../components/advancedFilter/SearchInput';
+import { useToastHandler } from '../hooks/useToastHandler';
 
 type ApiBookResponse<T> = {
   data: T;
@@ -34,52 +35,28 @@ const Store = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [allGenres, setAllGenres] = useState<string[]>([]);
   const apiURL = new URL(API_ROUTES.getAllBooks, window.location.origin);
+  const location = useLocation();
+  const toast = useToastHandler();
 
   const fetchBooks = async () => {
-    let urlSearchTerm = '';
     setIsLoading(true);
 
-    if (inputValue === '') {
-      setSearchParams((prev) => {
-        prev.delete('query');
-        return prev;
-      });
-    }
-    if (searchParams) {
-      if (searchParams.has('genre') || searchParams.has('query')) {
-        setSearchParams((prev) => {
-          prev.set('skip', bookSkip.toString());
-          return prev;
-        });
-      }
-
-      if (searchParams.has('query')) {
-        const raw = searchParams.get('query');
-        console.log('RAW: ', raw);
-        urlSearchTerm = raw && JSON.parse(raw).searchTerm;
-        setInputValueTemperary(urlSearchTerm);
-        setInputValue(urlSearchTerm);
-      }
-    }
-
-    if (!searchParams.has('skip') && !searchParams.has('limit')) {
-      console.log('NO PARAMS');
-      setSearchParams({ skip: bookSkip.toString(), limit: bookLimit.toString() });
-    }
-
-    console.log('SEARCH PARAMS: ', searchParams);
     const response = await fetchAllBooks({
       method: 'GET',
       url: `${apiURL.pathname}?${searchParams}`
     });
-    console.log('URLaaaaa: ', `${apiURL.pathname}${apiURL.search}`);
-    console.log('search params: ', searchParams);
 
     if (response && response.status === 200) {
       dispatch(setAllBooks(response && response.data.data));
       setNumberOfAllBooks(response.data['itemsCountNoSkip']);
 
       setIsLoading(false);
+
+      console.log('PARAMS: ', location.search);
+
+      localStorage.setItem('search', location.search);
+    } else {
+      toast('Something went wrong', 'error', 'bottom');
     }
   };
 
@@ -97,29 +74,60 @@ const Store = () => {
 
   const updateSearchParams = useCallback(
     (callback: (prev: URLSearchParams) => URLSearchParams) => {
-      setSearchParams((prevParams) => {
-        const next = callback(new URLSearchParams(prevParams));
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        callback(next);
         return next;
       });
     },
     [setSearchParams]
   );
 
+  useEffect(() => {
+    setSearchParams((params) => {
+      if (!params.has('skip')) {
+        params.set('skip', bookSkip.toString());
+      }
+      if (!params.has('limit')) {
+        params.set('limit', bookLimit.toString());
+      }
+      return params;
+    });
+  }, []);
+
   //Fetch books
   useEffect(() => {
     console.log('FETCHHHHH STORE SCREEN');
+    if (searchParams.has('genre')) {
+      setSearchParams((prev) => {
+        prev.set('skip', '0'); // reset pagination
+        return prev;
+      });
+    }
     fetchBooks();
   }, [searchParams]);
 
   //Input search by query
   useEffect(() => {
-    updateSearchParams((prev) => {
-      prev.set('query', JSON.stringify({ searchTerm: inputValue }));
-      return prev;
-    });
+    setSearchParams((params) => {
+      if (inputValue) {
+        params.set('query', JSON.stringify({ searchTerm: inputValue }));
+        params.set('skip', '0'); // reset pagination
+      }
 
-    localStorage.setItem('search', `${`{"searchTerm": "${inputValue}"}`}`);
+      return params;
+    });
   }, [inputValue]);
+
+  useEffect(() => {
+    const raw = searchParams.get('query');
+    if (!raw) return;
+
+    console.log('RAW: ', raw);
+    const { searchTerm } = JSON.parse(raw);
+    setInputValue(searchTerm);
+    setInputValueTemperary(searchTerm);
+  }, []);
 
   //Fetch all genres from allBooks
   useEffect(() => {
@@ -143,7 +151,6 @@ const Store = () => {
           <AdvancedFilterPanel
             searchParams={searchParams}
             updateSearchParams={updateSearchParams}
-            setInputValueTemperary={setInputValueTemperary}
             allGenres={allGenres}></AdvancedFilterPanel>
         )}
         {isLoading ? (
@@ -171,11 +178,10 @@ const Store = () => {
               <Button
                 onClick={() => {
                   const newSkip = bookLimit * index;
-                  setSearchParams((prev) => {
-                    const newParams = new URLSearchParams(prev);
-                    newParams.set('skip', newSkip.toString());
-                    newParams.set('limit', bookLimit.toString());
-                    return newParams;
+                  updateSearchParams((prev) => {
+                    prev.set('skip', newSkip.toString());
+                    prev.set('limit', bookLimit.toString());
+                    return prev;
                   });
 
                   window.scrollTo({ top: 0 });

@@ -40,7 +40,7 @@ const SearchInput: FC<SearchInputProps> = ({
 
     timeoutRef.current = setTimeout(() => {
       setInputValueTemperary(value);
-    }, 100);
+    }, 50);
 
     if (value === '') {
       setInputValue('');
