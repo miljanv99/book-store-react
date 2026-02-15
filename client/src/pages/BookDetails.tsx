@@ -416,7 +416,20 @@ const BookDetails = () => {
       </Box>
 
       <VStack w="70%" mx={'auto'} mt={'18px'}>
-        <VStack w={'100%'} alignItems={'start'}>
+        <VStack
+          w={'100%'}
+          alignItems={'start'}
+          tabIndex={-1}
+          onFocus={() => {
+            setInputCommentInFocus(true);
+            inputRef.current && inputRef.current.focus();
+          }}
+          onBlur={(e) => {
+            const nextFocus = e.relatedTarget;
+            if (!e.currentTarget.contains(nextFocus)) {
+              setInputCommentInFocus(false);
+            }
+          }}>
           <Text fontSize={'x-large'}>
             {numberOfComment} {numberOfComment > 1 ? 'Comments' : 'Comment'}
           </Text>
@@ -431,7 +444,6 @@ const BookDetails = () => {
                 border={'none'}
                 borderBottom={'1px solid'}
                 borderRadius={'none'}
-                onBlur={() => setInputCommentInFocus(false)}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const inputValue = e.target.value;
                   setInputCommentValue(inputValue);
