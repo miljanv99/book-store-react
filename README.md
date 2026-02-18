@@ -1,14 +1,50 @@
 # Book Store Application
 
-This is a full-stack book store application designed to provide a smooth and interactive experience for both users and administrators. Users can browse a rich catalog of books, apply filters to quickly find titles of interest, view book ratings, and manage their purchases through an intuitive shopping cart and checkout flow.
+🌟 Features
 
-The application allows authenticated users to maintain personal profiles, where they can manage their information and curate a personalized list of favorite books. Each book includes a rating system and a comment section that enable users to evaluate books and share feedback through reviews and discussions. Users can add, edit, or remove their own comments, while administrators have moderation privileges to ensure appropriate content.
+👤 User Experience
 
-From a content management perspective, administrators can add new books to the store, edit existing book details, or remove books entirely. Ratings and comments are updated dynamically, ensuring that user interactions are reflected in real time across the application and that the store’s catalog remains accurate and engaging without disrupting the user experience.
+- Browse a rich catalog of books.
 
-The system includes role-based access control to clearly separate regular user functionality from administrative capabilities. Administrators have access to all user data, including profile information and permission settings, enabling effective user management and platform governance.
+- Apply filters to quickly find titles of interest.
 
-In addition, the application provides store analytics available exclusively to administrators. These analytics offer insight into user behavior, book performance, and overall store activity, helping inform decisions related to content management and business growth.
+- View book ratings and manage purchases via an intuitive shopping cart and checkout flow.
+
+📝 User Profiles
+
+- Maintain personal profiles.
+
+- Manage information and create a personalized list of favorite books.
+
+📖 Book Interaction
+
+- Rating system and comment section for each book.
+
+- Add, edit, or remove your own comments.
+
+- Admin moderation ensures appropriate content.
+
+🛠️ Admin Content Management
+
+- Add new books or import books via CSV.
+
+- Edit existing book details or remove books entirely.
+
+- Ratings and comments update dynamically in real time.
+
+🔐 Role-Based Access Control
+
+- Clear separation between regular users and administrators.
+
+- Admins have access to all user data and permission settings.
+
+- Ensures secure platform governance.
+
+📊 Analytics for Administrators
+
+- View store analytics for user behavior, book performance, and store activity.
+
+- Inform decisions for content management and business growth.
 
 ## UI DEMO
 <img width="1908" height="945" alt="home"
@@ -134,6 +170,7 @@ In addition, the application provides store analytics available exclusively to a
 - @apollo/client `4.0.6`
 - axios `1.7.2`
 - graphql `16.11.0`
+- papaparse `5.5.3`
 
 **Routing & Charts**
 - react-router-dom `6.23.1`
