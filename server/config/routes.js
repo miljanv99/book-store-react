@@ -64,6 +64,11 @@ const setupRoutes = (APP) => {
   APP.get('/book/search', BOOK_CONTROLLER.search);
   APP.get('/book/details/:bookId', BOOK_CONTROLLER.getSingle);
   APP.post('/book/add', AUTH.isInRole('Admin'), BOOK_CONTROLLER.add);
+  APP.post(
+    '/book/importBooks',
+    AUTH.isInRole('Admin'),
+    BOOK_CONTROLLER.importBooks
+  );
   APP.put('/book/edit/:bookId', AUTH.isInRole('Admin'), BOOK_CONTROLLER.edit);
   APP.delete(
     '/book/delete/:bookId',

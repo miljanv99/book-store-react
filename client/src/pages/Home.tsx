@@ -23,7 +23,7 @@ const Home = () => {
     setIsLoading(true);
     const newest = await handleBooks({
       method: 'GET',
-      url: `${API_ROUTES.getAllBooks}?sort={"creationDate": 1}&limit=5`
+      url: `${API_ROUTES.getAllBooks}?sort={"creationDate": -1}&limit=5`
     });
     const bestRated = await handleBooks({
       method: 'GET',

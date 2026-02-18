@@ -23,8 +23,10 @@ const booksSlice = createSlice({
     setTheNewest: (state, action: PayloadAction<Book[]>) => {
       state.theNewest = action.payload;
     },
-    addToTheNewest: (state, action: PayloadAction<Book>) => {
-      state.theNewest.unshift(action.payload);
+    addToTheNewest: (state, action: PayloadAction<Book[] | Book>) => {
+      Array.isArray(action.payload)
+        ? state.theNewest.unshift(...action.payload)
+        : state.theNewest.unshift(action.payload);
     },
     setTheBestRated: (state, action: PayloadAction<Book[]>) => {
       state.theBestRated = action.payload;
@@ -35,8 +37,10 @@ const booksSlice = createSlice({
     setAllBooks: (state, action: PayloadAction<Book[]>) => {
       state.FullList = action.payload;
     },
-    addToAllBooks: (state, action: PayloadAction<Book>) => {
-      state.FullList.unshift(action.payload);
+    addToAllBooks: (state, action: PayloadAction<Book[] | Book>) => {
+      Array.isArray(action.payload)
+        ? state.FullList.unshift(...action.payload)
+        : state.FullList.unshift(action.payload);
     }
   }
 });

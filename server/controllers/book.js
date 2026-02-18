@@ -165,6 +165,48 @@ export const add = async (req, res) => {
     });
 };
 
+export const importBooks = async (req, res) => {
+  let books = req.body;
+  let validationResult;
+
+  if (!Array.isArray(books)) {
+    return res.status(400).json({ message: 'Body must be an array of books' });
+  }
+
+  if (books.length === 0) {
+    return res.status(400).json({ message: 'Empty file is imported' });
+  }
+
+  for (let index = 0; index < books.length; index++) {
+    const book = books[index];
+    validationResult = validateBookForm(book);
+    if (!validationResult.success) {
+      break;
+    }
+  }
+
+  if (!validationResult.success) {
+    return res.status(400).json({
+      message: 'Book form validation failed!',
+      errors: validationResult.errors,
+    });
+  }
+
+  BOOK.insertMany(books)
+    .then((newBooks) => {
+      return res.status(200).json({
+        message: 'Books inserted successfully!',
+        data: newBooks,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).json({
+        message: 'Something went wrong, please try again.',
+      });
+    });
+};
+
 export const edit = async (req, res) => {
   let bookId = req.params.bookId;
   let editedBook = req.body;

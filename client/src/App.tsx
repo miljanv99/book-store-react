@@ -8,7 +8,19 @@ import Cart from './pages/Cart';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from './reducers/authSlice';
 import { AddIcon } from '@chakra-ui/icons';
-import { IconButton, useDisclosure } from '@chakra-ui/react';
+import {
+  Box,
+  HStack,
+  Text,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
+  Tooltip,
+  useDisclosure
+} from '@chakra-ui/react';
 import { buttonStyles } from './globalStyles';
 import { COLORS } from './globalColors';
 import BookModal from './components/modals/BookModal';
@@ -19,6 +31,8 @@ import UserProfile from './pages/UserProfile';
 import UserDetails from './pages/userList/UserDetails';
 import UserList from './pages/userList/UserList';
 import { ROUTES } from './constants/routes';
+import ImportBooksModal from './components/modals/ImportBooksModal';
+import { FaFileImport } from 'react-icons/fa6';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -27,30 +41,53 @@ function App() {
   const currentPath = location.pathname;
   const showFloatingButton = ['/', '/store'].includes(currentPath);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const importModalDisclosure = useDisclosure();
 
   return (
     <>
       {isAdmin && showFloatingButton && (
-        <IconButton
-          as={AddIcon}
-          zIndex={1}
-          {...buttonStyles}
-          backgroundColor={COLORS.darkerPrimaryColor}
-          width={'60px'}
-          height={'60px'}
-          position={'fixed'}
-          bottom={'50px'}
-          left={'92%'}
-          borderRadius={30}
-          aria-label={'floating_button_add'}
-          padding={'12px'}
-          onClick={onOpen}>
-          Add Now Book
-        </IconButton>
+        <Tooltip label="Add New Books">
+          <Box width={'60px'} height={'60px'} position={'fixed'} bottom={'50px'} left={'92%'}>
+            <Menu>
+              <MenuButton>
+                <IconButton
+                  as={AddIcon}
+                  width={'100%'}
+                  height={'100%'}
+                  zIndex={1}
+                  {...buttonStyles}
+                  backgroundColor={COLORS.darkerPrimaryColor}
+                  borderRadius={30}
+                  aria-label={'floating_button_add'}
+                  padding={'12px'}>
+                  Add Now Book
+                </IconButton>
+              </MenuButton>
+
+              <Portal>
+                <MenuList>
+                  <MenuItem onClick={onOpen}>
+                    <HStack>
+                      <AddIcon />
+                      <Text>Add Single Book</Text>
+                    </HStack>
+                  </MenuItem>
+                  <MenuItem onClick={importModalDisclosure.onOpen}>
+                    <HStack>
+                      <FaFileImport />
+                      <Text>Import Books</Text>
+                    </HStack>
+                  </MenuItem>
+                </MenuList>
+              </Portal>
+            </Menu>
+          </Box>
+        </Tooltip>
       )}
       {/* Modal for adding new books */}
       <BookModal isOpen={isOpen} onClose={onClose}></BookModal>
-
+      {/* Modal for import new books */}
+      <ImportBooksModal importModalDisclosure={importModalDisclosure}></ImportBooksModal>
       <Routes>
         <Route path={ROUTES.HOME} element={<Navigation />}>
           <Route index element={<Home />} />
