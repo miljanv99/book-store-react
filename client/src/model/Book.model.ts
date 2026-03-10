@@ -16,4 +16,5 @@ export type Book = {
   price: number;
   creationDate: Date;
   quantity?: number;
+  stock: number;
 };

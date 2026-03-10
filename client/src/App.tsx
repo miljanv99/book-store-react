@@ -33,6 +33,9 @@ import UserList from './pages/userList/UserList';
 import { ROUTES } from './constants/routes';
 import ImportBooksModal from './components/modals/ImportBooksModal';
 import { FaFileImport } from 'react-icons/fa6';
+import { useEffect } from 'react';
+import { socket } from './socket';
+import { useToastHandler } from './hooks/useToastHandler';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -42,6 +45,30 @@ function App() {
   const showFloatingButton = ['/', '/store'].includes(currentPath);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const importModalDisclosure = useDisclosure();
+  const toast = useToastHandler();
+
+  useEffect(() => {
+    if (!token) return;
+
+    socket.connect().auth = { token };
+
+    socket.on('connect', () => {
+      console.log('CONNTECTED Socket ID: ', socket.id);
+    });
+    socket.on('disconnect', () => {
+      console.log('DISCONNTECTED');
+    });
+  }, [token]);
+
+  useEffect(() => {
+    socket.on('low_stock_warning', (data) => {
+      toast(data.message, 'warning', 'top-right', 30000, data.bookId);
+    });
+
+    return () => {
+      socket.off('low_stock_warning');
+    };
+  }, []);
 
   return (
     <>

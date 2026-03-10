@@ -33,6 +33,7 @@ import { ApiResponse } from '../model/ApiResponse.model';
 import { Receipt } from '../model/Receipts.model';
 import { COLORS } from '../globalColors';
 import { ROUTES } from '../constants/routes';
+import { socket } from '../socket';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -85,11 +86,22 @@ const CartScreen = () => {
     const parsed = parseInt(quantityValue);
 
     setCartBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book._id === bookId
-          ? { ...book, quantity: parsed > 99 ? 99 : Number.isNaN(parsed) ? 0 : parsed }
-          : book
-      )
+      prevBooks.map((book) => {
+        if (book._id === bookId) {
+          if (book.stock < parsed) {
+            toast(
+              `Sorry, there are not enough copies of ${book.title} available in stock.`,
+              'error',
+              'top-right'
+            );
+            return book;
+          }
+
+          return { ...book, quantity: parsed > 99 ? 99 : Number.isNaN(parsed) ? 0 : parsed };
+        } else {
+          return book;
+        }
+      })
     );
   }, []);
 
@@ -99,7 +111,14 @@ const CartScreen = () => {
         book._id === bookId
           ? isNaN(book.quantity!)
             ? { ...book, quantity: 1 }
-            : { ...book, quantity: book.quantity! + 1 }
+            : book.quantity! + 1 > book.stock
+              ? (toast(
+                  `Sorry, there are not enough copies of ${book.title} available in stock.`,
+                  'error',
+                  'top-right'
+                ),
+                book)
+              : { ...book, quantity: book.quantity! + 1 }
           : book
       )
     );
@@ -179,11 +198,27 @@ const CartScreen = () => {
       data: getBookAndQuantity
     });
     console.log('AAA', response?.status);
-    if (response?.status === 200) {
+    if (response && response.status === 200) {
       dispatch(setCartCounter(0));
       navigate(ROUTES.HOME);
+
+      const booksInCart = Object.entries(getBookAndQuantity);
+
+      booksInCart.forEach((cart) => {
+        cartBooks.forEach((book) => {
+          if (book._id === cart[0] && book.stock - cart[1] <= 5) {
+            console.log('Trigerovan event low stock');
+            console.log('STOCK AFTER PURCHASE: ', book.stock - cart[1]);
+            socket.emit('low_stock', { bookId: book._id, [book.title]: book.stock - cart[1] });
+          }
+        });
+      });
     }
-    toast(response?.data.message, `${response?.status === 200 ? 'success' : 'error'}`);
+    toast(
+      response && response.data.message,
+      `${response && response.status === 200 ? 'success' : 'error'}`,
+      'bottom-left'
+    );
   };
 
   useEffect(() => {

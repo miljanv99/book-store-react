@@ -104,6 +104,21 @@ const Store = () => {
         return prev;
       });
     }
+
+    if (searchParams.get('limit') !== '30') {
+      setSearchParams((prev) => {
+        prev.set('limit', '30');
+        return prev;
+      });
+    }
+
+    if (parseInt(searchParams.get('skip')!) % 30 !== 0) {
+      setSearchParams((prev) => {
+        prev.set('skip', '0');
+        return prev;
+      });
+    }
+
     fetchBooks();
   }, [searchParams]);
 
@@ -176,6 +191,7 @@ const Store = () => {
           <HStack>
             {Array.from({ length: totalPages }, (_, index) => (
               <Button
+                key={index}
                 onClick={() => {
                   const newSkip = bookLimit * index;
                   updateSearchParams((prev) => {

@@ -22,6 +22,7 @@ const BOOK_SCHEMA = mongoose.Schema({
   ratedBy: [{ type: OBJECT_ID, ref: 'User' }],
   purchasesCount: { type: NUMBER, default: 0 },
   comments: [{ type: OBJECT_ID, ref: 'Comment' }],
+  stock: { type: NUMBER, required: true },
 });
 
 BOOK_SCHEMA.index({

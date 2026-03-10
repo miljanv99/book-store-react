@@ -90,10 +90,11 @@ const Navigation = () => {
               <WrapItem>
                 <Tooltip label="Home">
                   <Link
+                    as={RouterLink}
                     _hover={{ textDecoration: 'none' }}
                     textDecorationLine={'none'}
                     fontSize={18}
-                    href="/"
+                    to={'/'}
                     color={'white'}>
                     <IconButton
                       _hover={{ bg: COLORS.darkPrimaryColor }}
@@ -125,7 +126,7 @@ const Navigation = () => {
                 <>
                   <WrapItem>
                     <Tooltip label="Cart" placement="bottom">
-                      <Link href="/cart" color={'white'}>
+                      <Link as={RouterLink} to="/cart" color={'white'}>
                         <Box position={'relative'}>
                           {cartCounter > 0 && (
                             <Circle
@@ -133,7 +134,7 @@ const Navigation = () => {
                               position={'absolute'}
                               bottom={5}
                               left={25}
-                              size="1.5rem"
+                              size="1.3rem"
                               backgroundColor={'red'}>
                               {`${cartCounter}`}
                             </Circle>

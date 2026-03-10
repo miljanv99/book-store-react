@@ -5,6 +5,8 @@ import connectDatabase from './config/database.config.js';
 import setupExpress from './config/express.js';
 import setupRoutes from './config/routes.js';
 import setupGraphql from './graphql/GraphqlApollo.js';
+import setupSocket from './socket.js';
+import { createServer } from 'http';
 
 const PORT = 8000;
 const env = 'development';
@@ -18,6 +20,8 @@ APP.use(
 );
 
 const startServer = async () => {
+  const httpServer = createServer(APP);
+
   connectDatabase(CONFIG[env]);
 
   setupExpress(APP);
@@ -26,7 +30,9 @@ const startServer = async () => {
 
   setupRoutes(APP);
 
-  APP.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  setupSocket(httpServer);
+
+  httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 };
 
 startServer();

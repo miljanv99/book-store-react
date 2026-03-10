@@ -236,7 +236,7 @@ const BookDetails = () => {
     getBookDetails();
     getComments();
     scrollTo({ top: 0 });
-  }, [token]);
+  }, [token, bookId]);
 
   useEffect(() => {
     if (isEdit && editCommentRef) {
@@ -372,6 +372,11 @@ const BookDetails = () => {
 
                   <Text>Number Of Purachases: {singleBook.purchasesCount}</Text>
                   <Text>Year: {singleBook.year}</Text>
+                  {userDataSelector.isAdmin && (
+                    <Text fontWeight={'bold'} color={singleBook.stock < 6 ? COLORS.lightRed : ''}>
+                      Stock: {singleBook.stock}
+                    </Text>
+                  )}
                 </Box>
                 <Text fontSize={'xx-large'}>{singleBook.price}$</Text>
               </Flex>
@@ -389,6 +394,7 @@ const BookDetails = () => {
               </Flex>
               <Flex mt={4} gap={2}>
                 <Button
+                  isDisabled={singleBook.stock === 0}
                   {...buttonStyles}
                   onClick={async () => {
                     await addToCart(singleBook._id);

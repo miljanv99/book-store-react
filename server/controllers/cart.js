@@ -162,7 +162,10 @@ export const checkout = async (req, res) => {
           qty: qty,
         });
 
-        BOOK.updateOne({ _id: book._id }, { $inc: { purchasesCount: qty } })
+        BOOK.updateOne(
+          { _id: book._id },
+          { $inc: { purchasesCount: qty, stock: -qty } }
+        )
           .then((res) => {
             console.log(
               `Purchases count updated: ${book.title} - added qty: ${qty}`,

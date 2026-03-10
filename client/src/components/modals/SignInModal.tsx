@@ -25,7 +25,6 @@ import { Cart } from '../../model/Cart.model';
 import { Book } from '../../model/Book.model';
 import RestartPasswordRequestModal from './RestartPasswordRequestModal';
 import { buttonStyles } from '../../globalStyles';
-import { COLORS } from '../../globalColors';
 
 interface SignProps {
   isModalSignInOpen: boolean;
