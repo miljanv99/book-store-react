@@ -32,6 +32,14 @@
 
 - Ratings and comments update dynamically in real time.
 
+⚡ Real-time Low Stock Alerts
+
+- Uses Socket.IO ^4.8.3 for instant notifications.
+
+- Alerts are sent only to admin users when a book is low or out of stock.
+
+- Admin clients receive notifications in real time via a dedicated admins room.
+
 🔐 Role-Based Access Control
 
 - Clear separation between regular users and administrators.
@@ -131,6 +139,9 @@
 - graphql-tag `2.12.6`
 - graphql-type-json `0.3.2`
 
+**Real-time / WebSocket**
+- socket.io: `4.8.3`,
+
 **Utilities**
 - cors `2.8.5`
 - dotenv `17.2.2`
@@ -175,6 +186,9 @@
 **Routing & Charts**
 - react-router-dom `6.23.1`
 - recharts `3.2.1`
+
+**Real-time / WebSocket**
+- socket.io-client `4.8.3`
 
 **Dates**
 - date-fns `3.6.0`
