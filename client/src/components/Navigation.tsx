@@ -15,7 +15,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { COLORS } from '../globalColors';
 import { HamburgerIcon } from '@chakra-ui/icons';
-import { FiShoppingCart, FiUsers, FiHome } from 'react-icons/fi';
+import { FiShoppingCart, FiUsers, FiHome, FiMessageCircle } from 'react-icons/fi';
 import { MdStorefront } from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { selectAuthToken, selectUserData } from '../reducers/authSlice';
@@ -164,6 +164,17 @@ const Navigation = () => {
                       </Tooltip>
                     </WrapItem>
                   )}
+                  <WrapItem as={RouterLink} to={{ pathname: ROUTES.CHAT }}>
+                    <Tooltip label="Admin" placement="bottom">
+                      <IconButton
+                        _hover={{ bg: COLORS.darkPrimaryColor }}
+                        _active={{ bg: COLORS.darkPrimaryColor }}
+                        backgroundColor={'transparent'}
+                        aria-label="cart"
+                        icon={<FiMessageCircle color="white" size={25} />}
+                      />
+                    </Tooltip>
+                  </WrapItem>
                   <WrapItem>
                     {showSpinner ? (
                       <Spinner></Spinner>

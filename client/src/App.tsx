@@ -36,6 +36,7 @@ import { FaFileImport } from 'react-icons/fa6';
 import { useEffect } from 'react';
 import { socket } from './socket';
 import { useToastHandler } from './hooks/useToastHandler';
+import Chat from './pages/chat/Chat';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -142,6 +143,7 @@ function App() {
               element={token && isAdmin ? <UserDetails /> : <Navigate to="/" />}
             />
           </Route>
+          <Route path={ROUTES.CHAT} element={token ? <Chat /> : <Navigate to="/" />} />
         </Route>
         <Route path={ROUTES.RESTART_PASSWORD} element={<NewPassword></NewPassword>}></Route>
       </Routes>

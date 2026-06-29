@@ -4,8 +4,9 @@ import { CONFIG } from './config/config.js';
 import connectDatabase from './config/database.config.js';
 import setupExpress from './config/express.js';
 import setupRoutes from './config/routes.js';
+import setupSocket from './sockets/socket.js';
 import setupGraphql from './graphql/GraphqlApollo.js';
-import setupSocket from './socket.js';
+
 import { createServer } from 'http';
 
 const PORT = 8000;

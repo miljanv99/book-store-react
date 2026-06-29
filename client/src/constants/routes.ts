@@ -2,6 +2,7 @@ export const ROUTES = {
   HOME: '/',
   STORE: '/store',
   CART: '/cart',
+  CHAT: '/chat',
   BOOK_DETAILS: '/bookDetails/:bookId',
   BOOK_DETAILS_DYNAMIC_PATH: (bookId: string) => `/bookDetails/${bookId}`,
   PROFILE: '/profile/:username',
