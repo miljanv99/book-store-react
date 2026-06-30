@@ -33,7 +33,8 @@ import { ApiResponse } from '../model/ApiResponse.model';
 import { Receipt } from '../model/Receipts.model';
 import { COLORS } from '../globalColors';
 import { ROUTES } from '../constants/routes';
-import { socket } from '../socket';
+import { socket } from '../socket/socket';
+import { STOCK_EVENTS } from '../socket/events/stock.event';
 
 const CartScreen = () => {
   const token = useSelector(selectAuthToken);
@@ -209,7 +210,10 @@ const CartScreen = () => {
           if (book._id === cart[0] && book.stock - cart[1] <= 5) {
             console.log('Trigerovan event low stock');
             console.log('STOCK AFTER PURCHASE: ', book.stock - cart[1]);
-            socket.emit('low_stock', { bookId: book._id, [book.title]: book.stock - cart[1] });
+            socket.emit(STOCK_EVENTS.LOW_STOCK, {
+              bookId: book._id,
+              [book.title]: book.stock - cart[1]
+            });
           }
         });
       });

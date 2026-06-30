@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Button,
   Divider,
   HStack,
   IconButton,
@@ -8,21 +7,17 @@ import {
   List,
   ListItem,
   Text,
-  useColorMode,
   useColorModeValue,
-  useTheme,
   VStack
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { socket } from '../../socket';
+import { socket } from '../../socket/socket';
 import { useSelector } from 'react-redux';
 import { selectUserData } from '../../reducers/authSlice';
 import { formattedDate } from '../../utils/formatDate';
 import ChatPanel from './ChatPanel';
-import { MdMessage } from 'react-icons/md';
-import { FaPlus } from 'react-icons/fa6';
-import { AddIcon, ChatIcon } from '@chakra-ui/icons';
-import { SOCKET_EVENTS } from '../../socket';
+import { AddIcon } from '@chakra-ui/icons';
+import { CHAT_EVENTS } from '../../socket/events/chat.event';
 import { Conversation } from '../../model/Conversation.model';
 import { User } from '../../model/User.model';
 import { Message } from '../../model/Message.model';
@@ -38,7 +33,7 @@ const Chat = () => {
     console.log('SOCKET ID: ', socket.id);
     console.log(socket.connected);
     console.log(socket.id);
-    socket.emit(SOCKET_EVENTS.PULL_CONVERSATIONS);
+    socket.emit(CHAT_EVENTS.PULL_CONVERSATIONS);
 
     const pulledConversations = (allConversations: any) => {
       console.log('Received conversations:', allConversations);
@@ -50,8 +45,8 @@ const Chat = () => {
       setMessages(allMessages);
     };
 
-    socket.on(SOCKET_EVENTS.PULLED_CONVERSATIONS, pulledConversations);
-    socket.on(SOCKET_EVENTS.PULLED_MESSAGES, pulledMessages);
+    socket.on(CHAT_EVENTS.PULLED_CONVERSATIONS, pulledConversations);
+    socket.on(CHAT_EVENTS.PULLED_MESSAGES, pulledMessages);
 
     socket.on('conversation_updated', (conversation_data) => {
       console.log('UPDATE CONV LAST MESSAGE: ', conversation_data);
@@ -73,8 +68,8 @@ const Chat = () => {
     });
 
     return () => {
-      socket.off(SOCKET_EVENTS.PULLED_CONVERSATIONS, pulledConversations);
-      socket.off(SOCKET_EVENTS.PULLED_MESSAGES, pulledMessages);
+      socket.off(CHAT_EVENTS.PULLED_CONVERSATIONS, pulledConversations);
+      socket.off(CHAT_EVENTS.PULLED_MESSAGES, pulledMessages);
       socket.off('conversation_updated');
     };
   }, []);
@@ -106,7 +101,7 @@ const Chat = () => {
                 onClick={() => {
                   console.log('THIS IS ID: ', conversation._id);
                   setSelectedConversationId(conversation._id);
-                  socket.emit(SOCKET_EVENTS.PULL_MESSAGES, conversation._id);
+                  socket.emit(CHAT_EVENTS.PULL_MESSAGES, conversation._id);
                 }}
                 boxShadow="xl"
                 borderRadius={3}

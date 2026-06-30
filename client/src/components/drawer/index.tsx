@@ -17,7 +17,7 @@ import { matchPath, useNavigate } from 'react-router-dom';
 import { useToastHandler } from '../../hooks/useToastHandler';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { ROUTES } from '../../constants/routes';
-import { socket } from '../../socket';
+import { socket } from '../../socket/socket';
 
 interface DrawerProps {
   onModalSignInOpen: () => void;

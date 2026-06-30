@@ -1,6 +1,6 @@
 import { VStack, Text, HStack, Avatar } from '@chakra-ui/react';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { socket } from '../../socket';
+import { socket } from '../../socket/socket';
 import { useSelector } from 'react-redux';
 import { selectUserData } from '../../reducers/authSlice';
 import { COLORS } from '../../globalColors';

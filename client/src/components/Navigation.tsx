@@ -165,7 +165,7 @@ const Navigation = () => {
                     </WrapItem>
                   )}
                   <WrapItem as={RouterLink} to={{ pathname: ROUTES.CHAT }}>
-                    <Tooltip label="Admin" placement="bottom">
+                    <Tooltip label="Chat" placement="bottom">
                       <IconButton
                         _hover={{ bg: COLORS.darkPrimaryColor }}
                         _active={{ bg: COLORS.darkPrimaryColor }}

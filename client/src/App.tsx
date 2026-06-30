@@ -34,9 +34,10 @@ import { ROUTES } from './constants/routes';
 import ImportBooksModal from './components/modals/ImportBooksModal';
 import { FaFileImport } from 'react-icons/fa6';
 import { useEffect } from 'react';
-import { socket } from './socket';
+import { socket } from './socket/socket';
 import { useToastHandler } from './hooks/useToastHandler';
 import Chat from './pages/chat/Chat';
+import { STOCK_EVENTS } from './socket/events/stock.event';
 
 function App() {
   const token = useSelector(selectAuthToken);
@@ -62,12 +63,12 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    socket.on('low_stock_warning', (data) => {
+    socket.on(STOCK_EVENTS.LOW_STOCK_WARNING, (data) => {
       toast(data.message, 'warning', 'top-right', 30000, data.bookId);
     });
 
     return () => {
-      socket.off('low_stock_warning');
+      socket.off(STOCK_EVENTS.LOW_STOCK_WARNING);
     };
   }, []);
 
